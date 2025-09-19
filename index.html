@@ -5,335 +5,228 @@
   <title>Intake Wizard</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .page { display: none; }
-    .page.active { display: block; }
-    .hidden { display: none; }
-    label { display: block; margin-top: 8px; font-weight: bold; }
-    input, select, textarea { width: 100%; padding: 4px; margin-top: 2px; }
-    .radio-group { display: flex; gap: 15px; margin-top: 4px; }
-    .buttons { margin-top: 20px; display: flex; gap: 10px; }
-    table, td, th { border: 1px solid black; border-collapse: collapse; }
-    th, td { padding: 6px; font-size: 12px; vertical-align: top; }
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    .italic { font-style: italic; }
+    body { font-family: Arial, sans-serif; margin:20px; }
+    .hidden { display:none; }
+    .page { margin-bottom:20px; }
+    .btn { padding:8px 16px; margin:5px; background:#fdd835; border:1px solid #000; cursor:pointer; }
+    table { border-collapse:collapse; width:100%; }
+    td, th { border:1px solid black; padding:4px; }
+    @media print {
+      .no-print { display:none; }
+    }
   </style>
 </head>
 <body>
-  <div id="wizardRoot">
-    <!-- Step 1 -->
-    <div class="page active" data-step="1">
-      <h2>Step 1: Contact Information</h2>
-      <label>Date <input type="date" id="date"></label>
-      <label>Taken By <input type="text" id="takenBy"></label>
-      <label>Contact Name/Surname <input type="text" id="contactName"></label>
-      <label>Contact Phone # <input type="text" id="contactPhone"></label>
-      <label>Contact Relationship <input type="text" id="contactRel"></label>
-      <div class="buttons">
-        <button onclick="goTo(2)">Next</button>
-      </div>
-    </div>
 
-    <!-- Step 2 -->
-    <div class="page" data-step="2">
-      <h2>Step 2: Immigration</h2>
-      <label>Student's Status
-        <div class="radio-group">
-          <label><input type="radio" name="studentStatus" value="RC"> RC</label>
-          <label><input type="radio" name="studentStatus" value="SP"> SP</label>
-          <label><input type="radio" name="studentStatus" value="Other"> Other <input type="text" id="studentStatusOther"></label>
-        </div>
-      </label>
-      <label>Immigration Document (Natural Parent/Guardian)
-        <div class="radio-group">
-          <label><input type="radio" name="immDoc" value="PR"> PR</label>
-          <label><input type="radio" name="immDoc" value="Other"> Other <input type="text" id="immDocOther"></label>
-        </div>
-      </label>
-      <label>Expiry Date <input type="date" id="expiry"></label>
-      <label>Previous Attendance?
-        <div class="radio-group">
-          <label><input type="radio" name="prevAttend" value="Yes"> Yes</label>
-          <label><input type="radio" name="prevAttend" value="No"> No</label>
-        </div>
-      </label>
-      <label>Date Student(s) Landed in Canada <input type="date" id="landed"></label>
-      <div class="buttons">
-        <button onclick="goTo(1)">Back</button>
-        <button onclick="goTo(3)">Next</button>
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div class="page" data-step="3">
-      <h2>Step 3: Parent and Address</h2>
-      <label>Father's Surname <input type="text" id="fatherSurname"></label>
-      <label>Father's Given Name <input type="text" id="fatherGiven"></label>
-      <label>Mother's Surname <input type="text" id="motherSurname"></label>
-      <label>Mother's Given Name <input type="text" id="motherGiven"></label>
-      <label>Apt # <input type="text" id="apt"></label>
-      <label>Family Address <input type="text" id="address"></label>
-      <label>Postal Code <input type="text" id="postal"></label>
-      <label>Family Phone # <input type="text" id="familyPhone"></label>
-      <label>Home Language <input type="text" id="homeLang"></label>
-      <label>Catholic?
-        <div class="radio-group">
-          <label><input type="radio" name="catholic" value="Yes"> Yes</label>
-          <label><input type="radio" name="catholic" value="No"> No</label>
-        </div>
-      </label>
-      <div class="buttons">
-        <button onclick="goTo(2)">Back</button>
-        <button onclick="goTo(4)">Next</button>
-      </div>
-    </div>
-
-    <!-- Step 4 -->
-    <div class="page" data-step="4">
-      <h2>Step 4: Student(s)</h2>
-      <div id="students"></div>
-      <button onclick="addStudent()">Add Student</button>
-      <div class="buttons">
-        <button onclick="goTo(3)">Back</button>
-        <button onclick="goTo(5)">Next</button>
-      </div>
-    </div>
-
-    <!-- Step 5 -->
-    <div class="page" data-step="5">
-      <h2>Step 5: Profile and Notes</h2>
-      <label>Potential Limited Profile?
-        <div class="radio-group">
-          <label><input type="radio" name="limitedProfile" value="Yes"> Yes</label>
-          <label><input type="radio" name="limitedProfile" value="No"> No</label>
-        </div>
-      </label>
-      <label>Notes <textarea id="notes"></textarea></label>
-      <div class="buttons">
-        <button onclick="goTo(4)">Back</button>
-        <button onclick="generateFinal()">Finish</button>
-      </div>
-    </div>
+<div id="wizardRoot">
+  <!-- Page 1 -->
+  <div class="page" data-step="1">
+    <h2>Step 1 - Contact Info</h2>
+    <label>Date: <input type="date" id="date"></label><br>
+    <label>Taken By: <input type="text" id="takenBy"></label><br>
+    <label>Contact Name: <input type="text" id="contactName"></label><br>
+    <label>Contact Phone: <input type="text" id="contactPhone"></label><br>
+    <label>Contact Relationship: <input type="text" id="contactRel"></label><br>
+    <button class="btn" onclick="goTo(2)">Next</button>
   </div>
 
-  <!-- Final Form -->
-  <div id="finalWrap" class="hidden">
-    <h2>Final Yellow Form</h2>
-    <div id="finalArea"></div>
-    <div class="buttons">
-      <button onclick="downloadPDF()">Download PDF</button>
-      <button onclick="window.print()">Print</button>
-      <button onclick="backToEdit()">Back to Edit</button>
-    </div>
+  <!-- Page 2 -->
+  <div class="page hidden" data-step="2">
+    <h2>Step 2 - Immigration</h2>
+    <label><input type="radio" name="studentStatus" value="Resident"> Resident</label>
+    <label><input type="radio" name="studentStatus" value="Other"> Other</label>
+    <input type="text" id="studentStatusOther"><br>
+
+    <label><input type="radio" name="immDoc" value="RC"> RC</label>
+    <label><input type="radio" name="immDoc" value="Other"> Other</label>
+    <input type="text" id="immDocOther"><br>
+
+    <label>Expiry Date: <input type="date" id="expiry"></label><br>
+    <label><input type="radio" name="prevAttend" value="Yes"> Prev Yes</label>
+    <label><input type="radio" name="prevAttend" value="No"> Prev No</label><br>
+    <label>Date Landed: <input type="date" id="landed"></label><br>
+    <button class="btn" onclick="goTo(1)">Back</button>
+    <button class="btn" onclick="goTo(3)">Next</button>
   </div>
+
+  <!-- Page 3 -->
+  <div class="page hidden" data-step="3">
+    <h2>Step 3 - Parents</h2>
+    <label>Father Surname: <input type="text" id="fatherSurname"></label><br>
+    <label>Father Given: <input type="text" id="fatherGiven"></label><br>
+    <label>Mother Surname: <input type="text" id="motherSurname"></label><br>
+    <label>Mother Given: <input type="text" id="motherGiven"></label><br>
+    <label>Apartment: <input type="text" id="apt"></label><br>
+    <label>Address: <input type="text" id="address"></label><br>
+    <label>Postal: <input type="text" id="postal"></label><br>
+    <label>Family Phone: <input type="text" id="familyPhone"></label><br>
+    <label>Home Language: <input type="text" id="homeLang"></label><br>
+    <label><input type="radio" name="catholic" value="Yes"> Catholic Yes</label>
+    <label><input type="radio" name="catholic" value="No"> Catholic No</label><br>
+    <button class="btn" onclick="goTo(2)">Back</button>
+    <button class="btn" onclick="goTo(4)">Next</button>
+  </div>
+
+  <!-- Page 4 -->
+  <div class="page hidden" data-step="4">
+    <h2>Step 4 - Students</h2>
+    <div id="students"></div>
+    <button class="btn" onclick="addStudent()">Add Student</button><br>
+    <button class="btn" onclick="goTo(3)">Back</button>
+    <button class="btn" onclick="goTo(5)">Next</button>
+  </div>
+
+  <!-- Page 5 -->
+  <div class="page hidden" data-step="5">
+    <h2>Step 5 - Other</h2>
+    <label><input type="radio" name="limitedProfile" value="Yes"> Limited Yes</label>
+    <label><input type="radio" name="limitedProfile" value="No"> Limited No</label><br>
+    <label>Notes: <textarea id="notes"></textarea></label><br>
+    <button class="btn" onclick="goTo(4)">Back</button>
+    <button class="btn" onclick="generateFinal()">Generate Form</button>
+  </div>
+</div>
+
+<div id="finalWrap" class="hidden">
+  <div class="no-print">
+    <button class="btn" onclick="document.getElementById('wizardRoot').classList.remove('hidden');document.getElementById('finalWrap').classList.add('hidden');">Back to Edit</button>
+    <button class="btn" onclick="window.print()">Print</button>
+    <button class="btn" onclick="downloadPDF()">Download PDF</button>
+  </div>
+  <div id="finalArea"></div>
+</div>
 
 <script>
 let studentCount = 0
-
 function goTo(step){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
-  document.querySelector(`.page[data-step='${step}']`).classList.add('active')
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'))
+  document.querySelector(`.page[data-step='${step}']`).classList.remove('hidden')
   window.scrollTo({top:0,behavior:'smooth'})
 }
-
 function addStudent(){
   studentCount++
-  const div = document.createElement('div')
-  div.className = 'student border p-2 my-2'
-  div.id = 'student'+studentCount
-  div.innerHTML = `
-    <h3>Student ${studentCount}</h3>
-    <label>Surname <input type="text" id="s_${studentCount}_surname"></label>
-    <label>Given Name <input type="text" id="s_${studentCount}_given"></label>
-    <label>Gender
-      <div class="radio-group">
-        <label><input type="radio" name="s_${studentCount}_gender" value="M"> M</label>
-        <label><input type="radio" name="s_${studentCount}_gender" value="F"> F</label>
-      </div>
-    </label>
-    <label>DOB <input type="date" id="s_${studentCount}_dob"></label>
-    <label>Birth Country <input type="text" id="s_${studentCount}_birth"></label>
-    <label>Last Grade Completed <input type="text" id="s_${studentCount}_lastgrade"></label>
-    <label>School Year
-      <div class="radio-group">
-        <label><input type="radio" name="s_${studentCount}_year" value="ThisYear"> This Year</label>
-        <label><input type="radio" name="s_${studentCount}_year" value="NextYear"> Next Year</label>
-      </div>
-    </label>
-    <label>Program?
-      <div class="radio-group">
-        <label><input type="radio" name="s_${studentCount}_prog" value="Yes"> Yes <input type="text" id="s_${studentCount}_prog_spec"></label>
-        <label><input type="radio" name="s_${studentCount}_prog" value="No"> No</label>
-      </div>
-    </label>
+  const div=document.createElement('div')
+  div.id='student_'+studentCount
+  div.innerHTML=`
+    <h4>Student ${studentCount}</h4>
+    <label>Surname: <input type="text" id="s_${studentCount}_surname"></label>
+    <label>Given: <input type="text" id="s_${studentCount}_given"></label>
+    <label><input type="radio" name="s_${studentCount}_gender" value="M">M</label>
+    <label><input type="radio" name="s_${studentCount}_gender" value="F">F</label>
+    <label>DOB: <input type="date" id="s_${studentCount}_dob"></label>
+    <label>Birth Country: <input type="text" id="s_${studentCount}_birth"></label>
+    <label>Last Grade: <input type="text" id="s_${studentCount}_lastgrade"></label>
+    <label><input type="radio" name="s_${studentCount}_year" value="ThisYear">This Year</label>
+    <label><input type="radio" name="s_${studentCount}_year" value="NextYear">Next Year</label>
+    <label><input type="radio" name="s_${studentCount}_prog" value="Yes">Prog Yes</label>
+    <label><input type="radio" name="s_${studentCount}_prog" value="No">Prog No</label>
+    <label>Prog Spec: <input type="text" id="s_${studentCount}_prog_spec"></label>
     <button onclick="removeStudent(${studentCount})">Remove</button>
-  `
+    <hr>`
   document.getElementById('students').appendChild(div)
 }
-function removeStudent(i){
-  document.getElementById('student'+i)?.remove()
+function removeStudent(n){
+  document.getElementById('student_'+n)?.remove()
 }
 function getRadioValue(name){
-  const el = document.querySelector(`input[name='${name}']:checked`)
+  const el=document.querySelector(`input[name='${name}']:checked`)
   return el?el.value:''
 }
-function escapeHtml(str){
-  if(!str) return ''
-  return str.replace(/[&<>'"]/g, t=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[t]))
-}
-function checkboxMark(cond){ return cond? '☑':'☐' }
+function escapeHtml(t){return t.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function checkboxMark(v){return v?'☑':'☐'}
 
+// --- NEW generateFinal with grouped layout ---
 function generateFinal(){
-  const final = document.getElementById('finalArea')
-  final.innerHTML = ''
-
-  const tbl = document.createElement('table')
-  tbl.className = 'w-full border-collapse text-xs'
-  tbl.style.border = "1px solid black"
-
-  function cell(label, val){
-    return `
-      <td class="p-1 border align-top" style="border:1px solid black;">
-        <div class="font-semibold">${label}</div>
-        <div>${val||''}</div>
-      </td>
-    `
+  const final=document.getElementById('finalArea')
+  final.innerHTML=''
+  const tbl=document.createElement('table')
+  tbl.className='w-full border-collapse text-xs'
+  tbl.style.border='1px solid black'
+  function cell(label,val){
+    return `<td class="p-1 border align-top" style="border:1px solid black;">
+      <div class="font-semibold">${label}</div>
+      <div>${val||''}</div></td>`
   }
-
-  // --- Row 1: Contact
-  tbl.innerHTML += `
+  tbl.innerHTML+=`
     <tr>
-      ${cell('DATE', escapeHtml(document.getElementById('date').value))}
-      ${cell('TAKEN BY', escapeHtml(document.getElementById('takenBy').value))}
-      ${cell('CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value))}
-      ${cell('CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))}
-      ${cell('CONTACT RELATIONSHIP', escapeHtml(document.getElementById('contactRel').value))}
-    </tr>
-  `
-
-  // --- Row 2: Immigration
-  const sStatus = getRadioValue('studentStatus')==='Other'
-    ? document.getElementById('studentStatusOther').value
-    : getRadioValue('studentStatus')
-  const imm = getRadioValue('immDoc')==='Other'
-    ? document.getElementById('immDocOther').value
-    : getRadioValue('immDoc')
-
-  tbl.innerHTML += `
+      ${cell('DATE',escapeHtml(document.getElementById('date').value))}
+      ${cell('TAKEN BY',escapeHtml(document.getElementById('takenBy').value))}
+      ${cell('CONTACT NAME/SURNAME',escapeHtml(document.getElementById('contactName').value))}
+      ${cell('CONTACT PHONE #',escapeHtml(document.getElementById('contactPhone').value))}
+      ${cell('CONTACT RELATIONSHIP',escapeHtml(document.getElementById('contactRel').value))}
+    </tr>`
+  const sStatus=getRadioValue('studentStatus')==='Other'?document.getElementById('studentStatusOther').value:getRadioValue('studentStatus')
+  const imm=getRadioValue('immDoc')==='Other'?document.getElementById('immDocOther').value:getRadioValue('immDoc')
+  tbl.innerHTML+=`
     <tr>
-      ${cell("STUDENT'S STATUS", escapeHtml(sStatus))}
-      ${cell("IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)", escapeHtml(imm))}
-      ${cell("EXPIRY DATE (RC/SP/WP)", escapeHtml(document.getElementById('expiry').value))}
-      ${cell("PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?",
-        getRadioValue('prevAttend')==='Yes'
-          ? '☑ Yes  ☐ No'
-          : getRadioValue('prevAttend')==='No'
-          ? '☐ Yes  ☑ No'
-          : ''
-      )}
-      ${cell("DATE STUDENT(S) LANDED IN CANADA", escapeHtml(document.getElementById('landed').value))}
-    </tr>
-  `
-
-  // --- Row 3: Parents
-  tbl.innerHTML += `
+      ${cell("STUDENT'S STATUS",escapeHtml(sStatus))}
+      ${cell("IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)",escapeHtml(imm))}
+      ${cell("EXPIRY DATE (RC/SP/WP)",escapeHtml(document.getElementById('expiry').value))}
+      ${cell("PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?",getRadioValue('prevAttend')==='Yes'?'☑ Yes  ☐ No':getRadioValue('prevAttend')==='No'?'☐ Yes  ☑ No':'')}
+      ${cell("DATE STUDENT(S) LANDED IN CANADA",escapeHtml(document.getElementById('landed').value))}
+    </tr>`
+  tbl.innerHTML+=`
     <tr>
-      ${cell("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value))}
-      ${cell("FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value))}
-      ${cell("MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value))}
-      ${cell("MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))}
-    </tr>
-  `
-
-  // --- Row 4: Address & Family
-  tbl.innerHTML += `
+      ${cell("FATHER'S SURNAME",escapeHtml(document.getElementById('fatherSurname').value))}
+      ${cell("FATHER'S GIVEN NAME",escapeHtml(document.getElementById('fatherGiven').value))}
+      ${cell("MOTHER'S SURNAME",escapeHtml(document.getElementById('motherSurname').value))}
+      ${cell("MOTHER'S GIVEN NAME",escapeHtml(document.getElementById('motherGiven').value))}
+    </tr>`
+  tbl.innerHTML+=`
     <tr>
-      ${cell("APARTMENT #", escapeHtml(document.getElementById('apt').value))}
-      ${cell("FAMILY ADDRESS / POSTAL CODE",
-        escapeHtml(document.getElementById('address').value) +
-        (document.getElementById('postal').value ? ' / '+escapeHtml(document.getElementById('postal').value) : '')
-      )}
-      ${cell("FAMILY PHONE #", escapeHtml(document.getElementById('familyPhone').value))}
-      ${cell("HOME LANGUAGE", escapeHtml(document.getElementById('homeLang').value))}
-      ${cell("CATHOLIC", getRadioValue('catholic')
-        ? (getRadioValue('catholic')==='Yes' ? '☑ Yes  ☐ No' : '☐ Yes  ☑ No')
-        : ''
-      )}
-    </tr>
-  `
-
-  // --- Row 5: Students (header + rows)
-  let studentBlock = `
-    <tr>
-      <td colspan="5" class="p-0 border" style="border:1px solid black;">
-        <table class="w-full border-collapse text-xs" style="border:1px solid black;width:100%;">
-          <tr>
-            <th class="p-1 border">STUDENT'S SURNAME</th>
-            <th class="p-1 border">STUDENT'S GIVEN NAME</th>
-            <th class="p-1 border">GENDER</th>
-            <th class="p-1 border">DOB (MMM/DD/YYYY)</th>
-            <th class="p-1 border">BIRTH COUNTRY</th>
-            <th class="p-1 border">LAST GRADE COMPLETED</th>
-            <th class="p-1 border">SCHOOL YEAR</th>
-            <th class="p-1 border">PROGRAM</th>
-          </tr>
-  `
+      ${cell("APARTMENT #",escapeHtml(document.getElementById('apt').value))}
+      ${cell("FAMILY ADDRESS / POSTAL CODE",escapeHtml(document.getElementById('address').value)+(document.getElementById('postal').value?' / '+escapeHtml(document.getElementById('postal').value):''))}
+      ${cell("FAMILY PHONE #",escapeHtml(document.getElementById('familyPhone').value))}
+      ${cell("HOME LANGUAGE",escapeHtml(document.getElementById('homeLang').value))}
+      ${cell("CATHOLIC",getRadioValue('catholic')?(getRadioValue('catholic')==='Yes'?'☑ Yes  ☐ No':'☐ Yes  ☑ No'):'')}
+    </tr>`
+  let studentBlock=`<tr><td colspan="5" class="p-0 border" style="border:1px solid black;"><table class="w-full border-collapse text-xs" style="border:1px solid black;width:100%;"><tr>
+    <th class="p-1 border">STUDENT'S SURNAME</th>
+    <th class="p-1 border">STUDENT'S GIVEN NAME</th>
+    <th class="p-1 border">GENDER</th>
+    <th class="p-1 border">DOB (MMM/DD/YYYY)</th>
+    <th class="p-1 border">BIRTH COUNTRY</th>
+    <th class="p-1 border">LAST GRADE COMPLETED</th>
+    <th class="p-1 border">SCHOOL YEAR</th>
+    <th class="p-1 border">PROGRAM</th></tr>`
   for(let i=1;i<=studentCount;i++){
-    const surname = document.getElementById(`s_${i}_surname`)?.value || ''
-    const given = document.getElementById(`s_${i}_given`)?.value || ''
-    const gender = getRadioValue(`s_${i}_gender`)
-    const dob = document.getElementById(`s_${i}_dob`)?.value || ''
-    const birth = document.getElementById(`s_${i}_birth`)?.value || ''
-    const last = document.getElementById(`s_${i}_lastgrade`)?.value || ''
-    const year = getRadioValue(`s_${i}_year`)
-    const prog = getRadioValue(`s_${i}_prog`)
-    const progSpec = document.getElementById(`s_${i}_prog_spec`)?.value || ''
-
-    if(surname || given || birth || last){
-      studentBlock += `
-        <tr>
-          <td class="p-1 border">${escapeHtml(surname)}</td>
-          <td class="p-1 border">${escapeHtml(given)}</td>
-          <td class="p-1 border text-center">${gender||''}</td>
-          <td class="p-1 border text-center">${escapeHtml(dob)}</td>
-          <td class="p-1 border">${escapeHtml(birth)}</td>
-          <td class="p-1 border text-center">${escapeHtml(last)}</td>
-          <td class="p-1 border text-center">${year==='ThisYear'?'This year':year==='NextYear'?'Next year':''}</td>
-          <td class="p-1 border text-center">${prog==='Yes'?'Yes — '+escapeHtml(progSpec):(prog==='No'?'No':'')}</td>
-        </tr>
-      `
+    const surname=document.getElementById(`s_${i}_surname`)?.value||''
+    const given=document.getElementById(`s_${i}_given`)?.value||''
+    const gender=getRadioValue(`s_${i}_gender`)
+    const dob=document.getElementById(`s_${i}_dob`)?.value||''
+    const birth=document.getElementById(`s_${i}_birth`)?.value||''
+    const last=document.getElementById(`s_${i}_lastgrade`)?.value||''
+    const year=getRadioValue(`s_${i}_year`)
+    const prog=getRadioValue(`s_${i}_prog`)
+    const progSpec=document.getElementById(`s_${i}_prog_spec`)?.value||''
+    if(surname||given||birth||last){
+      studentBlock+=`<tr>
+        <td class="p-1 border">${escapeHtml(surname)}</td>
+        <td class="p-1 border">${escapeHtml(given)}</td>
+        <td class="p-1 border text-center">${gender||''}</td>
+        <td class="p-1 border text-center">${escapeHtml(dob)}</td>
+        <td class="p-1 border">${escapeHtml(birth)}</td>
+        <td class="p-1 border text-center">${escapeHtml(last)}</td>
+        <td class="p-1 border text-center">${year==='ThisYear'?'This year':year==='NextYear'?'Next year':''}</td>
+        <td class="p-1 border text-center">${prog==='Yes'?'Yes — '+escapeHtml(progSpec):(prog==='No'?'No':'')}</td>
+      </tr>`
     }
   }
-  studentBlock += `</table></td></tr>`
-  tbl.innerHTML += studentBlock
-
-  // --- Row 6: Limited profile & Notes
-  tbl.innerHTML += `
+  studentBlock+=`</table></td></tr>`
+  tbl.innerHTML+=studentBlock
+  tbl.innerHTML+=`
     <tr>
-      ${cell("POTENTIAL LIMITED FORMAL SCHOOLING PROFILE",
-        checkboxMark(getRadioValue('limitedProfile')==='Yes')+' Yes '+
-        checkboxMark(getRadioValue('limitedProfile')==='No')+' No')}
-      ${cell("NOTES", escapeHtml(document.getElementById('notes').value))}
+      ${cell("POTENTIAL LIMITED FORMAL SCHOOLING PROFILE",checkboxMark(getRadioValue('limitedProfile')==='Yes')+' Yes '+checkboxMark(getRadioValue('limitedProfile')==='No')+' No')}
+      ${cell("NOTES",escapeHtml(document.getElementById('notes').value))}
     </tr>
-    <tr><td colspan="5" class="text-right text-xs italic p-1">Rev. 2021</td></tr>
-  `
-
+    <tr><td colspan="5" class="text-right text-xs italic p-1">Rev. 2021</td></tr>`
   final.appendChild(tbl)
-
-  // show final, hide wizard
   document.getElementById('wizardRoot').classList.add('hidden')
   document.getElementById('finalWrap').classList.remove('hidden')
 }
-
 function downloadPDF(){
-  html2pdf().from(document.getElementById('finalArea')).save('yellow_form.pdf')
-}
-function backToEdit(){
-  document.getElementById('wizardRoot').classList.remove('hidden')
-  document.getElementById('finalWrap').classList.add('hidden')
+  const element=document.getElementById('finalArea')
+  html2pdf().set({margin:0.5,filename:'yellow_form.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'letter',orientation:'portrait'}}).from(element).save()
 }
 </script>
 <script>addStudent()</script>

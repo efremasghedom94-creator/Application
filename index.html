@@ -43,54 +43,62 @@
 <!-- PAGE 1 -->
 <section class="page" data-step="1">
   <h2 class="font-medium mb-3">Page 1</h2>
+
   <div class="grid grid-cols-12 gap-3">
+    <!-- DATE -->
     <div class="col-span-2">
       <label class="block text-sm">DATE</label>
       <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
     </div>
+
+    <!-- TAKEN BY -->
     <div class="col-span-3">
       <label class="block text-sm">TAKEN BY</label>
       <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1" placeholder="Name" />
     </div>
+
+    <!-- CONTACT NAME / SURNAME -->
     <div class="col-span-4">
       <label class="block text-sm">CONTACT NAME / SURNAME</label>
       <input id="contactName" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
+
+    <!-- CONTACT PHONE # -->
     <div class="col-span-2">
       <label class="block text-sm">CONTACT PHONE #</label>
       <input id="contactPhone" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
-    <!-- Contact Relationship field -->
+    <!-- CONTACT RELATIONSHIP -->
     <div class="col-span-4">
       <label for="contactRel" class="block text-sm">CONTACT RELATIONSHIP</label>
       <select id="contactRel" name="contactRel" 
               class="border rounded p-2 w-72" 
               onchange="toggleOtherRelation(this)">
         <option value="" disabled selected hidden>-- Select Relation --</option>
-    <option value="Mother">Mother</option>
-    <option value="Father">Father</option>
-    <option value="Step-Mother">Step-Mother</option>
-    <option value="Step-Father">Step-Father</option>
-    <option value="Guardian">Guardian</option>
-    <option value="Sponsor">Sponsor</option>
-    <option value="Sister">Sister</option>
-    <option value="Brother">Brother</option>
-    <option value="Half-Sister">Half-Sister</option>
-    <option value="Half-Brother">Half-Brother</option>
-    <option value="Cousin">Cousin</option>
-    <option value="Uncle">Uncle</option>
-    <option value="Aunt">Aunt</option>
-    <option value="Grandmother">Grandmother</option>
-    <option value="Grandfather">Grandfather</option>
-    <option value="Family Friend">Family Friend</option>
-    <option value="Neighbor">Neighbor</option>
-    <option value="Community Worker">Community Worker</option>
-    <option value="Social Worker">Social Worker</option>
+        <option value="Mother">Mother</option>
+        <option value="Father">Father</option>
+        <option value="Step-Mother">Step-Mother</option>
+        <option value="Step-Father">Step-Father</option>
+        <option value="Guardian">Guardian</option>
+        <option value="Sponsor">Sponsor</option>
+        <option value="Sister">Sister</option>
+        <option value="Brother">Brother</option>
+        <option value="Half-Sister">Half-Sister</option>
+        <option value="Half-Brother">Half-Brother</option>
+        <option value="Cousin">Cousin</option>
+        <option value="Uncle">Uncle</option>
+        <option value="Aunt">Aunt</option>
+        <option value="Grandmother">Grandmother</option>
+        <option value="Grandfather">Grandfather</option>
+        <option value="Family Friend">Family Friend</option>
+        <option value="Neighbor">Neighbor</option>
+        <option value="Community Worker">Community Worker</option>
+        <option value="Social Worker">Social Worker</option>
         <option value="Other">Other</option>
       </select>
 
-      <!-- This input only shows when 'Other' is chosen -->
+      <!-- Show this input only if "Other" is selected -->
       <input 
         type="text" 
         id="otherRelation" 
@@ -101,9 +109,9 @@
     </div>
   </div> <!-- end grid -->
 
-  <!-- Next button in its own row -->
+  <!-- Next button -->
   <div class="flex justify-end mt-4">
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
+    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
   </div>
 </section>
 
@@ -114,11 +122,11 @@
       otherBox.classList.remove('hidden');
     } else {
       otherBox.classList.add('hidden');
-      otherBox.removeAttribute('required');
-      otherBox.value = '';
+      otherBox.value = ''; // clear input when not Other
     }
   }
 </script>
+
 
       <!-- PAGE 2 -->
       <section class="page hidden" data-step="2">

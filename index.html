@@ -61,12 +61,47 @@
       <input id="contactPhone" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
-    <!-- Relation field -->
-    <div class="col-span-4">
-      <label for="CONTACT RELATIONSHIP" class="block text-sm">CONTACT RELATIONSHIP</label>
-      <input type="text" id="CONTACT RELATIONSHIP" name="CONTACT RELATIONSHIP" class="border rounded p-2 w-72" />
-    </div>
-  </div> <!-- close grid -->
+   <!-- Contact Relationship field -->
+<div class="col-span-4">
+  <label for="contactRel" class="block text-sm">Contact Relationship</label>
+  <select id="contactRel" name="contactRel" 
+          class="border rounded p-2 w-72" 
+          onchange="toggleOtherRelation(this)">
+    <option value="">-- Select Relation --</option>
+    <option value="Mother">Mother</option>
+    <option value="Father">Father</option>
+    <option value="Brother">Brother</option>
+    <option value="Sister">Sister</option>
+    <option value="Aunt">Aunt</option>
+    <option value="Uncle">Uncle</option>
+    <option value="Sponsor">Sponsor</option>
+    <option value="Other">Other</option>
+  </select>
+
+  <!-- This input only shows when 'Other' is chosen -->
+  <input 
+    type="text" 
+    id="otherRelation" 
+    name="otherRelation" 
+    class="border rounded p-2 w-72 mt-2 hidden" 
+    placeholder="Please specify"
+  />
+</div>
+
+<script>
+  function toggleOtherRelation(select) {
+    const otherBox = document.getElementById('otherRelation');
+    if (select.value === 'Other') {
+      otherBox.classList.remove('hidden');
+      otherBox.setAttribute('required', 'true'); // make it required
+    } else {
+      otherBox.classList.add('hidden');
+      otherBox.removeAttribute('required');
+      otherBox.value = ''; // clear old value
+    }
+  }
+</script>
+
 
   <!-- Button aligned bottom-right -->
   <div class="flex justify-end mt-4">

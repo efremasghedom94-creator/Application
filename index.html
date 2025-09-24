@@ -112,7 +112,6 @@
     const otherBox = document.getElementById('otherRelation');
     if (select.value === 'Other') {
       otherBox.classList.remove('hidden');
-      otherBox.setAttribute('required', 'true'); // required if visible
     } else {
       otherBox.classList.add('hidden');
       otherBox.removeAttribute('required');

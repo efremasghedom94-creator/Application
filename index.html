@@ -327,22 +327,93 @@
 </section>
 
 
-      <!-- PAGE 5 Students (dynamic add) -->
-      <section class="page hidden" data-step="5">
-        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
-        <div id="studentsContainer" class="space-y-4">
-          <!-- template inserted by JS -->
-        </div>
-        <div class="flex items-center gap-3 mt-3">
-          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
-          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
-        </div>
+   <!-- Page 5: Student Details -->
+<section class="page hidden" data-step="5">
+  <h2 class="text-xl font-bold mb-4">Student Details</h2>
+  <div id="studentsContainer"></div>
+  <button type="button" onclick="addStudent()" class="bg-green-500 text-white px-4 py-2 rounded">Add Student</button>
+  <button type="button" onclick="removeStudent()" class="bg-red-500 text-white px-4 py-2 rounded">Remove Student</button>
+</section>
 
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
-        </div>
-      </section>
+<script>
+let studentCount = 0;
+
+function addStudent() {
+  studentCount++;
+  const container = document.getElementById("studentsContainer");
+
+  const studentDiv = document.createElement("div");
+  studentDiv.classList.add("border", "p-4", "mb-4", "rounded", "bg-gray-50");
+  studentDiv.setAttribute("id", "student-" + studentCount);
+
+  studentDiv.innerHTML = `
+    <h3 class="font-semibold mb-2">Student ${studentCount}</h3>
+
+    <!-- Student Surname -->
+    <label class="block mb-2">Student Surname:
+      <input type="text" id="studentSurname-${studentCount}" class="border p-1 w-full">
+    </label>
+
+    <!-- DOB + Birth Country in one row -->
+    <div class="grid grid-cols-2 gap-4 mb-2">
+      <label class="block">Date of Birth:
+        <input type="date" id="studentDOB-${studentCount}" class="border p-1 w-full">
+      </label>
+      <label class="block">Birth Country:
+        <input type="text" id="studentBirthCountry-${studentCount}" class="border p-1 w-full">
+      </label>
+    </div>
+
+    <!-- Last Grade Completed -->
+    <label class="block mb-2">Last Grade Completed:
+      <select id="studentGrade-${studentCount}" class="border p-1 w-full" onchange="toggleOtherGrade(${studentCount})">
+        <option value="">Select Grade</option>
+        <option>Pre K</option>
+        <option>KG</option>
+        ${Array.from({length: 12}, (_, i) => `<option>Grade ${i+1}</option>`).join('')}
+        <option>Other</option>
+      </select>
+    </label>
+    <input type="text" id="studentGradeOther-${studentCount}" class="border p-1 w-full mb-2 hidden" placeholder="Specify other grade">
+
+    <!-- Program -->
+    <label class="block mb-2">Program:
+      <select id="studentProgram-${studentCount}" class="border p-1 w-full" onchange="toggleOtherProgram(${studentCount})">
+        <option value="">Select Program</option>
+        <option>French Immersion</option>
+        <option>Spanish Bilingual</option>
+        <option>Ukrainian Bilingual</option>
+        <option>Other</option>
+      </select>
+    </label>
+    <input type="text" id="studentProgramOther-${studentCount}" class="border p-1 w-full hidden" placeholder="Specify other program">
+  `;
+
+  container.appendChild(studentDiv);
+}
+
+function removeStudent() {
+  if(studentCount > 0) {
+    const studentDiv = document.getElementById("student-" + studentCount);
+    studentDiv.remove();
+    studentCount--;
+  }
+}
+
+// Show/hide "Other" grade input
+function toggleOtherGrade(id) {
+  const gradeSelect = document.getElementById(`studentGrade-${id}`);
+  const gradeOther = document.getElementById(`studentGradeOther-${id}`);
+  gradeOther.classList.toggle("hidden", gradeSelect.value !== "Other");
+}
+
+// Show/hide "Other" program input
+function toggleOtherProgram(id) {
+  const programSelect = document.getElementById(`studentProgram-${id}`);
+  const programOther = document.getElementById(`studentProgramOther-${id}`);
+  programOther.classList.toggle("hidden", programSelect.value !== "Other");
+}
+</script>
 
       <!-- PAGE 6 Schooling profile & notes -->
       <section class="page hidden" data-step="6">

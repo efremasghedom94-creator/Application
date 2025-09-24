@@ -185,7 +185,8 @@
         <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="SP" class="mr-2">SP</label>
         <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-2">WP</label>
         <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-2">Other</label>
-        <input id="studentStatusOther" type="text" class="hidden border rounded p-2" placeholder="Specify" disabled />
+        <!-- Always present but disabled until "Other" is selected -->
+        <input id="studentStatusOther" type="text" class="border rounded p-2 ml-2 hidden" placeholder="Specify" />
       </div>
     </div>
 
@@ -198,7 +199,8 @@
         <label class="inline-flex items-center"><input type="radio" name="immDoc" value="SP" class="mr-2">SP</label>
         <label class="inline-flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-2">WP</label>
         <label class="inline-flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-2">Other</label>
-        <input id="immDocOther" type="text" class="hidden border rounded p-2" placeholder="Specify" disabled />
+        <!-- Always present but hidden until "Other" is selected -->
+        <input id="immDocOther" type="text" class="border rounded p-2 ml-2 hidden" placeholder="Specify" />
       </div>
     </div>
 
@@ -237,6 +239,7 @@
     const radios = document.querySelectorAll(`input[name='${groupName}']`);
     const otherInput = document.getElementById(inputId);
 
+    // Check if "Other" is selected
     let otherSelected = false;
     radios.forEach(radio => {
       if (radio.checked && radio.value === "Other") {
@@ -250,8 +253,8 @@
       otherInput.focus();
     } else {
       otherInput.classList.add("hidden");
-      otherInput.setAttribute("disabled", "true");
       otherInput.value = "";
+      otherInput.setAttribute("disabled", "true");
     }
   }
 
@@ -264,7 +267,6 @@
     radio.addEventListener("change", () => toggleOtherField("immDoc", "immDocOther"));
   });
 </script>
-
 
       <!-- PAGE 3 Parents -->
       <section class="page hidden" data-step="3">

@@ -61,53 +61,53 @@
       <input id="contactPhone" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
-   <!-- Contact Relationship field -->
-<div class="col-span-4">
-  <label for="contactRel" class="block text-sm">Contact Relationship</label>
-  <select id="contactRel" name="contactRel" 
-          class="border rounded p-2 w-72" 
-          onchange="toggleOtherRelation(this)">
-    <option value="">-- Select Relation --</option>
-    <option value="Mother">Mother</option>
-    <option value="Father">Father</option>
-    <option value="Brother">Brother</option>
-    <option value="Sister">Sister</option>
-    <option value="Aunt">Aunt</option>
-    <option value="Uncle">Uncle</option>
-    <option value="Sponsor">Sponsor</option>
-    <option value="Other">Other</option>
-  </select>
+    <!-- Contact Relationship field -->
+    <div class="col-span-4">
+      <label for="contactRel" class="block text-sm">Contact Relationship</label>
+      <select id="contactRel" name="contactRel" 
+              class="border rounded p-2 w-72" 
+              onchange="toggleOtherRelation(this)">
+        <option value="">-- Select Relation --</option>
+        <option value="Mother">Mother</option>
+        <option value="Father">Father</option>
+        <option value="Brother">Brother</option>
+        <option value="Sister">Sister</option>
+        <option value="Aunt">Aunt</option>
+        <option value="Uncle">Uncle</option>
+        <option value="Sponsor">Sponsor</option>
+        <option value="Other">Other</option>
+      </select>
 
-  <!-- This input only shows when 'Other' is chosen -->
-  <input 
-    type="text" 
-    id="otherRelation" 
-    name="otherRelation" 
-    class="border rounded p-2 w-72 mt-2 hidden" 
-    placeholder="Please specify"
-  />
-</div>
+      <!-- This input only shows when 'Other' is chosen -->
+      <input 
+        type="text" 
+        id="otherRelation" 
+        name="otherRelation" 
+        class="border rounded p-2 w-72 mt-2 hidden" 
+        placeholder="Please specify"
+      />
+    </div>
+  </div> <!-- end grid -->
+
+  <!-- Next button in its own row -->
+  <div class="flex justify-end mt-4">
+    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
+  </div>
+</section>
 
 <script>
   function toggleOtherRelation(select) {
     const otherBox = document.getElementById('otherRelation');
     if (select.value === 'Other') {
       otherBox.classList.remove('hidden');
-      otherBox.setAttribute('required', 'true'); // make it required
+      otherBox.setAttribute('required', 'true'); // required if visible
     } else {
       otherBox.classList.add('hidden');
       otherBox.removeAttribute('required');
-      otherBox.value = ''; // clear old value
+      otherBox.value = '';
     }
   }
 </script>
-
-
-  <!-- Button aligned bottom-right -->
-  <div class="flex justify-end mt-4">
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
-  </div>
-</section>
 
       <!-- PAGE 2 -->
       <section class="page hidden" data-step="2">

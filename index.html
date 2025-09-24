@@ -98,7 +98,7 @@
         <option value="Other">Other</option>
       </select>
 
-      <!-- Show this input only if "Other" is selected -->
+      <!-- Show only if "Other" is selected -->
       <input 
         type="text" 
         id="otherRelation" 
@@ -107,7 +107,7 @@
         placeholder="Please specify"
       />
     </div>
-  </div> <!-- end grid -->
+  </div>
 
   <!-- Next button -->
   <div class="flex justify-end mt-4">
@@ -116,16 +116,26 @@
 </section>
 
 <script>
-  function toggleOtherRelation(select) {
+  // Show/hide the "Other" input box for Contact Relationship
+  function toggleOtherRelation(select){
     const otherBox = document.getElementById('otherRelation');
-    if (select.value === 'Other') {
+    if(select.value === 'Other'){
       otherBox.classList.remove('hidden');
+      otherBox.focus();
     } else {
       otherBox.classList.add('hidden');
-      otherBox.value = ''; // clear input when not Other
+      otherBox.value = '';
     }
   }
+
+  // Clean value retrieval for yellow form
+  function getContactRelationship() {
+    const rel = document.getElementById('contactRel')?.value;
+    const other = document.getElementById('otherRelation')?.value;
+    return rel === 'Other' ? (other || 'Other') : (rel || '');
+  }
 </script>
+
 
 
       <!-- PAGE 2 -->
@@ -292,6 +302,8 @@
 
     </div> <!-- end wizardRoot -->
 
+ 
+    
     <!-- FINAL STATIC YELLOW FORM -->
     <div id="finalWrap" class="final-wrap hidden mt-6">
       <div id="finalArea" class="yellow-bg p-6 rounded shadow border">
@@ -440,16 +452,10 @@
       addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
 
       // CONTACT RELATIONSHIP as its own compact row (span all columns)
-      const trRel = document.createElement('tr')
-      trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td><td class="p-2" style="border:1px solid #000;" colspan="3"><td>${
-<td>${
-  (() => {
-    const rel = document.getElementById('contactRel')?.value;
-    const other = document.getElementById('otherRelation')?.value;
-    if (rel === 'Other') return other || 'Other';
-    return rel || '';
-  })()
-}</td>
+const trRel = document.createElement('tr');
+trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
+                   <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
+
 
 
       tbl.appendChild(trRel)

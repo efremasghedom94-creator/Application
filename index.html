@@ -63,11 +63,39 @@
       <input id="contactName" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
-    <!-- CONTACT PHONE # -->
-    <div class="col-span-2">
-      <label class="block text-sm">CONTACT PHONE #</label>
-      <input id="contactPhone" type="text" class="w-full border rounded p-2 mt-1" />
-    </div>
+<!-- CONTACT PHONE # -->
+<div class="col-span-2">
+  <label class="block text-sm">CONTACT PHONE #</label>
+  <input 
+    id="contactPhone" 
+    type="text" 
+    maxlength="14" 
+    class="w-full border rounded p-2 mt-1" 
+    placeholder="(123) 456-7890"
+    oninput="formatPhone(this)" 
+  />
+</div>
+
+<script>
+  function formatPhone(input) {
+    // remove all non-digits
+    let value = input.value.replace(/\D/g, '');
+
+    // format as (xxx) xxx-xxxx
+    if (value.length > 0) {
+      value = '(' + value.substring(0, 3);
+    }
+    if (value.length > 4) {
+      value += ') ' + value.substring(3, 6);
+    }
+    if (value.length > 9) {
+      value += '-' + value.substring(6, 10);
+    }
+
+    input.value = value;
+  }
+</script>
+
 
     <!-- CONTACT RELATIONSHIP -->
     <div class="col-span-4">

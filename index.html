@@ -442,12 +442,15 @@
       // CONTACT RELATIONSHIP as its own compact row (span all columns)
       const trRel = document.createElement('tr')
       trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td><td class="p-2" style="border:1px solid #000;" colspan="3"><td>${
-  escapeHtml(
-    document.getElementById('contactRel').value === 'Other'
-      ? document.getElementById('otherRelation').value || 'Other'
-      : document.getElementById('contactRel').value
-  )
+<td>${
+  (() => {
+    const rel = document.getElementById('contactRel')?.value;
+    const other = document.getElementById('otherRelation')?.value;
+    if (rel === 'Other') return other || 'Other';
+    return rel || '';
+  })()
 }</td>
+
 
       tbl.appendChild(trRel)
 

@@ -180,13 +180,13 @@
     <div class="col-span-6">
       <label class="block text-sm">STUDENT'S STATUS</label>
       <div class="mt-1 flex flex-wrap gap-3 items-center">
-        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="PR" class="mr-2">PR</label>
-        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="RC" class="mr-2">RC</label>
-        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="SP" class="mr-2">SP</label>
-        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-2">WP</label>
-        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-2">Other</label>
-        <!-- Always visible -->
-        <input id="studentStatusOther" type="text" class="border rounded p-2 ml-2" placeholder="Specify" disabled />
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="PR" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">PR</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="RC" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">RC</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="SP" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">SP</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">WP</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">Other</label>
+        <!-- Hidden until "Other" -->
+        <input id="studentStatusOther" type="text" class="hidden border rounded p-2 ml-2" placeholder="Specify" />
       </div>
     </div>
 
@@ -194,13 +194,13 @@
     <div class="col-span-6">
       <label class="block text-sm">IMMIGRATION DOCUMENT (OF NATURAL PARENT / GUARDIAN)</label>
       <div class="mt-1 flex flex-wrap gap-3 items-center">
-        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="PR" class="mr-2">PR</label>
-        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="RC" class="mr-2">RC</label>
-        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="SP" class="mr-2">SP</label>
-        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-2">WP</label>
-        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-2">Other</label>
-        <!-- Always visible -->
-        <input id="immDocOther" type="text" class="border rounded p-2 ml-2" placeholder="Specify" disabled />
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="PR" class="mr-2" onchange="toggleOtherField('immDocOther', this)">PR</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="RC" class="mr-2" onchange="toggleOtherField('immDocOther', this)">RC</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="SP" class="mr-2" onchange="toggleOtherField('immDocOther', this)">SP</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-2" onchange="toggleOtherField('immDocOther', this)">WP</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-2" onchange="toggleOtherField('immDocOther', this)">Other</label>
+        <!-- Hidden until "Other" -->
+        <input id="immDocOther" type="text" class="hidden border rounded p-2 ml-2" placeholder="Specify" />
       </div>
     </div>
 
@@ -235,28 +235,16 @@
 </section>
 
 <script>
-  function handleOtherField(groupName, inputId) {
-    const radios = document.querySelectorAll(`input[name='${groupName}']`);
-    const otherInput = document.getElementById(inputId);
-
-    let otherSelected = false;
-    radios.forEach(radio => {
-      if (radio.checked && radio.value === "Other") {
-        otherSelected = true;
-      }
-    });
-
-    if (otherSelected) {
-      otherInput.removeAttribute("disabled");
-      otherInput.focus();
+  function toggleOtherField(inputId, radio) {
+    const input = document.getElementById(inputId);
+    if (radio.value === "Other" && radio.checked) {
+      input.classList.remove("hidden");
     } else {
-      otherInput.value = "";
-      otherInput.setAttribute("disabled", "true");
+      input.classList.add("hidden");
+      input.value = "";
     }
   }
-
-  // Attach listeners
-  document.querySelectorAll("input
+</script>
 
 
       <!-- PAGE 3 Parents -->

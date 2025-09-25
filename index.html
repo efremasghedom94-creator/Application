@@ -391,93 +391,21 @@
 
       
    <!-- PAGE 5 Students (dynamic add) -->
-  <!-- PAGE 5 Student Info -->
-<section class="page hidden" data-step="5">
-  <h2 class="text-xl font-bold mb-4">Page 5: Student Information</h2>
+      <section class="page hidden" data-step="5">
+        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
+        <div id="studentsContainer" class="space-y-4">
+          <!-- template inserted by JS -->
+        </div>
+        <div class="flex items-center gap-3 mt-3">
+          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
+          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
+        </div>
 
-  <div id="studentForms"></div>
-  <button type="button" onclick="addStudent()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">
-    + Add Student
-  </button>
-</section>
-
-<script>
-function addStudent() {
-  const id = document.querySelectorAll('#studentForms .student-block').length + 1;
-  const container = document.getElementById('studentForms');
-
-  const div = document.createElement('div');
-  div.className = "student-block border p-4 rounded mb-4 bg-gray-50";
-  div.innerHTML = `
-    <h3 class="font-semibold mb-2">Student ${id}</h3>
-    
-    <!-- Student Name -->
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm">Student Given Name</label>
-        <input type="text" class="w-full border rounded p-2 mt-1" id="s_${id}_fname"/>
-      </div>
-      <div>
-        <label class="block text-sm">Student Surname</label>
-        <input type="text" class="w-full border rounded p-2 mt-1" id="s_${id}_lname"/>
-      </div>
-    </div>
-
-    <!-- DOB + Birth Country -->
-    <div class="grid grid-cols-2 gap-4 mt-2">
-      <div>
-        <label class="block text-sm">Date of Birth</label>
-        <input type="date" class="w-full border rounded p-2 mt-1" id="s_${id}_dob"/>
-      </div>
-      <div>
-        <label class="block text-sm">Birth Country</label>
-        <input list="countryList" class="w-full border rounded p-2 mt-1" id="s_${id}_birthcountry"/>
-      </div>
-    </div>
-
-    <!-- Last Grade Completed -->
-    <div class="mt-2">
-      <label class="block text-sm">Last Grade Completed</label>
-      <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
-        <option value="">-- Select Grade --</option>
-        <option>Pre K</option>
-        <option>KG</option>
-        ${Array.from({length: 12}, (_, i) => `<option>Grade ${i+1}</option>`).join('')}
-        <option>Other</option>
-      </select>
-      <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Please specify"/>
-    </div>
-
-    <!-- Program -->
-    <div class="mt-2">
-      <label class="block text-sm">Program</label>
-      <select id="s_${id}_prog" class="w-full border rounded p-2 mt-1" onchange="toggleOtherProg(${id})">
-        <option value="">-- Select Program --</option>
-        <option>French Immersion</option>
-        <option>Spanish Bilingual</option>
-        <option>Ukrainian Bilingual</option>
-        <option>Other</option>
-      </select>
-      <input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Please specify"/>
-    </div>
-  `;
-  container.appendChild(div);
-}
-
-function toggleOtherGrade(id){
-  const sel = document.getElementById(`s_${id}_lastgrade`);
-  const spec = document.getElementById(`s_${id}_lastgrade_spec`);
-  if(sel.value === 'Other') spec.classList.remove('hidden');
-  else { spec.classList.add('hidden'); spec.value=''; }
-}
-
-function toggleOtherProg(id){
-  const sel = document.getElementById(`s_${id}_prog`);
-  const spec = document.getElementById(`s_${id}_prog_spec`);
-  if(sel.value === 'Other') spec.classList.remove('hidden');
-  else { spec.classList.add('hidden'); spec.value=''; }
-}
-</script>
+        <div class="flex justify-between mt-4">
+          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
+          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
+        </div>
+      </section>
 
 
       <!-- PAGE 6 Schooling profile & notes -->
@@ -645,11 +573,6 @@ function addStudent(prefill){
 
     function removeStudent(){ if(studentCount===0) return; const el=document.getElementById(`student-${studentCount}`); if(el) el.remove(); studentCount-- }
 
-  
-    
-    
-    
-    
     // start with 1 student by default
     addStudent()
 // Helper functions to toggle the "Other" fields

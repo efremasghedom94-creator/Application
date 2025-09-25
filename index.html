@@ -508,7 +508,7 @@ function addStudent(prefill){
         <label class="text-sm">LAST GRADE COMPLETED</label>
         <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
           <option value="" disabled selected hidden>Select grade</option>
-          <option value="Pre K">Pre K</option>
+          <option value="Pre KG">Pre KG</option>
           <option value="KG">KG</option>
           ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
           <option value="Other">Other</option>

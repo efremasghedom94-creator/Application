@@ -291,36 +291,11 @@
 
 
 
-<div class="col-span-2">
-  <label class="block text-sm">POSTAL CODE</label>
-  <input 
-    id="postal" 
-    type="text" 
-    class="w-full border rounded p-2 mt-1 uppercase" 
-    maxlength="7"
-    placeholder="T5G 1N3"
-    pattern="[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d"
-    title="Format: A1A 1A1"
-    oninput="formatPostal(this)"
-  />
-</div>
-
-<script>
-  function formatPostal(input) {
-    // Force uppercase
-    input.value = input.value.toUpperCase();
-
-    // Automatically add space after 3 characters
-    let v = input.value.replace(/[^A-Z0-9]/g, '');
-    if (v.length > 3) {
-      input.value = v.substring(0, 3) + ' ' + v.substring(3, 6);
-    } else {
-      input.value = v;
-    }
-  }
-</script>
-
-    
+    </div>
+    <div class="col-span-2">
+      <label class="block text-sm">POSTAL CODE</label>
+      <input id="postal" type="text" class="w-full border rounded p-2 mt-1" />
+    </div>
 
     <!-- Family Phone + Home Language in same row -->
     <div class="col-span-2 mt-2">

@@ -496,13 +496,11 @@ function addStudent(prefill){
         <label class="text-sm">DOB</label>
         <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" />
       </div>
-     <div class="col-span-3">
-  <label class="text-sm">BIRTH COUNTRY</label>
-  <select id="s_${id}_birth" class="w-full border rounded p-2 mt-1">
-    <option value="" disabled selected hidden>Select country</option>
-  </select>
-</div>
-
+      <div class="col-span-3">
+        <label class="text-sm">BIRTH COUNTRY</label>
+        <input type="text" id="s_${id}_birth" class="w-full border rounded p-2 mt-1" value="${prefill?.birth||''}" />
+      </div>
+    </div>
 
     <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
     <div class="grid grid-cols-12 gap-4 mt-4">
@@ -811,56 +809,6 @@ trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">
 
     // Expose generate function for the button and ensure print button works (print uses browser)
     window.generateFinal = generateFinal
-
-// Full list of countries
-const countries = [
-  "Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria",
-  "Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia",
-  "Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon",
-  "Canada","Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Brazzaville)",
-  "Congo (Kinshasa)","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic",
-  "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France",
-  "Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana",
-  "Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan",
-  "Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho",
-  "Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta",
-  "Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco",
-  "Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia",
-  "Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar",
-  "Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino",
-  "Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia",
-  "Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland",
-  "Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey",
-  "Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
-  "Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
-];
-
-// Populate dropdown whenever a new student block is added
-function populateCountryDropdown(id) {
-  const select = document.getElementById(`s_${id}_birth`);
-  if (!select) return;
-  countries.forEach(country => {
-    const opt = document.createElement("option");
-    opt.value = country;
-    opt.textContent = country;
-    select.appendChild(opt);
-  });
-}
-
-// Modify addStudent to auto-fill the dropdown after creating it
-const originalAddStudent = addStudent;
-addStudent = function(prefill) {
-  originalAddStudent(prefill);
-  populateCountryDropdown(studentCount);
-
-  // Pre-fill value if passed
-  if (prefill?.birth) {
-    document.getElementById(`s_${studentCount}_birth`).value = prefill.birth;
-  }
-};
-
-    <script>
-
 
   </script>
 </body>

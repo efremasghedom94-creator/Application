@@ -387,22 +387,121 @@
 </script>
 
 
-   <!-- PAGE 5 Students (dynamic add) -->
-      <section class="page hidden" data-step="5">
-        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
-        <div id="studentsContainer" class="space-y-4">
-          <!-- template inserted by JS -->
-        </div>
-        <div class="flex items-center gap-3 mt-3">
-          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
-          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
-        </div>
 
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
+      
+ <script>
+let studentCount = 0
+function addStudent(prefill){
+  studentCount++
+  const id = studentCount
+  const container = document.getElementById('studentsContainer')
+  const wrap = document.createElement('div')
+  wrap.className = 'p-4 border rounded bg-gray-50'
+  wrap.id = `student-${id}`
+
+  wrap.innerHTML = `
+    <div class="grid grid-cols-12 gap-3">
+      <!-- Student Names -->
+      <div class="col-span-3">
+        <label class="text-sm">STUDENT'S SURNAME</label>
+        <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
+      </div>
+      <div class="col-span-3">
+        <label class="text-sm">STUDENT'S GIVEN NAME</label>
+        <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
+      </div>
+      <div class="col-span-2">
+        <label class="text-sm">GENDER</label>
+        <div class="mt-1 flex items-center gap-3">
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
         </div>
-      </section>
+      </div>
+
+      <!-- DOB + Birth Country (NEW position) -->
+      <div class="col-span-2">
+        <label class="text-sm">DOB</label>
+        <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" />
+      </div>
+      <div class="col-span-2">
+        <label class="text-sm">BIRTH COUNTRY</label>
+        <input type="text" id="s_${id}_birth" class="w-full border rounded p-2 mt-1" value="${prefill?.birth||''}" />
+      </div>
+
+      <!-- Last Grade Completed with dropdown -->
+      <div class="col-span-4 mt-2">
+        <label class="text-sm">LAST GRADE COMPLETED</label>
+        <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
+          <option value="">-- Select Grade --</option>
+          <option value="Pre K">Pre K</option>
+          <option value="KG">KG</option>
+          ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="s_${id}_lastgrade_other" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify grade" />
+      </div>
+
+      <!-- School Year -->
+      <div class="col-span-4 mt-2">
+        <label class="text-sm">SCHOOL YEAR</label>
+        <div class="mt-1 flex items-center gap-3">
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
+        </div>
+      </div>
+
+      <!-- Program dropdown -->
+      <div class="col-span-4 mt-2">
+        <label class="text-sm">PROGRAM</label>
+        <select id="s_${id}_prog" class="w-full border rounded p-2 mt-1" onchange="toggleOtherProgram(${id})">
+          <option value="">-- Select Program --</option>
+          <option value="French Immersion">French Immersion</option>
+          <option value="Spanish Bilingual">Spanish Bilingual</option>
+          <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="s_${id}_prog_other" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
+      </div>
+    </div>
+  `
+  container.appendChild(wrap)
+  window.scrollTo({top:wrap.offsetTop-60, behavior:'smooth'})
+}
+
+function removeStudent(){ 
+  if(studentCount===0) return
+  const el=document.getElementById(`student-${studentCount}`)
+  if(el) el.remove()
+  studentCount-- 
+}
+
+// Show/hide Other Grade box
+function toggleOtherGrade(id){
+  const select = document.getElementById(`s_${id}_lastgrade`)
+  const otherBox = document.getElementById(`s_${id}_lastgrade_other`)
+  if(select.value === 'Other'){
+    otherBox.classList.remove('hidden')
+    otherBox.focus()
+  } else {
+    otherBox.classList.add('hidden')
+    otherBox.value = ''
+  }
+}
+
+// Show/hide Other Program box
+function toggleOtherProgram(id){
+  const select = document.getElementById(`s_${id}_prog`)
+  const otherBox = document.getElementById(`s_${id}_prog_other`)
+  if(select.value === 'Other'){
+    otherBox.classList.remove('hidden')
+    otherBox.focus()
+  } else {
+    otherBox.classList.add('hidden')
+    otherBox.value = ''
+  }
+}
+</script>
+
 
 
       <!-- PAGE 6 Schooling profile & notes -->

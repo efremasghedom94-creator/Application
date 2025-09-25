@@ -8,6 +8,11 @@
   <!-- html2pdf bundle -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
+  <!-- jQuery + Select2 (for searchable country dropdown) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
   <style> 
     /* small helpers */
     .field-gap{gap:12px}
@@ -167,8 +172,6 @@
   }
 </script>
 
-
-
 <!-- PAGE 2 -->
 <section class="page hidden" data-step="2">
   <h2 class="font-medium mb-3">Page 2</h2>
@@ -244,8 +247,6 @@
   }
 </script>
 
-
-
       
       <!-- PAGE 3 Parents -->
       <section class="page hidden" data-step="3">
@@ -273,11 +274,6 @@
           <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
         </div>
       </section>
-
-
-
-
-      
 
 <!-- PAGE 4 Address & family --> 
 <section class="page hidden" data-step="4">
@@ -386,9 +382,6 @@
   }
 </script>
 
-
-
-
       
    <!-- PAGE 5 Students (dynamic add) -->
       <section class="page hidden" data-step="5">
@@ -434,7 +427,6 @@
     </div> <!-- end wizardRoot -->
 
  
-    
     <!-- FINAL STATIC YELLOW FORM -->
     <div id="finalWrap" class="final-wrap hidden mt-6">
       <div id="finalArea" class="yellow-bg p-6 rounded shadow border">
@@ -471,6 +463,46 @@
       if(isYes){ d.disabled = false; d.classList.remove('disabled-input') } else { d.disabled = true; d.classList.add('disabled-input'); d.value = '' }
     }
 
+    // --- Countries: load once and populate dynamic selects ---
+    let countries = [];
+    let countriesLoaded = false;
+    const loadCountriesPromise = loadCountries();
+
+    async function loadCountries(){
+      try {
+        const res = await fetch("https://restcountries.com/v3.1/all");
+        const data = await res.json();
+        countries = data.map(c => c.name?.common || c.name).filter(Boolean).sort((a,b)=> a.localeCompare(b));
+      } catch(err){
+        console.error("Error loading countries:", err);
+        countries = ["Canada", "United States", "Ethiopia", "India"]; // fallback
+      } finally {
+        countriesLoaded = true;
+      }
+    }
+
+    function populateCountrySelectById(selectEl, selectedValue){
+      const $s = $(selectEl);
+      $s.empty();
+      // placeholder option
+      $s.append($('<option disabled>').text('Select country').prop('selected', selectedValue ? false : true).prop('hidden', true));
+      countries.forEach(c => {
+        $s.append($('<option>').val(c).text(c));
+      });
+
+      // initialize Select2 (destroy first if already applied)
+      if($s.data('select2')) { $s.select2('destroy'); }
+      $s.select2({
+        width: '100%',
+        placeholder: "Search for a country",
+        dropdownParent: $(document.body)
+      });
+
+      if(selectedValue) {
+        $s.val(selectedValue).trigger('change');
+      }
+    }
+
     // --- Dynamic students ---
     let studentCount = 0
 function addStudent(prefill){
@@ -480,7 +512,7 @@ function addStudent(prefill){
   const wrap = document.createElement('div')
   wrap.className = 'p-4 border rounded bg-gray-50 mb-4'
   wrap.id = `student-${id}`
-  
+
   wrap.innerHTML = `
     <!-- ROW 1: STUDENT NAME -->
     <div class="grid grid-cols-12 gap-4">
@@ -498,7 +530,10 @@ function addStudent(prefill){
       </div>
       <div class="col-span-3">
         <label class="text-sm">BIRTH COUNTRY</label>
-        <input type="text" id="s_${id}_birth" class="w-full border rounded p-2 mt-1" value="${prefill?.birth||''}" />
+        <!-- replaced text input with searchable select (will be populated dynamically) -->
+        <select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1">
+          <option disabled selected>Loading countries...</option>
+        </select>
       </div>
     </div>
 
@@ -565,11 +600,22 @@ function addStudent(prefill){
   `
 
   container.appendChild(wrap)
+
+  // Populate the country select (if countries are loaded already, populate immediately;
+  // otherwise wait for the loadCountriesPromise to resolve)
+  const selectEl = wrap.querySelector(`#s_${id}_birth`);
+  if (countriesLoaded) {
+    populateCountrySelectById(selectEl, prefill?.birth || '')
+  } else {
+    loadCountriesPromise.then(()=> populateCountrySelectById(selectEl, prefill?.birth || ''));
+  }
+
   window.scrollTo({top:wrap.offsetTop-60, behavior:'smooth'})
 }
 
 
       
+
 
     function removeStudent(){ if(studentCount===0) return; const el=document.getElementById(`student-${studentCount}`); if(el) el.remove(); studentCount-- }
 

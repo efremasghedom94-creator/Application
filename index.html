@@ -290,7 +290,7 @@
 
 
 
-<!-- Postal Code -->
+</div>
 <div class="col-span-2">
   <label class="block text-sm">POSTAL CODE</label>
   <input 
@@ -307,9 +307,7 @@
 
 <script>
   function formatPostal(input) {
-    // Convert to uppercase
     let v = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    // Insert space after 3rd character if more than 3 entered
     if (v.length > 3) {
       input.value = v.substring(0, 3) + ' ' + v.substring(3, 6);
     } else {
@@ -317,6 +315,7 @@
     }
   }
 </script>
+
 
 
 

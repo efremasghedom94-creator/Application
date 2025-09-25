@@ -299,20 +299,24 @@
     class="w-full border rounded p-2 mt-1" 
     maxlength="7"
     placeholder="T5G 1N3"
-    oninput="formatPostal(this)" 
-    pattern="[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d"
-    title="Format: A1A 1A1"
+    oninput="enforcePostalFormat(this)" 
   />
 </div>
 
 <script>
-  function formatPostal(input) {
-    let v = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (v.length > 3) {
-      input.value = v.substring(0, 3) + ' ' + v.substring(3, 6);
-    } else {
-      input.value = v;
-    }
+  function enforcePostalFormat(input) {
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    // Apply format step by step
+    let formatted = '';
+    if (value.length > 0) formatted += value[0].replace(/[^A-Z]/g, ''); // Letter
+    if (value.length > 1) formatted += value[1].replace(/[^0-9]/g, ''); // Number
+    if (value.length > 2) formatted += value[2].replace(/[^A-Z]/g, ''); // Letter
+    if (value.length > 3) formatted += ' ' + value[3].replace(/[^0-9]/g, ''); // Space + Number
+    if (value.length > 4) formatted += value[4].replace(/[^A-Z]/g, ''); // Letter
+    if (value.length > 5) formatted += value[5].replace(/[^0-9]/g, ''); // Number
+
+    input.value = formatted;
   }
 </script>
 

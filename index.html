@@ -483,7 +483,7 @@ function addStudent(prefill){
   
   wrap.innerHTML = `
     <!-- ROW 1: STUDENT NAME -->
-    <div class="grid grid-cols-12 gap-3">
+    <div class="grid grid-cols-12 gap-4">
       <div class="col-span-3">
         <label class="text-sm">STUDENT'S SURNAME</label>
         <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
@@ -503,8 +503,8 @@ function addStudent(prefill){
     </div>
 
     <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
-    <div class="grid grid-cols-12 gap-3 mt-2">
-      <div class="col-span-6">
+    <div class="grid grid-cols-12 gap-4 mt-4">
+      <div class="col-span-4">
         <label class="text-sm">LAST GRADE COMPLETED</label>
         <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
           <option value="" disabled selected hidden>Select grade</option>
@@ -516,41 +516,41 @@ function addStudent(prefill){
         <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
       </div>
 
-    <div class="col-span-6">
-  <label class="text-sm">PROGRAM</label>
-  <div class="mt-1">
-    <!-- Step 1: Regular or Special -->
-    <div class="flex items-center gap-4">
-      <label class="inline-flex items-center">
-        <input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular
-      </label>
-      <label class="inline-flex items-center">
-        <input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special
-      </label>
+      <div class="col-span-8">
+        <label class="text-sm">PROGRAM</label>
+        <div class="mt-1">
+          <!-- Step 1: Regular or Special -->
+          <div class="flex items-center gap-4">
+            <label class="inline-flex items-center">
+              <input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular
+            </label>
+            <label class="inline-flex items-center">
+              <input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special
+            </label>
+          </div>
+
+          <!-- Step 2: Dropdown only if "Special" is chosen -->
+          <select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})">
+            <option value="" disabled selected hidden>Select program</option>
+            <option value="French Immersion">French Immersion</option>
+            <option value="Spanish Bilingual">Spanish Bilingual</option>
+            <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
+            <option value="Mandarin Bilingual">Mandarin Bilingual</option>
+            <option value="German Bilingual">German Bilingual</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <!-- Step 3: Free text box only if "Other" is chosen -->
+          <input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
+        </div>
+      </div>
     </div>
 
-    <!-- Step 2: Dropdown only if "Special" is chosen -->
-    <select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})">
-      <option value="" disabled selected hidden>Select program</option>
-      <option value="French Immersion">French Immersion</option>
-      <option value="Spanish Bilingual">Spanish Bilingual</option>
-      <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
-      <option value="Mandarin Bilingual">Mandarin Bilingual</option>
-      <option value="German Bilingual">German Bilingual</option>
-      <option value="Other">Other</option>
-    </select>
-
-    <!-- Step 3: Free text box only if "Other" is chosen -->
-    <input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
-  </div>
-</div>
-
-
     <!-- ROW 3: GENDER & SCHOOL YEAR -->
-    <div class="grid grid-cols-12 gap-3 mt-2">
+    <div class="grid grid-cols-12 gap-4 mt-4">
       <div class="col-span-6">
         <label class="text-sm">GENDER</label>
-        <div class="mt-1 flex items-center gap-3">
+        <div class="mt-1 flex items-center gap-6">
           <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
           <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
         </div>
@@ -558,7 +558,7 @@ function addStudent(prefill){
 
       <div class="col-span-6">
         <label class="text-sm">SCHOOL YEAR</label>
-        <div class="mt-1 flex items-center gap-3">
+        <div class="mt-1 flex items-center gap-6">
           <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
           <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
         </div>
@@ -578,6 +578,17 @@ function addStudent(prefill){
     // start with 1 student by default
     addStudent()
 // Helper functions to toggle the "Other" fields
+
+function toggleOtherGrade(id){
+  const sel = document.getElementById(`s_${id}_lastgrade`);
+  const spec = document.getElementById(`s_${id}_lastgrade_spec`);
+  if(sel.value === 'Other'){
+    spec.classList.remove('hidden');
+  } else {
+    spec.classList.add('hidden');
+    spec.value = '';
+  }
+}
 
 function toggleProgramDropdown(id){
   const radios = document.getElementsByName(`s_${id}_progType`);

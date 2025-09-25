@@ -387,156 +387,22 @@
 </script>
 
 
-
-      
-<!-- PAGE 5 Students (dynamic add) -->
-<section class="page hidden" data-step="5">
-  <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
-
-  <div id="studentsContainer" class="space-y-4">
-    <!-- student cards inserted here by JS -->
-  </div>
-
-  <div class="flex items-center gap-3 mt-3">
-    <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
-    <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
-  </div>
-
-  <div class="flex justify-between mt-4">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
-  </div>
-</section>
-
-<script>
-/* Dynamic students: add/remove and per-student toggles */
-let studentCount = 0;
-
-function addStudent(prefill){
-  studentCount++;
-  const id = studentCount;
-  const container = document.getElementById('studentsContainer');
-
-  const wrap = document.createElement('div');
-  wrap.className = 'p-4 border rounded bg-gray-50';
-  wrap.id = `student-${id}`;
-
-  wrap.innerHTML = `
-    <div class="grid grid-cols-12 gap-3">
-      <!-- Row 1: Names + Gender -->
-      <div class="col-span-3">
-        <label class="text-sm">STUDENT'S SURNAME</label>
-        <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
-      </div>
-      <div class="col-span-3">
-        <label class="text-sm">STUDENT'S GIVEN NAME</label>
-        <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
-      </div>
-      <div class="col-span-2">
-        <label class="text-sm">GENDER</label>
-        <div class="mt-1 flex items-center gap-3">
-          <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
-          <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
+   <!-- PAGE 5 Students (dynamic add) -->
+      <section class="page hidden" data-step="5">
+        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
+        <div id="studentsContainer" class="space-y-4">
+          <!-- template inserted by JS -->
         </div>
-      </div>
-
-      <!-- Row 2: DOB + Birth Country + Last Grade (all in one row) -->
-      <div class="col-span-3">
-        <label class="text-sm">DOB</label>
-        <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" />
-      </div>
-      <div class="col-span-5">
-        <label class="text-sm">BIRTH COUNTRY</label>
-        <input type="text" id="s_${id}_birth" class="w-full border rounded p-2 mt-1" value="${prefill?.birth||''}" />
-      </div>
-      <div class="col-span-4">
-        <label class="text-sm">LAST GRADE COMPLETED</label>
-        <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
-          <option value="">-- Select Grade --</option>
-          <option value="Pre K">Pre K</option>
-          <option value="KG">KG</option>
-          ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="s_${id}_lastgrade_other" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify grade" />
-      </div>
-
-      <!-- Row 3: School Year + Program -->
-      <div class="col-span-4 mt-2">
-        <label class="text-sm">SCHOOL YEAR</label>
-        <div class="mt-1 flex items-center gap-3">
-          <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
-          <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
+        <div class="flex items-center gap-3 mt-3">
+          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
+          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
         </div>
-      </div>
 
-      <div class="col-span-4 mt-2">
-        <label class="text-sm">PROGRAM</label>
-        <select id="s_${id}_prog" class="w-full border rounded p-2 mt-1" onchange="toggleOtherProgram(${id})">
-          <option value="">-- Select Program --</option>
-          <option value="French Immersion">French Immersion</option>
-          <option value="Spanish Bilingual">Spanish Bilingual</option>
-          <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="s_${id}_prog_other" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
-      </div>
-
-      <!-- small spacer column if needed -->
-      <div class="col-span-4 mt-2"></div>
-    </div>
-  `;
-
-  container.appendChild(wrap);
-
-  // if a prefill was provided, reapply selects & toggles
-  if(prefill){
-    const lg = document.getElementById(`s_${id}_lastgrade`);
-    if(lg && prefill.lastgrade){ lg.value = prefill.lastgrade; if(prefill.lastgrade === 'Other') toggleOtherGrade(id) }
-    const pg = document.getElementById(`s_${id}_prog`);
-    if(pg && prefill.prog){ pg.value = prefill.prog; if(prefill.prog === 'Other') toggleOtherProgram(id) }
-  }
-
-  window.scrollTo({top: wrap.offsetTop - 60, behavior: 'smooth'});
-}
-
-function removeStudent(){
-  if(studentCount === 0) return;
-  const el = document.getElementById(`student-${studentCount}`);
-  if(el) el.remove();
-  studentCount--;
-}
-
-/* helpers to show/hide the "Other" boxes for grade & program */
-function toggleOtherGrade(id){
-  const select = document.getElementById(`s_${id}_lastgrade`);
-  const other = document.getElementById(`s_${id}_lastgrade_other`);
-  if(!select || !other) return;
-  if(select.value === 'Other'){
-    other.classList.remove('hidden');
-    other.focus();
-  } else {
-    other.classList.add('hidden');
-    other.value = '';
-  }
-}
-function toggleOtherProgram(id){
-  const select = document.getElementById(`s_${id}_prog`);
-  const other = document.getElementById(`s_${id}_prog_other`);
-  if(!select || !other) return;
-  if(select.value === 'Other'){
-    other.classList.remove('hidden');
-    other.focus();
-  } else {
-    other.classList.add('hidden');
-    other.value = '';
-  }
-}
-
-/* start with 1 student by default */
-addStudent();
-</script>
-
+        <div class="flex justify-between mt-4">
+          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
+          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
+        </div>
+      </section>
 
 
       <!-- PAGE 6 Schooling profile & notes -->
@@ -782,35 +648,30 @@ trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">
           <th class="p-2" style="border:1px solid #000;">PROGRAM</th>
         </tr>`
 
-for (let i = 1; i <= studentCount; i++) {
-  const surname = document.getElementById(`s_${i}_surname`)?.value || '';
-  const given = document.getElementById(`s_${i}_given`)?.value || '';
-  const gender = (function(){ const g = document.querySelector(`input[name='s_${i}_gender']:checked`); return g? g.value : '' })();
-  const dob = document.getElementById(`s_${i}_dob`)?.value || '';
-  const birth = document.getElementById(`s_${i}_birth`)?.value || '';
-  const last = document.getElementById(`s_${i}_lastgrade`)?.value || '';
-  const lastOther = document.getElementById(`s_${i}_lastgrade_other`)?.value || '';
-  const lastDisplay = last === 'Other' ? (lastOther || 'Other') : last;
-  const year = (function(){ const y = document.querySelector(`input[name='s_${i}_year']:checked`); return y? y.value : '' })();
-  const prog = document.getElementById(`s_${i}_prog`)?.value || '';
-  const progOther = document.getElementById(`s_${i}_prog_other`)?.value || '';
-  const progDisplay = prog === 'Other' ? (progOther || 'Other') : prog;
+      for(let i=1;i<=studentCount;i++){
+        const surname = document.getElementById(`s_${i}_surname`)?.value || ''
+        const given = document.getElementById(`s_${i}_given`)?.value || ''
+        const gender = (function(){ const g = document.querySelector(`input[name='s_${i}_gender']:checked`); return g? g.value : '' })()
+        const dob = document.getElementById(`s_${i}_dob`)?.value || ''
+        const birth = document.getElementById(`s_${i}_birth`)?.value || ''
+        const last = document.getElementById(`s_${i}_lastgrade`)?.value || ''
+        const year = (function(){ const y = document.querySelector(`input[name='s_${i}_year']:checked`); return y? y.value : '' })()
+        const prog = (function(){ const p = document.querySelector(`input[name='s_${i}_prog']:checked`); return p? p.value : '' })()
+        const progSpec = document.getElementById(`s_${i}_prog_spec`)?.value || ''
 
-  // only include the row if there is at least some data
-  if (surname || given || dob || birth || last) {
-    studentTableHtml += `<tr>
-      <td class="p-2" style="border:1px solid #000;">${escapeHtml(surname)}</td>
-      <td class="p-2" style="border:1px solid #000;">${escapeHtml(given)}</td>
-      <td class="p-2 text-center" style="border:1px solid #000;">${checkboxMark(gender==='F')} F&nbsp;&nbsp;${checkboxMark(gender==='M')} M</td>
-      <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(dob)}</td>
-      <td class="p-2" style="border:1px solid #000;">${escapeHtml(birth)}</td>
-      <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(lastDisplay)}</td>
-      <td class="p-2 text-center" style="border:1px solid #000;">${year==='ThisYear' ? 'This year' : (year==='NextYear' ? 'Next year' : '')}</td>
-      <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(progDisplay)}</td>
-    </tr>`;
-  }
-}
-
+        if(surname || given || birth || last){
+          studentTableHtml += `<tr>
+            <td class="p-2" style="border:1px solid #000;">${escapeHtml(surname)}</td>
+            <td class="p-2" style="border:1px solid #000;">${escapeHtml(given)}</td>
+            <td class="p-2 text-center" style="border:1px solid #000;">${checkboxMark(gender==='F')} F&nbsp;&nbsp;${checkboxMark(gender==='M')} M</td>
+            <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(dob)}</td>
+            <td class="p-2" style="border:1px solid #000;">${escapeHtml(birth)}</td>
+            <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(last)}</td>
+            <td class="p-2 text-center" style="border:1px solid #000;">${year==='ThisYear' ? 'This year' : (year==='NextYear' ? 'Next year' : '')}</td>
+            <td class="p-2 text-center" style="border:1px solid #000;">${prog==='Yes' ? 'Yes — ' + escapeHtml(progSpec) : (prog==='No' ? 'No' : '')}</td>
+          </tr>`
+        }
+      }
 
       studentTableHtml += `</table>`
       studentCellInner.innerHTML = studentTableHtml

@@ -495,13 +495,12 @@ function addStudent(prefill){
       <div class="col-span-3">
         <label class="text-sm">DOB</label>
         <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" />
+      </div>
       <div class="col-span-3">
-  <label class="text-sm">BIRTH COUNTRY</label>
-  <select id="s_${id}_birth" class="w-full border rounded p-2 mt-1 select-country">
-    <option value="" disabled selected hidden>Select country</option>
-  </select>
-</div>
-
+        <label class="text-sm">BIRTH COUNTRY</label>
+        <input type="text" id="s_${id}_birth" class="w-full border rounded p-2 mt-1" value="${prefill?.birth||''}" />
+      </div>
+    </div>
 
     <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
     <div class="grid grid-cols-12 gap-4 mt-4">
@@ -566,8 +565,6 @@ function addStudent(prefill){
   `
 
   container.appendChild(wrap)
-  populateCountries(`s_${id}_birth`);
-
   window.scrollTo({top:wrap.offsetTop-60, behavior:'smooth'})
 }
 
@@ -579,40 +576,6 @@ function addStudent(prefill){
     // start with 1 student by default
     addStudent()
 // Helper functions to toggle the "Other" fields
-// Full country list (shortened here, but you can include all ISO countries)
-const countries = [
-  "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia",
-  "Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium",
-  "Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil",
-  "Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Chile",
-  "China","Colombia","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark",
-  "Djibouti","Dominican Republic","Ecuador","Egypt","El Salvador","Eritrea","Estonia",
-  "Ethiopia","Finland","France","Germany","Ghana","Greece","Guatemala","Honduras",
-  "Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy",
-  "Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Laos","Latvia",
-  "Lebanon","Liberia","Libya","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia",
-  "Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco",
-  "Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nepal","Netherlands",
-  "New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway",
-  "Oman","Pakistan","Panama","Paraguay","Peru","Philippines","Poland","Portugal","Qatar",
-  "Romania","Russia","Rwanda","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone",
-  "Singapore","Slovakia","Slovenia","Somalia","South Africa","South Korea","Spain",
-  "Sri Lanka","Sudan","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania",
-  "Thailand","Togo","Trinidad and Tobago","Tunisia","Turkey","Uganda","Ukraine",
-  "United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
-  "Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
-];
-
-// Populate select when student form is created
-function populateCountries(selectId) {
-  const select = document.getElementById(selectId);
-  countries.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    select.appendChild(opt);
-  });
-}
 
 function toggleOtherGrade(id){
   const sel = document.getElementById(`s_${id}_lastgrade`);

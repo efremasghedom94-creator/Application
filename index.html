@@ -401,30 +401,54 @@
       </section>
 
 
-      <!-- PAGE 6 Schooling profile & notes -->
-      <section class="page hidden" data-step="6">
-        <h2 class="font-medium mb-3">Page 6</h2>
-        <div class="grid grid-cols-12 gap-3">
-          <div class="col-span-4">
-            <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
-            <div class="mt-1 flex items-center gap-6">
-              <label class="inline-flex items-center"><input type="radio" name="limitedProfile" value="No">No</label>
-              <label class="inline-flex items-center"><input type="radio" name="limitedProfile" value="Yes">Yes</label>
-            </div>
-          </div>
-          <div class="col-span-8">
-            <label class="block text-sm">DETAILS (Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin)</label>
-            <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Describe if relevant"></textarea>
-          </div>
-        </div>
+  <!-- PAGE 6 Schooling profile & notes -->
+<section class="page hidden" data-step="6">
+  <h2 class="font-medium mb-3">Page 6</h2>
+  <div class="grid grid-cols-12 gap-3">
+    <div class="col-span-4">
+      <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
+      <div class="mt-1 flex items-center gap-6">
+        <label class="inline-flex items-center">
+          <input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)">No
+        </label>
+        <label class="inline-flex items-center">
+          <input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)">Yes
+        </label>
+      </div>
+    </div>
 
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
-        </div>
-      </section>
+    <!-- DETAILS field (always visible) -->
+    <div class="col-span-8">
+      <label class="block text-sm">
+        DETAILS (Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin)
+      </label>
+      <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Describe if relevant"></textarea>
+    </div>
+  </div>
 
-    </div> <!-- end wizardRoot -->
+  <!-- Conditional box if "Yes" is chosen -->
+  <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
+    <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
+    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-1" placeholder="Provide details for each student"></textarea>
+  </div>
+
+  <div class="flex justify-between mt-4">
+    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
+    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
+  </div>
+</section>
+
+<script>
+  function toggleLimitedProfile(isYes) {
+    const box = document.getElementById('limitedProfileBox');
+    if (isYes) {
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+      document.getElementById('limitedProfileDetails').value = '';
+    }
+  }
+</script>
 
  
     <!-- FINAL STATIC YELLOW FORM -->
@@ -698,7 +722,7 @@ function toggleOtherProg(id){
 }
 
 
-    // --- Build final static yellow form ---
+  // --- Build final static yellow form ---
     function checkboxMark(cond){ return cond ? '☑' : '☐' }
 
     function getRadioValue(name){ const r=document.querySelector(`input[name='${name}']:checked`); return r? r.value : '' }
@@ -746,12 +770,9 @@ function toggleOtherProg(id){
       addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
 
       // CONTACT RELATIONSHIP as its own compact row (span all columns)
-const trRel = document.createElement('tr');
-trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
-                   <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
-
-
-
+      const trRel = document.createElement('tr');
+      trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
+                         <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
       tbl.appendChild(trRel)
 
       // immigration + student status row (4 cells)
@@ -785,17 +806,16 @@ trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">
       addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))
 
       // address row: apartment / family address + postal / family phone / home language + catholic
-      // we'll split across 4 stacked cells: Apt / Address+Postal (concatenated) / Family Phone / Home Lang + Catholic
       const addressWithPostal = escapeHtml(document.getElementById('address').value) + (document.getElementById('postal').value ? ' / ' + escapeHtml(document.getElementById('postal').value) : '')
       const cath = (function(){ const c=getRadioValue('catholic'); return c? (checkboxMark(c==='Yes')+' Yes   '+checkboxMark(c==='No')+' No') : '' })()
       addRowStacked('APARTMENT #', escapeHtml(document.getElementById('apt').value), 'FAMILY ADDRESS / POSTAL CODE', addressWithPostal, 'FAMILY PHONE #', escapeHtml(document.getElementById('familyPhone').value), 'HOME LANGUAGE / CATHOLIC', escapeHtml(document.getElementById('homeLang').value) + '  ' + cath)
 
-      // students header row (single row spanning all columns)
+      // students header row
       const header = document.createElement('tr')
       header.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">STUDENTS</td><td class="p-2" style="border:1px solid #000;" colspan="3"></td>`
       tbl.appendChild(header)
 
-      // For student details we will add a small nested table for consistent layout with the exact headers on a single row
+      // student details nested table
       const studentCell = document.createElement('tr')
       const studentCellInner = document.createElement('td')
       studentCellInner.colSpan = 4
@@ -846,6 +866,7 @@ trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">
 
       // limited profile + notes
       const limited = getRadioValue('limitedProfile')
+      const limitedDetails = document.getElementById('limitedProfileDetails')?.value || ''   // NEW
       const trLimited = document.createElement('tr')
       trLimited.innerHTML = `
         <td class="p-2 font-semibold" style="border:1px solid #000;" colspan="2">
@@ -854,6 +875,7 @@ trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">
         <td class="p-2" style="border:1px solid #000;" colspan="2">
           ${checkboxMark(limited==='Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited==='No')} No
           <div class="text-xs italic mt-1">If YES, describe for each student, Grade 1 – Grade 12, as relevant. Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin.</div>
+          ${limitedDetails ? `<div class="mt-2">${escapeHtml(limitedDetails)}</div>` : ''}   <!-- NEW -->
         </td>
       `
       tbl.appendChild(trLimited)

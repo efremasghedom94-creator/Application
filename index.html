@@ -716,8 +716,7 @@ function toggleOtherProg(id){
   }
 }
 
-
-  // --- Build final static yellow form ---
+// --- Build final static yellow form ---
     function checkboxMark(cond){ return cond ? '☑' : '☐' }
 
     function getRadioValue(name){ const r=document.querySelector(`input[name='${name}']:checked`); return r? r.value : '' }
@@ -761,16 +760,16 @@ function toggleOtherProg(id){
         tbl.appendChild(tr)
       }
 
-      // Top single row (we'll split across 4 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE - CONTACT RELATIONSHIP will be its own row)
+      // Top single row (DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE)
       addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
 
-      // CONTACT RELATIONSHIP as its own compact row (span all columns)
+      // CONTACT RELATIONSHIP
       const trRel = document.createElement('tr');
       trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
                          <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
       tbl.appendChild(trRel)
 
-      // immigration + student status row (4 cells)
+      // immigration + student status
       const sStatus = getRadioValue('studentStatus')
       const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
       const imm = getRadioValue('immDoc')
@@ -784,7 +783,7 @@ function toggleOtherProg(id){
         return ''
       })())
 
-      // landed date + prev details (prev details spans two columns to give space)
+      // landed date + prev details
       const prevDetails = document.getElementById('prevDetails')
       const prevShown = prevDetails.value
       const prevMuted = prevDetails.disabled
@@ -797,10 +796,10 @@ function toggleOtherProg(id){
       `
       tbl.appendChild(trLanded)
 
-      // parents in a single row (4 cells)
+      // parents
       addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))
 
-      // address row: apartment / family address + postal / family phone / home language + catholic
+      // address row
       const addressWithPostal = escapeHtml(document.getElementById('address').value) + (document.getElementById('postal').value ? ' / ' + escapeHtml(document.getElementById('postal').value) : '')
       const cath = (function(){ const c=getRadioValue('catholic'); return c? (checkboxMark(c==='Yes')+' Yes   '+checkboxMark(c==='No')+' No') : '' })()
       addRowStacked('APARTMENT #', escapeHtml(document.getElementById('apt').value), 'FAMILY ADDRESS / POSTAL CODE', addressWithPostal, 'FAMILY PHONE #', escapeHtml(document.getElementById('familyPhone').value), 'HOME LANGUAGE / CATHOLIC', escapeHtml(document.getElementById('homeLang').value) + '  ' + cath)
@@ -861,7 +860,7 @@ function toggleOtherProg(id){
 
       // limited profile + notes
       const limited = getRadioValue('limitedProfile')
-      const limitedDetails = document.getElementById('limitedProfileDetails')?.value || ''   // NEW
+      const limitedDetails = document.getElementById('limitedProfileDetails')?.value || ''
       const trLimited = document.createElement('tr')
       trLimited.innerHTML = `
         <td class="p-2 font-semibold" style="border:1px solid #000;" colspan="2">
@@ -870,7 +869,7 @@ function toggleOtherProg(id){
         <td class="p-2" style="border:1px solid #000;" colspan="2">
           ${checkboxMark(limited==='Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited==='No')} No
           <div class="text-xs italic mt-1">If YES, describe for each student, Grade 1 – Grade 12, as relevant. Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin.</div>
-          ${limitedDetails ? `<div class="mt-2">${escapeHtml(limitedDetails)}</div>` : ''}   <!-- NEW -->
+          ${limitedDetails ? `<div class="mt-2">${escapeHtml(limitedDetails)}</div>` : ''}
         </td>
       `
       tbl.appendChild(trLimited)
@@ -906,7 +905,7 @@ function toggleOtherProg(id){
       }
     }
 
-    // Expose generate function for the button and ensure print button works (print uses browser)
+    // Expose generate function for the button
     window.generateFinal = generateFinal
 
   </script>

@@ -401,11 +401,13 @@
       </section>
 
 
-  <!-- PAGE 6 Schooling profile & notes -->
+<!-- PAGE 6 Schooling profile & notes -->
 <section class="page hidden" data-step="6">
   <h2 class="font-medium mb-3">Page 6</h2>
+
+  <!-- Limited Profile YES/NO -->
   <div class="grid grid-cols-12 gap-3">
-    <div class="col-span-4">
+    <div class="col-span-12">
       <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
       <div class="mt-1 flex items-center gap-6">
         <label class="inline-flex items-center">
@@ -416,39 +418,32 @@
         </label>
       </div>
     </div>
-
-    <!-- DETAILS field (always visible) -->
-    <div class="col-span-8">
-      <label class="block text-sm">
-        DETAILS (Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin)
-      </label>
-      <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Describe if relevant"></textarea>
-    </div>
   </div>
 
   <!-- Conditional box if "Yes" is chosen -->
   <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
-    <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
+    <label class="block text-sm font-medium">
+      If YES, describe for each student, Grade 1–Grade 12, as relevant:
+    </label>
     <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-1" placeholder="Provide details for each student"></textarea>
   </div>
 
+  <!-- DETAILS section with Note -->
+  <div class="col-span-12 mt-6">
+    <p class="font-medium">Note</p>
+    <label class="block text-sm mt-1">
+      DETAILS (Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin)
+    </label>
+    <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Describe if relevant"></textarea>
+  </div>
+
+  <!-- Navigation -->
   <div class="flex justify-between mt-4">
     <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
     <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
   </div>
 </section>
 
-<script>
-  function toggleLimitedProfile(isYes) {
-    const box = document.getElementById('limitedProfileBox');
-    if (isYes) {
-      box.classList.remove('hidden');
-    } else {
-      box.classList.add('hidden');
-      document.getElementById('limitedProfileDetails').value = '';
-    }
-  }
-</script>
 
  
     <!-- FINAL STATIC YELLOW FORM -->

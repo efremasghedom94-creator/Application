@@ -689,6 +689,17 @@ function toggleOtherGrade(id){
   }
 }
 
+  function toggleLimitedProfile(isYes) {
+    const box = document.getElementById('limitedProfileBox');
+    if (isYes) {
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+      document.getElementById('limitedProfileDetails').value = "";
+    }
+  }
+</script>
+
 function toggleProgramDropdown(id){
   const radios = document.getElementsByName(`s_${id}_progType`);
   const dropdown = document.getElementById(`s_${id}_prog_dropdown`);

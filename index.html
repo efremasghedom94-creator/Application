@@ -858,21 +858,27 @@ function toggleOtherProg(id){
       studentCell.appendChild(studentCellInner)
       tbl.appendChild(studentCell)
 
-      // limited profile + notes
-      const limited = getRadioValue('limitedProfile')
-      const limitedDetails = document.getElementById('limitedProfileDetails')?.value || ''
-      const trLimited = document.createElement('tr')
-      trLimited.innerHTML = `
-        <td class="p-2 font-semibold" style="border:1px solid #000;" colspan="2">
-          POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
-        </td>
-        <td class="p-2" style="border:1px solid #000;" colspan="2">
-          ${checkboxMark(limited==='Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited==='No')} No
-          <div class="text-xs italic mt-1">If YES, describe for each student, Grade 1 – Grade 12, as relevant. Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin.</div>
-          ${limitedDetails ? `<div class="mt-2">${escapeHtml(limitedDetails)}</div>` : ''}
-        </td>
-      `
-      tbl.appendChild(trLimited)
+     // limited profile + notes
+const limited = getRadioValue('limitedProfile')
+const limitedDetails = document.getElementById('limitedProfileDetails')?.value || ''
+const trLimited = document.createElement('tr')
+trLimited.innerHTML = `
+  <td class="p-2 font-semibold" style="border:1px solid #000;" colspan="2">
+    POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
+  </td>
+  <td class="p-2" style="border:1px solid #000;" colspan="2">
+    ${checkboxMark(limited==='Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited==='No')} No
+    <div class="text-xs italic mt-1">
+      If YES, describe for each student, Grade 1 – Grade 12, as relevant. 
+      Number of years as refugees, country of relocation, refugee camp name, 
+      nature of schooling, parent country of origin.
+    </div>
+    ${limited==='Yes' && limitedDetails 
+        ? `<div class="mt-2">${escapeHtml(limitedDetails)}</div>` 
+        : ''}
+  </td>
+`
+tbl.appendChild(trLimited)
 
       const trNotes = document.createElement('tr')
       trNotes.innerHTML = `

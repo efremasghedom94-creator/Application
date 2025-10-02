@@ -401,7 +401,7 @@
       </section>
 
 
-  <!-- PAGE 6 Schooling profile & notes -->
+<!-- PAGE 6 Schooling profile & notes -->
 <section class="page hidden" data-step="6">
   <h2 class="font-medium mb-3">Page 6</h2>
   <div class="grid grid-cols-12 gap-3">
@@ -416,27 +416,30 @@
         </label>
       </div>
     </div>
-
-    <!-- DETAILS field (always visible) -->
-    <div class="col-span-8">
-      <label class="block text-sm">
-        DETAILS (Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin)
-      </label>
-      <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Describe if relevant"></textarea>
-    </div>
   </div>
 
   <!-- Conditional box if "Yes" is chosen -->
   <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
     <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
-    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-1" placeholder="Provide details for each student"></textarea>
+    <p class="text-xs italic text-gray-600">
+      Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin
+    </p>
+    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2" placeholder="Provide details for each student"></textarea>
   </div>
 
+  <!-- Note field -->
+  <div class="col-span-12 mt-4">
+    <label class="block text-sm font-medium">NOTE:</label>
+    <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Additional notes if relevant"></textarea>
+  </div>
+
+  <!-- Navigation -->
   <div class="flex justify-between mt-4">
     <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
     <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
   </div>
 </section>
+
 
 <script>
   function toggleLimitedProfile(isYes) {

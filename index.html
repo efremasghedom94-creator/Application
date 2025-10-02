@@ -421,15 +421,16 @@
   <!-- Conditional box if "Yes" is chosen -->
   <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
     <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
-    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-1" placeholder="Provide details for each student"></textarea>
+    <p class="text-xs italic text-gray-600">
+      Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin
+    </p>
+    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2" placeholder="Provide details for each student"></textarea>
   </div>
 
-  <!-- DETAILS field (now placed AFTER the conditional box) -->
+  <!-- Note field -->
   <div class="col-span-12 mt-4">
-    <label class="block text-sm">
-      DETAILS (Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin)
-    </label>
-    <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Describe if relevant"></textarea>
+    <label class="block text-sm font-medium">Note</label>
+    <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Additional notes if relevant"></textarea>
   </div>
 
   <!-- Navigation -->

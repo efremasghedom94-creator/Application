@@ -611,11 +611,11 @@ function addStudent(prefill){
         <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
       </div>
 
-      <div class="col-span-8">
+      <div class="col-span-10">
         <label class="text-sm">PROGRAM</label>
         <div class="mt-1">
           <!-- Step 1: Regular or Special -->
-          <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4">
             <label class="inline-flex items-center">
               <input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular
             </label>

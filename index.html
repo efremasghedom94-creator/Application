@@ -11,22 +11,26 @@
 
 
 
-  <style>
-    /* Make all pages the same background size and height */
-    .page {
-      min-height: 70vh;           /* full viewport height */
-      background-color: white;     /* consistent white background */
-      padding: 1.5rem;             /* same spacing */
-      border-radius: 0.5rem;       /* rounded corners */
-      box-sizing: border-box;      /* padding included in size */
-    }
+ <style>
+  .page {
+    min-height: 80vh;              /* ensures tall pages */
+    display: flex;
+    flex-direction: column;
+  }
 
-    @media print {
-      body { margin: 0 }
-      .wizard { display: none }
-      .final-wrap { display: block }
-    }
-  </style>
+  .nav-buttons {
+    margin-top: auto;              /* pushes buttons to the bottom */
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1rem;
+  }
+
+  /* Optional: single Next button aligned right */
+  .nav-buttons.single {
+    justify-content: flex-end;
+  }
+</style>
+
 
 
 
@@ -171,10 +175,11 @@
   </div>
 
   <!-- Next button -->
-  <div class="flex justify-end mt-4">
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
-  </div>
-</section>
+<!-- Navigation buttons -->
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
 
 <script>
   // Show/hide the "Other" input box for Contact Relationship

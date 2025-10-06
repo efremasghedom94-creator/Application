@@ -8,6 +8,39 @@
   <!-- html2pdf bundle -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
+
+
+
+
+
+<style>
+  .page {
+    min-height: 80vh;              /* ensures tall pages */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-buttons {
+    margin-top: auto;              /* pushes buttons to the bottom */
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1rem;
+  }
+
+  /* Optional: single Next button aligned right */
+  .nav-buttons.single {
+    justify-content: flex-end;
+  }
+</style>
+
+
+
+  
+
+
+
+
+  
   <!-- jQuery + Select2 (for searchable country dropdown) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

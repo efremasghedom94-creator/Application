@@ -10,16 +10,27 @@
 
 
   <style>
-    /* Make all pages match the size and spacing of Page 4 */
+    /* --- Make all pages uniform like Page 4 --- */
     .page {
-      background-color: white;     /* consistent white background */
-      padding: 1.5rem;             /* same inner spacing */
-      border-radius: 0.5rem;       /* same rounded corners */
-      box-sizing: border-box;      /* include padding in total size */
-      width: 100%;                 /* keep same width */
-      max-width: 900px;            /* same as typical Page 4 width */
-      margin: 0 auto 2rem auto;    /* center and add space between pages */
-      min-height: 1250px;          /* same height as Page 4 */
+      background-color: white;     /* consistent background */
+      padding: 1.5rem;             /* equal inner spacing */
+      border-radius: 0.5rem;       /* rounded corners */
+      box-sizing: border-box;      /* include padding in total height */
+      width: 100%;
+      max-width: 900px;            /* same width as Page 4 */
+      margin: 0 auto 2rem auto;    /* center + spacing between pages */
+      min-height: 1250px;          /* same background height as Page 4 */
+      position: relative;          /* allows fixed button area inside */
+    }
+
+    /* --- Keep navigation buttons in the same place --- */
+    .nav-buttons {
+      position: absolute;
+      bottom: 1.5rem;              /* fixed distance from bottom */
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
     }
 
     @media print {
@@ -173,10 +184,11 @@
   </div>
 
   <!-- Next button -->
-  <div class="flex justify-end mt-4">
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
-  </div>
-</section>
+<div class="nav-buttons">
+  <button>Back</button>
+  <button>Next</button>
+</div>
+
 
 <script>
   // Show/hide the "Other" input box for Contact Relationship

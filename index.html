@@ -9,37 +9,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
 
-  <style>
-    /* --- Make all pages uniform like Page 4 --- */
-    .page {
-      background-color: white;     /* consistent background */
-      padding: 1.5rem;             /* equal inner spacing */
-      border-radius: 0.5rem;       /* rounded corners */
-      box-sizing: border-box;      /* include padding in total height */
-      width: 100%;
-      max-width: 900px;            /* same width as Page 4 */
-      margin: 0 auto 2rem auto;    /* center + spacing between pages */
-      min-height: 1250px;          /* same background height as Page 4 */
-      position: relative;          /* allows fixed button area inside */
-    }
 
-    /* --- Keep navigation buttons in the same place --- */
-    .nav-buttons {
-      position: absolute;
-      bottom: 1.5rem;              /* fixed distance from bottom */
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-    }
 
-    @media print {
-      body { margin: 0 }
-      .wizard { display: none }
-      .final-wrap { display: block }
-    }
-  </style>
-
+  
 
 
 

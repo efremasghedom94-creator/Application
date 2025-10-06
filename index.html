@@ -9,6 +9,25 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
 
+  <style>
+    /* Make all pages match the size and spacing of Page 4 */
+    .page {
+      background-color: white;     /* consistent white background */
+      padding: 1.5rem;             /* same inner spacing */
+      border-radius: 0.5rem;       /* same rounded corners */
+      box-sizing: border-box;      /* include padding in total size */
+      width: 100%;                 /* keep same width */
+      max-width: 900px;            /* same as typical Page 4 width */
+      margin: 0 auto 2rem auto;    /* center and add space between pages */
+      min-height: 1250px;          /* same height as Page 4 */
+    }
+
+    @media print {
+      body { margin: 0 }
+      .wizard { display: none }
+      .final-wrap { display: block }
+    }
+  </style>
 
 
   

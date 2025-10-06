@@ -11,6 +11,23 @@
 
 
 
+<style>
+.nav-buttons {
+  position: absolute;
+  bottom: 20px;          /* pushes the buttons to the lower end */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2rem;       /* adjust space from edges */
+}
+
+.nav-buttons.single {
+  justify-content: flex-end;
+}
+
+  <style>
+
 
 
 <style>
@@ -179,9 +196,10 @@
   </div>
 
   <!-- Next button -->
-  <div class="flex justify-end mt-4">
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
-  </div>
+<div class="nav-buttons single">
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
+</div>
+
 </section>
 
 <script>
@@ -262,10 +280,11 @@
   </div>
 
   <!-- Navigation buttons -->
-  <div class="flex justify-between">
-    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
-  </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
 </section>
 
 <script>
@@ -302,10 +321,11 @@
             <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
           </div>
         </div>
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(2)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
-        </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
       </section>
 
 <!-- PAGE 4 Address & family --> 
@@ -385,10 +405,11 @@
   </div>
 
   <!-- Navigation -->
-  <div class="flex justify-between mt-4">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
-  </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
 </section>
 
 <script>
@@ -427,10 +448,11 @@
           <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
         </div>
 
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
-        </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
       </section>
 
 

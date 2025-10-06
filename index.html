@@ -8,6 +8,35 @@
   <!-- html2pdf bundle -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
+
+
+
+
+<style>
+  /* existing CSS here */
+
+  /* Ensure all pages have the same background size and height */
+  .page {
+    min-height: 100vh;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  @media print {
+    body { margin: 0 }
+    .wizard { display: none }
+    .final-wrap { display: block }
+  }
+</style>
+
+
+
+
+
+
+  
   <!-- jQuery + Select2 (for searchable country dropdown) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

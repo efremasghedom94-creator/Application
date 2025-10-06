@@ -8,35 +8,6 @@
   <!-- html2pdf bundle -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
-
-  <style>
-    /* Make all pages match the size and spacing of Page 4 */
-    .page {
-      background-color: white;     /* consistent white background */
-      padding: 1.5rem;             /* same inner spacing */
-      border-radius: 0.5rem;       /* same rounded corners */
-      box-sizing: border-box;      /* include padding in total size */
-      width: 100%;                 /* keep same width */
-      max-width: 900px;            /* same as typical Page 4 width */
-      margin: 0 auto 2rem auto;    /* center and add space between pages */
-      min-height: 1250px;          /* same height as Page 4 */
-    }
-
-    @media print {
-      body { margin: 0 }
-      .wizard { display: none }
-      .final-wrap { display: block }
-    }
-  </style>
-
-
-  
-
-
-
-
-
-  
   <!-- jQuery + Select2 (for searchable country dropdown) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -175,11 +146,10 @@
   </div>
 
   <!-- Next button -->
-<div class="nav-buttons">
-  <button>Back</button>
-  <button>Next</button>
-</div>
-
+  <div class="flex justify-end mt-4">
+    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
+  </div>
+</section>
 
 <script>
   // Show/hide the "Other" input box for Contact Relationship
@@ -382,11 +352,11 @@
   </div>
 
   <!-- Navigation -->
-<div class="flex justify-between mt-6">
-  <button>Back</button>
-  <button>Next</button>
-</div>
-
+  <div class="flex justify-between mt-4">
+    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
+    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
+  </div>
+</section>
 
 <script>
   function formatPhone(input) {

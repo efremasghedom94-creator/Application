@@ -36,6 +36,33 @@
 
 
 
+  <style>
+/* Fixed navigation bar at the bottom */
+.nav-buttons {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 20px;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+/* Spacer to prevent overlap */
+.page-content {
+  padding-bottom: 120px;
+}
+</style>
+
+
+
+
   
   <!-- jQuery + Select2 (for searchable country dropdown) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -175,9 +202,17 @@
   </div>
 
   <!-- Next button -->
-  <div class="flex justify-end mt-4">
+<div id="page1" class="page hidden">
+  <div class="page-content">
+    <!-- Your existing Page 1 form fields go here -->
+  </div>
+
+  <div class="nav-buttons">
+    <button type="button" class="px-4 py-2 bg-gray-400 text-white rounded opacity-60 cursor-not-allowed" disabled>Back</button>
     <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
   </div>
+</div>
+
 </section>
 
 <script>
@@ -258,10 +293,17 @@
   </div>
 
   <!-- Navigation buttons -->
-  <div class="flex justify-between">
+<div id="page2" class="page hidden">
+  <div class="page-content">
+    <!-- Your existing Page 2 fields -->
+  </div>
+
+  <div class="nav-buttons">
     <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
     <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
   </div>
+</div>
+
 </section>
 
 <script>
@@ -298,10 +340,17 @@
             <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
           </div>
         </div>
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(2)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
-        </div>
+<div id="page3" class="page hidden">
+  <div class="page-content">
+    <!-- Your existing Page 3 fields -->
+  </div>
+
+  <div class="nav-buttons">
+    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(2)">Back</button>
+    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
+  </div>
+</div>
+
       </section>
 
 <!-- PAGE 4 Address & family --> 
@@ -381,10 +430,17 @@
   </div>
 
   <!-- Navigation -->
-  <div class="flex justify-between mt-4">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
+<div id="page4" class="page hidden">
+  <div class="page-content">
+    <!-- Your existing Page 4 fields -->
   </div>
+
+  <div class="nav-buttons">
+    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
+    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
+  </div>
+</div>
+
 </section>
 
 <script>
@@ -423,10 +479,17 @@
           <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
         </div>
 
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
-        </div>
+<div id="page5" class="page hidden">
+  <div class="page-content">
+    <!-- Your existing Page 5 fields -->
+  </div>
+
+  <div class="nav-buttons">
+    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
+    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
+  </div>
+</div>
+
       </section>
 
 
@@ -463,13 +526,28 @@
   </div>
 
   <!-- Navigation -->
-  <div class="flex justify-between mt-4">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
+
+
+
+<div id="page6" class="page hidden">
+  <div class="page-content">
+    <!-- Final yellow paper content -->
   </div>
-</section>
+
+  <div class="nav-buttons">
+    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
+    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded">Generate Yellow Form</button>
+  </div>
+</div>
 
 
+
+
+
+
+
+
+      
 <script>
   function toggleLimitedProfile(isYes) {
     const box = document.getElementById('limitedProfileBox');

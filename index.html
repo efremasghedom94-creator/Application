@@ -11,15 +11,27 @@
 
 
 <style>
-  /* existing CSS here */
-
   /* Ensure all pages have the same background size and height */
   .page {
+    position: relative;
     min-height: 70vh;
     background-color: white;
     padding: 1.5rem;
     border-radius: 0.5rem;
     box-sizing: border-box;
+
+    /* Keeps the buttons aligned at the bottom */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Navigation buttons row (same color styles kept in HTML) */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 1rem;
   }
 
   @media print {
@@ -28,6 +40,15 @@
     .final-wrap { display: block }
   }
 </style>
+
+
+  @media print {
+    body { margin: 0 }
+    .wizard { display: none }
+    .final-wrap { display: block }
+  }
+</style>
+
 
 
 
@@ -170,9 +191,10 @@
   </div>
 
   <!-- Next button -->
-  <div class="flex justify-end mt-4">
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
-  </div>
+<div class="nav-buttons justify-end">
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
+</div>
+
 </section>
 
 <script>
@@ -253,10 +275,11 @@
   </div>
 
   <!-- Navigation buttons -->
-  <div class="flex justify-between">
-    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
-  </div>
+ <div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
 </section>
 
 <script>
@@ -293,10 +316,11 @@
             <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
           </div>
         </div>
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(2)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
-        </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
       </section>
 
 <!-- PAGE 4 Address & family --> 
@@ -376,10 +400,11 @@
   </div>
 
   <!-- Navigation -->
-  <div class="flex justify-between mt-4">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
-  </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
 </section>
 
 <script>
@@ -418,10 +443,11 @@
           <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
         </div>
 
-        <div class="flex justify-between mt-4">
-          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
-          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
-        </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
       </section>
 
 
@@ -458,10 +484,11 @@
   </div>
 
   <!-- Navigation -->
-  <div class="flex justify-between mt-4">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
-  </div>
+<div class="nav-buttons">
+  <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
+  <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
+</div>
+
 </section>
 
 

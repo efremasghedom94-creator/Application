@@ -46,6 +46,42 @@
 
 
 
+<style>
+  /* Make the yellow form exactly half of A4 size when printed */
+  @media print {
+    #finalArea {
+      width: 148mm;   /* A5 width */
+      height: 210mm;  /* A5 height (half of A4) */
+      margin: 0 auto;
+      padding: 10mm;
+      page-break-after: always;
+    }
+
+    /* Center the yellow form on the printed page */
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: white;
+    }
+
+    /* Hide buttons when printing */
+    #printBtn, #pdfBtn, #editBtn {
+      display: none !important;
+    }
+
+    /* Force print to A5 page size */
+    @page {
+      size: A5 portrait;
+      margin: 0;
+    }
+  }
+</style>
+
+
+  
+
 
 
   <style>

@@ -16,32 +16,36 @@
   <title>One World One Centre...</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    .page {
-      position: relative;
-      min-height: 70vh;
-      background-color: white;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+ <style>
+  .page {
+    position: relative;
+    min-height: 70vh;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    /* 🔸 Added soft thin border around the background */
+    border: 1px solid #C7631C; /* thin brown border */
+    box-shadow: 0 0 4px rgba(199, 99, 28, 0.2); /* soft glow around edge */
+  }
 
-    .nav-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: auto;
-      padding-top: 1rem;
-    }
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 1rem;
+  }
 
-    @media print {
-      body { margin: 0 }
-      .wizard { display: none }
-      .final-wrap { display: block }
-    }
-  </style>
+  @media print {
+    body { margin: 0 }
+    .wizard { display: none }
+    .final-wrap { display: block }
+  }
+</style>
 </head>
 
 

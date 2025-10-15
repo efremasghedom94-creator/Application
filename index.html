@@ -934,32 +934,31 @@ trContactRel.innerHTML = `
 tbl.appendChild(trContactRel);
 
 
-      // immigration + student status row (4 cells)
-      const sStatus = getRadioValue('studentStatus')
-      const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
-      const imm = getRadioValue('immDoc')
-      const immOther = document.getElementById('immDocOther')?.value || ''
-      const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '')
-      const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '')
-      addRowStacked("STUDENT'S STATUS", statusText, 'IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)', immText, 'EXPIRY DATE (RC / SP / WP)', escapeHtml(document.getElementById('expiry').value), 'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', (function(){
-        const val = getRadioValue('prevAttend')
-        if(val==='Yes') return checkboxMark(true)+' Yes'
-        if(val==='No') return checkboxMark(true)+' No'
-        return ''
-      })())
+// immigration + student status row (5 cells)
+const sStatus = getRadioValue('studentStatus')
+const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
+const imm = getRadioValue('immDoc')
+const immOther = document.getElementById('immDocOther')?.value || ''
+const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '')
+const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '')
 
-      // landed date + prev details (prev details spans two columns to give space)
-      const prevDetails = document.getElementById('prevDetails')
-      const prevShown = prevDetails.value
-      const prevMuted = prevDetails.disabled
-      const trLanded = document.createElement('tr')
-      trLanded.innerHTML = `
-        <td class="p-2 font-semibold" style="border:1px solid #000;">DATE STUDENT(S) LANDED IN CANADA</td>
-        <td class="p-2" style="border:1px solid #000;">${escapeHtml(document.getElementById('landed').value)}</td>
-        <td class="p-2 font-semibold" style="border:1px solid #000;">PREVIOUS DETAILS</td>
-        <td class="p-2 ${prevMuted? 'muted':''}" style="border:1px solid #000;">${prevShown || (prevMuted ? '—' : '')}</td>
-      `
-      tbl.appendChild(trLanded)
+// previous attendance
+const prevAttendVal = getRadioValue('prevAttend')
+let prevAttendText = ''
+if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
+else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
+
+// date landed
+const landedDate = escapeHtml(document.getElementById('landed').value)
+
+addRowStacked(
+  "STUDENT'S STATUS", statusText,
+  'IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)', immText,
+  'EXPIRY DATE (RC / SP / WP)', escapeHtml(document.getElementById('expiry').value),
+  'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', prevAttendText,
+  'DATE STUDENT(S) LANDED IN CANADA', landedDate
+)
+
 
       // parents in a single row (4 cells)
       addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))

@@ -922,13 +922,15 @@ function toggleOtherProg(id){
         tbl.appendChild(tr)
       }
 
-      // Top single row (we'll split across 4 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE - CONTACT RELATIONSHIP will be its own row)
-      addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
+    // Top single row with 5 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE / CONTACT RELATIONSHIP
+addRowStacked(
+  'DATE', escapeHtml(document.getElementById('date').value),
+  'TAKEN BY', escapeHtml(document.getElementById('takenBy').value),
+  'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value),
+  'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value),
+  'CONTACT RELATIONSHIP', escapeHtml(getContactRelationship())
+);
 
-      // CONTACT RELATIONSHIP as its own compact row (span all columns)
-const trRel = document.createElement('tr');
-trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
-                   <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
 
 
 

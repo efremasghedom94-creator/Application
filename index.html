@@ -878,6 +878,14 @@ function toggleOtherProg(id){
 }
 
 
+
+
+
+
+
+
+
+    
     // --- Build final static yellow form ---
     function checkboxMark(cond){ return cond ? '☑' : '☐' }
 
@@ -910,7 +918,7 @@ function toggleOtherProg(id){
                 </td>`
       }
 
-   function addRowStacked(...args) {
+ function addRowStacked(...args) {
   const tr = document.createElement('tr');
   let cells = '';
   for (let i = 0; i < args.length; i += 2) {
@@ -920,8 +928,9 @@ function toggleOtherProg(id){
               <td class="p-2" style="border:1px solid #000;">${value}</td>`;
   }
   tr.innerHTML = cells;
-  table.appendChild(tr);
+  tbl.appendChild(tr); // ✅ fixed here
 }
+
 
     // Top single row with 5 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE / CONTACT RELATIONSHIP
 addRowStacked(

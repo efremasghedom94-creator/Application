@@ -934,13 +934,17 @@ trContactRel.innerHTML = `
 tbl.appendChild(trContactRel);
 
 
-// immigration + student status row (5 cells)
+// immigration + student status row (5 cells total)
 const sStatus = getRadioValue('studentStatus')
 const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
 const imm = getRadioValue('immDoc')
 const immOther = document.getElementById('immDocOther')?.value || ''
+
 const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '')
 const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '')
+
+const expiry = escapeHtml(document.getElementById('expiry').value)
+const landedDate = escapeHtml(document.getElementById('landed').value)
 
 // previous attendance
 const prevAttendVal = getRadioValue('prevAttend')
@@ -948,13 +952,11 @@ let prevAttendText = ''
 if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
-// date landed
-const landedDate = escapeHtml(document.getElementById('landed').value)
-
+// now all in one row
 addRowStacked(
   "STUDENT'S STATUS", statusText,
   'IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)', immText,
-  'EXPIRY DATE (RC / SP / WP)', escapeHtml(document.getElementById('expiry').value),
+  'EXPIRY DATE (RC / SP / WP)', expiry,
   'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', prevAttendText,
   'DATE STUDENT(S) LANDED IN CANADA', landedDate
 )

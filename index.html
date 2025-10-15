@@ -8,6 +8,14 @@
   <!-- html2pdf bundle -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
+
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>One World One Centre...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
  <style>
     .page {
       position: relative;
@@ -885,60 +893,46 @@ function toggleOtherProg(id){
         .replace(/'/g, '&#039;');
     }
 
-   function generateFinal() {
-  const final = document.getElementById('finalArea');
-  final.innerHTML = '';
+    function generateFinal(){
+      const final = document.getElementById('finalArea')
+      final.innerHTML = ''
 
-  // top-level table (using yellow-table class for consistent black borders + smaller font)
-  const tbl = document.createElement('table');
-  tbl.className = 'yellow-table w-full';
-  tbl.style.border = '1px solid #000';
+      // top-level table (using yellow-table class for consistent black borders + smaller font)
+      const tbl = document.createElement('table')
+      tbl.className = 'yellow-table w-full'
+      tbl.style.border = "1px solid #000"
 
-  // helper to return a cell where label is above the answer (same box)
-  function cellStacked(label, val, muted) {
-    return `<td class="p-2" style="border:1px solid #000; vertical-align: top;">
-              <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
-              <div class="${muted ? 'muted' : ''}">${val || ''}</div>
-            </td>`;
-  }
+      // helper to return a cell where label is above the answer (same box)
+      function cellStacked(label, val, muted){
+        return `<td class="p-2" style="border:1px solid #000; vertical-align: top;">
+                  <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
+                  <div class="${muted? 'muted':''}">${val||''}</div>
+                </td>`
+      }
 
-  // Top single row — now includes CONTACT RELATIONSHIP (5 evenly spaced columns)
-  const trTop = document.createElement('tr');
-  trTop.innerHTML = `
-    ${cellStacked('DATE', escapeHtml(document.getElementById('date').value))}
-    ${cellStacked('TAKEN BY', escapeHtml(document.getElementById('takenBy').value))}
-    ${cellStacked('CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value))}
-    ${cellStacked('CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))}
-    ${cellStacked('CONTACT RELATIONSHIP', escapeHtml(getContactRelationship()))}
-  `;
-  tbl.appendChild(trTop);
+      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
+      function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val){
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          ${cellStacked(c1Label, c1Val)}
+          ${cellStacked(c2Label, c2Val)}
+          ${cellStacked(c3Label, c3Val)}
+          ${cellStacked(c4Label, c4Val)}
+        `
+        tbl.appendChild(tr)
+      }
 
-  // 🪄 Style block for even 5-column layout and clean print formatting
-  const style = document.createElement('style');
-  style.textContent = `
-    #finalWrap table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    #finalWrap td {
-      width: 20%;
-      padding: 6px 8px;
-      border: 1px solid #000;
-      vertical-align: top;
-      word-wrap: break-word;
-    }
-    @media print {
-      body * { visibility: hidden; }
-      #finalWrap, #finalWrap * { visibility: visible; }
-      #finalWrap { position: absolute; left: 0; top: 0; width: 100%; }
-    }
-  `;
-  document.head.appendChild(style);
+      // Top single row (we'll split across 4 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE - CONTACT RELATIONSHIP will be its own row)
+      addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
 
-  // ✅ Append the completed table to finalArea
-  final.appendChild(tbl);
-}
+      // CONTACT RELATIONSHIP as its own compact row (span all columns)
+const trRel = document.createElement('tr');
+trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
+                   <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
 
+
+
+      tbl.appendChild(trRel)
 
       // immigration + student status row (4 cells)
       const sStatus = getRadioValue('studentStatus')

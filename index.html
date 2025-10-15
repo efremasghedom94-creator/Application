@@ -878,14 +878,6 @@ function toggleOtherProg(id){
 }
 
 
-
-
-
-
-
-
-
-    
     // --- Build final static yellow form ---
     function checkboxMark(cond){ return cond ? '☑' : '☐' }
 
@@ -918,34 +910,25 @@ function toggleOtherProg(id){
                 </td>`
       }
 
-  // Create a new table row with any number of label/value pairs
-  function addRowStacked(...args) {
-    const tr = document.createElement('tr');
-    let cells = '';
-    for (let i = 0; i < args.length; i += 2) {
-      const label = args[i];
-      const value = args[i + 1] ?? '';
-      cells += `<td class="p-2 font-semibold" style="border:1px solid #000;">${label}</td>
-                <td class="p-2" style="border:1px solid #000;">${value}</td>`;
-    }
-    tr.innerHTML = cells;
-    tbl.appendChild(tr); // ✅ Correct variable name
-  }
+      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
+      function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val){
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          ${cellStacked(c1Label, c1Val)}
+          ${cellStacked(c2Label, c2Val)}
+          ${cellStacked(c3Label, c3Val)}
+          ${cellStacked(c4Label, c4Val)}
+        `
+        tbl.appendChild(tr)
+      }
 
-  // Function to get contact relationship value
-  function getContactRelationship() {
-    return document.getElementById('contactRelationship')?.value || '';
-  }
+      // Top single row (we'll split across 4 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE - CONTACT RELATIONSHIP will be its own row)
+      addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
 
-    // Top single row with 5 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE / CONTACT RELATIONSHIP
-addRowStacked(
-  'DATE', escapeHtml(document.getElementById('date').value),
-  'TAKEN BY', escapeHtml(document.getElementById('takenBy').value),
-  'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value),
-  'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value),
-  'CONTACT RELATIONSHIP', escapeHtml(getContactRelationship())
-);
-
+      // CONTACT RELATIONSHIP as its own compact row (span all columns)
+const trRel = document.createElement('tr');
+trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
+                   <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
 
 
 

@@ -936,7 +936,8 @@ tbl.appendChild(trContactRel);
 
 
 
-// immigration + student status row (aligned 5 columns, skip empty cells safely)
+      
+// immigration + student status row
 const sStatus = getRadioValue('studentStatus')
 const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
 const imm = getRadioValue('immDoc')
@@ -947,46 +948,31 @@ const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '')
 const expiry = escapeHtml(document.getElementById('expiry').value)
 const landedDate = escapeHtml(document.getElementById('landed').value)
 
+// previous attendance
 const prevAttendVal = getRadioValue('prevAttend')
 let prevAttendText = ''
 if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
-// Collect all possible cells
-const cells = [
-  { label: "STUDENT'S STATUS", value: statusText },
-  { label: 'IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)', value: immText },
-  { label: 'EXPIRY DATE (RC / SP / WP)', value: expiry },
-  { label: 'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', value: prevAttendText },
-  { label: 'DATE STUDENT(S) LANDED IN CANADA', value: landedDate }
-]
+// --- create proper row for data (not header) ---
+const tr = document.createElement('tr')
+tr.innerHTML = `
+  <td class="p-2 font-semibold" style="border:1px solid #000;">STUDENT'S STATUS</td>
+  <td class="p-2" style="border:1px solid #000;">${statusText}</td>
 
-// Filter only non-empty fields
-const nonEmptyCells = cells.filter(c => c.value && c.value.replace(/<[^>]*>/g, '').trim() !== '')
+  <td class="p-2 font-semibold" style="border:1px solid #000;">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</td>
+  <td class="p-2" style="border:1px solid #000;">${immText}</td>
 
-const trImmigration = document.createElement('tr')
+  <td class="p-2 font-semibold" style="border:1px solid #000;">EXPIRY DATE (RC / SP / WP)</td>
+  <td class="p-2" style="border:1px solid #000;">${expiry}</td>
 
-if (nonEmptyCells.length > 0) {
-  // At least one cell has content
-  trImmigration.innerHTML = nonEmptyCells
-    .map(c => `
-      <td class="p-2" style="border:1px solid #000;">
-        <div class="font-semibold">${c.label}</div>
-        <div>${c.value}</div>
-      </td>
-    `)
-    .join('')
-} else {
-  // All were empty — show a placeholder row
-  trImmigration.innerHTML = `
-    <td class="p-2" style="border:1px solid #000;" colspan="5">—</td>
-  `
-}
+  <td class="p-2 font-semibold" style="border:1px solid #000;">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</td>
+  <td class="p-2" style="border:1px solid #000;">${prevAttendText}</td>
 
-tbl.appendChild(trImmigration)
-
-
-
+  <td class="p-2 font-semibold" style="border:1px solid #000;">DATE STUDENT(S) LANDED IN CANADA</td>
+  <td class="p-2" style="border:1px solid #000;">${landedDate}</td>
+`
+tbl.appendChild(tr)
 
 
 

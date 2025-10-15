@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>One World One Centre...</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2pdf bundle -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>One World One Centre...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 
  <style>
     .page {
@@ -900,16 +910,29 @@ function toggleOtherProg(id){
                 </td>`
       }
 
-     // New code for the same row with 5 cells:
-const trContactRel = document.createElement('tr');
-trContactRel.innerHTML = `
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">DATE</div><div>${escapeHtml(document.getElementById('date').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">TAKEN BY</div><div>${escapeHtml(document.getElementById('takenBy').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT NAME/SURNAME</div><div>${escapeHtml(document.getElementById('contactName').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT PHONE #</div><div>${escapeHtml(document.getElementById('contactPhone').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT RELATIONSHIP</div><div>${escapeHtml(getContactRelationship())}</div></td>
-`;
-tbl.appendChild(trContactRel);
+      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
+      function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val){
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          ${cellStacked(c1Label, c1Val)}
+          ${cellStacked(c2Label, c2Val)}
+          ${cellStacked(c3Label, c3Val)}
+          ${cellStacked(c4Label, c4Val)}
+        `
+        tbl.appendChild(tr)
+      }
+
+      // Top single row (we'll split across 4 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE - CONTACT RELATIONSHIP will be its own row)
+      addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
+
+      // CONTACT RELATIONSHIP as its own compact row (span all columns)
+const trRel = document.createElement('tr');
+trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
+                   <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
+
+
+
+      tbl.appendChild(trRel)
 
       // immigration + student status row (4 cells)
       const sStatus = getRadioValue('studentStatus')

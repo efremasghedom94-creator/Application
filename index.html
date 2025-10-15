@@ -934,7 +934,10 @@ trContactRel.innerHTML = `
 tbl.appendChild(trContactRel);
 
 
-// immigration + student status row (5 cells total)
+
+
+      
+// immigration + student status row
 const sStatus = getRadioValue('studentStatus')
 const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
 const imm = getRadioValue('immDoc')
@@ -952,13 +955,31 @@ let prevAttendText = ''
 if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
-// now all in one row
+// create the main row using addRowStacked (existing 4 pairs)
 addRowStacked(
   "STUDENT'S STATUS", statusText,
   'IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)', immText,
   'EXPIRY DATE (RC / SP / WP)', expiry,
-  'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', prevAttendText,
-  'DATE STUDENT(S) LANDED IN CANADA', landedDate
+  'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', prevAttendText
+)
+
+// append DATE LANDED to the same last row (ensures visible)
+const lastRow = tbl.lastElementChild
+if (lastRow) {
+  const tdLabel = document.createElement('td')
+  tdLabel.className = 'p-2 font-semibold'
+  tdLabel.style.border = '1px solid #000'
+  tdLabel.textContent = 'DATE STUDENT(S) LANDED IN CANADA'
+
+  const tdValue = document.createElement('td')
+  tdValue.className = 'p-2'
+  tdValue.style.border = '1px solid #000'
+  tdValue.textContent = landedDate || '—'
+
+  lastRow.appendChild(tdLabel)
+  lastRow.appendChild(tdValue)
+}
+
 )
 
 

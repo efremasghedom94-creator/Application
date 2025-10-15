@@ -937,7 +937,7 @@ tbl.appendChild(trContactRel);
 
 
       
-// IMMIGRATION + STUDENT STATUS row (with landed date inline)
+// immigration + student status row
 const sStatus = getRadioValue('studentStatus')
 const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
 const imm = getRadioValue('immDoc')
@@ -945,7 +945,6 @@ const immOther = document.getElementById('immDocOther')?.value || ''
 
 const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '')
 const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '')
-
 const expiry = escapeHtml(document.getElementById('expiry').value)
 const landedDate = escapeHtml(document.getElementById('landed').value)
 
@@ -955,7 +954,7 @@ let prevAttendText = ''
 if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
-// create the row manually (safer than addRowStacked)
+// --- create proper row for data (not header) ---
 const tr = document.createElement('tr')
 tr.innerHTML = `
   <td class="p-2 font-semibold" style="border:1px solid #000;">STUDENT'S STATUS</td>

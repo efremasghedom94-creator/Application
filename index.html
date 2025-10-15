@@ -937,7 +937,7 @@ tbl.appendChild(trContactRel);
 
 
       
-// immigration + student status row
+// IMMIGRATION + STUDENT STATUS row (with landed date inline)
 const sStatus = getRadioValue('studentStatus')
 const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
 const imm = getRadioValue('immDoc')
@@ -955,32 +955,26 @@ let prevAttendText = ''
 if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
-// create the main row using addRowStacked (existing 4 pairs)
-addRowStacked(
-  "STUDENT'S STATUS", statusText,
-  'IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)', immText,
-  'EXPIRY DATE (RC / SP / WP)', expiry,
-  'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', prevAttendText
-)
+// create the row manually (safer than addRowStacked)
+const tr = document.createElement('tr')
+tr.innerHTML = `
+  <td class="p-2 font-semibold" style="border:1px solid #000;">STUDENT'S STATUS</td>
+  <td class="p-2" style="border:1px solid #000;">${statusText}</td>
 
-// append DATE LANDED to the same last row (ensures visible)
-const lastRow = tbl.lastElementChild
-if (lastRow) {
-  const tdLabel = document.createElement('td')
-  tdLabel.className = 'p-2 font-semibold'
-  tdLabel.style.border = '1px solid #000'
-  tdLabel.textContent = 'DATE STUDENT(S) LANDED IN CANADA'
+  <td class="p-2 font-semibold" style="border:1px solid #000;">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</td>
+  <td class="p-2" style="border:1px solid #000;">${immText}</td>
 
-  const tdValue = document.createElement('td')
-  tdValue.className = 'p-2'
-  tdValue.style.border = '1px solid #000'
-  tdValue.textContent = landedDate || '—'
+  <td class="p-2 font-semibold" style="border:1px solid #000;">EXPIRY DATE (RC / SP / WP)</td>
+  <td class="p-2" style="border:1px solid #000;">${expiry}</td>
 
-  lastRow.appendChild(tdLabel)
-  lastRow.appendChild(tdValue)
-}
+  <td class="p-2 font-semibold" style="border:1px solid #000;">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</td>
+  <td class="p-2" style="border:1px solid #000;">${prevAttendText}</td>
 
-)
+  <td class="p-2 font-semibold" style="border:1px solid #000;">DATE STUDENT(S) LANDED IN CANADA</td>
+  <td class="p-2" style="border:1px solid #000;">${landedDate}</td>
+`
+tbl.appendChild(tr)
+
 
 
       // parents in a single row (4 cells)

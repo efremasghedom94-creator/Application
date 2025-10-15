@@ -922,17 +922,17 @@ function toggleOtherProg(id){
         tbl.appendChild(tr)
       }
 
-      // Top single row (we'll split across 4 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE - CONTACT RELATIONSHIP will be its own row)
-      addRowStacked('DATE', escapeHtml(document.getElementById('date').value), 'TAKEN BY', escapeHtml(document.getElementById('takenBy').value), 'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value), 'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))
+// Create a single row with 5 cells: DATE, TAKEN BY, CONTACT NAME, CONTACT PHONE, CONTACT RELATIONSHIP
+const trContactRel = document.createElement('tr');
+trContactRel.innerHTML = `
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">DATE</div><div>${escapeHtml(document.getElementById('date').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">TAKEN BY</div><div>${escapeHtml(document.getElementById('takenBy').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT NAME/SURNAME</div><div>${escapeHtml(document.getElementById('contactName').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT PHONE #</div><div>${escapeHtml(document.getElementById('contactPhone').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT RELATIONSHIP</div><div>${escapeHtml(getContactRelationship())}</div></td>
+`;
+tbl.appendChild(trContactRel);
 
-      // CONTACT RELATIONSHIP as its own compact row (span all columns)
-const trRel = document.createElement('tr');
-trRel.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">CONTACT RELATIONSHIP</td>
-                   <td class="p-2" style="border:1px solid #000;" colspan="3">${escapeHtml(getContactRelationship())}</td>`;
-
-
-
-      tbl.appendChild(trRel)
 
       // immigration + student status row (4 cells)
       const sStatus = getRadioValue('studentStatus')

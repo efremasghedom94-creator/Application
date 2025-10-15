@@ -918,19 +918,24 @@ function toggleOtherProg(id){
                 </td>`
       }
 
- function addRowStacked(...args) {
-  const tr = document.createElement('tr');
-  let cells = '';
-  for (let i = 0; i < args.length; i += 2) {
-    const label = args[i];
-    const value = args[i + 1] ?? '';
-    cells += `<td class="p-2 font-semibold" style="border:1px solid #000;">${label}</td>
-              <td class="p-2" style="border:1px solid #000;">${value}</td>`;
+  // Create a new table row with any number of label/value pairs
+  function addRowStacked(...args) {
+    const tr = document.createElement('tr');
+    let cells = '';
+    for (let i = 0; i < args.length; i += 2) {
+      const label = args[i];
+      const value = args[i + 1] ?? '';
+      cells += `<td class="p-2 font-semibold" style="border:1px solid #000;">${label}</td>
+                <td class="p-2" style="border:1px solid #000;">${value}</td>`;
+    }
+    tr.innerHTML = cells;
+    tbl.appendChild(tr); // ✅ Correct variable name
   }
-  tr.innerHTML = cells;
-  tbl.appendChild(tr); // ✅ fixed here
-}
 
+  // Function to get contact relationship value
+  function getContactRelationship() {
+    return document.getElementById('contactRelationship')?.value || '';
+  }
 
     // Top single row with 5 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE / CONTACT RELATIONSHIP
 addRowStacked(

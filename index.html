@@ -936,7 +936,7 @@ tbl.appendChild(trContactRel);
 
 
 
-// immigration + student status row (aligned 5 columns, no empty cells)
+// immigration + student status row (aligned 5 columns, skip empty cells safely)
 const sStatus = getRadioValue('studentStatus')
 const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
 const imm = getRadioValue('immDoc')
@@ -952,7 +952,7 @@ let prevAttendText = ''
 if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
-// Build all possible cells (label + value)
+// Collect all possible cells
 const cells = [
   { label: "STUDENT'S STATUS", value: statusText },
   { label: 'IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)', value: immText },
@@ -961,19 +961,30 @@ const cells = [
   { label: 'DATE STUDENT(S) LANDED IN CANADA', value: landedDate }
 ]
 
-// Create the row, skipping empty cells
+// Filter only non-empty fields
+const nonEmptyCells = cells.filter(c => c.value && c.value.replace(/<[^>]*>/g, '').trim() !== '')
+
 const trImmigration = document.createElement('tr')
-trImmigration.innerHTML = cells
-  .filter(c => c.value && c.value.trim() !== '') // remove empty ones
-  .map(c => `
-    <td class="p-2" style="border:1px solid #000;">
-      <div class="font-semibold">${c.label}</div>
-      <div>${c.value}</div>
-    </td>
-  `)
-  .join('')
+
+if (nonEmptyCells.length > 0) {
+  // At least one cell has content
+  trImmigration.innerHTML = nonEmptyCells
+    .map(c => `
+      <td class="p-2" style="border:1px solid #000;">
+        <div class="font-semibold">${c.label}</div>
+        <div>${c.value}</div>
+      </td>
+    `)
+    .join('')
+} else {
+  // All were empty — show a placeholder row
+  trImmigration.innerHTML = `
+    <td class="p-2" style="border:1px solid #000;" colspan="5">—</td>
+  `
+}
 
 tbl.appendChild(trImmigration)
+
 
 
 

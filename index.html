@@ -910,17 +910,18 @@ function toggleOtherProg(id){
                 </td>`
       }
 
-      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
-      function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val){
-        const tr = document.createElement('tr')
-        tr.innerHTML = `
-          ${cellStacked(c1Label, c1Val)}
-          ${cellStacked(c2Label, c2Val)}
-          ${cellStacked(c3Label, c3Val)}
-          ${cellStacked(c4Label, c4Val)}
-        `
-        tbl.appendChild(tr)
-      }
+   function addRowStacked(...args) {
+  const tr = document.createElement('tr');
+  let cells = '';
+  for (let i = 0; i < args.length; i += 2) {
+    const label = args[i];
+    const value = args[i + 1] ?? '';
+    cells += `<td class="p-2 font-semibold" style="border:1px solid #000;">${label}</td>
+              <td class="p-2" style="border:1px solid #000;">${value}</td>`;
+  }
+  tr.innerHTML = cells;
+  table.appendChild(tr);
+}
 
     // Top single row with 5 cells: DATE / TAKEN BY / CONTACT NAME / CONTACT PHONE / CONTACT RELATIONSHIP
 addRowStacked(

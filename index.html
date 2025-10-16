@@ -895,30 +895,30 @@ function toggleOtherProg(id){
 
 
     
-
-
- function generateFinal() {
+function generateFinal() {
   const final = document.getElementById('finalArea');
-  final.innerHTML = '';
+
+  // Remove only the existing table, NOT the entire area
+  const oldTable = final.querySelector('table.yellow-table');
+  if (oldTable) oldTable.remove();
 
   // main table
   const tbl = document.createElement('table');
   tbl.className = 'yellow-table w-full';
   tbl.style.border = '1px solid #000';
   tbl.style.borderCollapse = 'collapse';
-  tbl.style.tableLayout = 'fixed'; // ensures equal width columns
+  tbl.style.tableLayout = 'fixed';
   tbl.style.width = '100%';
 
-  // define 5 equal-width columns
+  // equal-width columns
   const colgroup = document.createElement('colgroup');
   for (let i = 0; i < 5; i++) {
     const col = document.createElement('col');
-    col.style.width = '20%'; // 100% / 5 columns
+    col.style.width = '20%';
     colgroup.appendChild(col);
   }
   tbl.appendChild(colgroup);
 
-  // helper to create stacked cells
   function cellStacked(label, val, muted) {
     return `
       <td class="p-2" style="border:1px solid #000; vertical-align: top; word-wrap:break-word;">
@@ -927,7 +927,6 @@ function toggleOtherProg(id){
       </td>`;
   }
 
-  // function to add a full row with 5 columns
   function addRow5(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -940,7 +939,7 @@ function toggleOtherProg(id){
     tbl.appendChild(tr);
   }
 
-  // ---- ROW 1: Contact info ----
+  // ---- Row 1 ----
   addRow5(
     'DATE', escapeHtml(document.getElementById('date').value),
     'TAKEN BY', escapeHtml(document.getElementById('takenBy').value),
@@ -949,7 +948,7 @@ function toggleOtherProg(id){
     'CONTACT RELATIONSHIP', escapeHtml(getContactRelationship())
   );
 
-  // ---- ROW 2: Immigration / Student status ----
+  // ---- Row 2 ----
   const sStatus = getRadioValue('studentStatus');
   const sStatusOther = document.getElementById('studentStatusOther')?.value || '';
   const imm = getRadioValue('immDoc');
@@ -973,9 +972,11 @@ function toggleOtherProg(id){
     'DATE STUDENT(S) LANDED IN CANADA', landedDate
   );
 
-  // append the table
+  // append new table under existing page structure
   final.appendChild(tbl);
 }
+
+
 
 
     

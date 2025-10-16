@@ -893,7 +893,11 @@ function toggleOtherProg(id){
         .replace(/'/g, '&#039;');
     }
 
-function generateFinal() {
+
+    
+
+
+ function generateFinal() {
   const final = document.getElementById('finalArea');
   final.innerHTML = '';
 
@@ -901,11 +905,23 @@ function generateFinal() {
   const tbl = document.createElement('table');
   tbl.className = 'yellow-table w-full';
   tbl.style.border = '1px solid #000';
+  tbl.style.borderCollapse = 'collapse';
+  tbl.style.tableLayout = 'fixed'; // ensures equal width columns
+  tbl.style.width = '100%';
+
+  // define 5 equal-width columns
+  const colgroup = document.createElement('colgroup');
+  for (let i = 0; i < 5; i++) {
+    const col = document.createElement('col');
+    col.style.width = '20%'; // 100% / 5 columns
+    colgroup.appendChild(col);
+  }
+  tbl.appendChild(colgroup);
 
   // helper to create stacked cells
   function cellStacked(label, val, muted) {
     return `
-      <td class="p-2" style="border:1px solid #000; vertical-align: top;">
+      <td class="p-2" style="border:1px solid #000; vertical-align: top; word-wrap:break-word;">
         <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
         <div class="${muted ? 'muted' : ''}">${val || ''}</div>
       </td>`;
@@ -961,6 +977,8 @@ function generateFinal() {
   final.appendChild(tbl);
 }
 
+
+    
 
       // parents in a single row (4 cells)
       addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))

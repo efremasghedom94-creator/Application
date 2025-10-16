@@ -5,17 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>One World One Centre...</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2pdf bundle -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      border: 3px solid #C7631C;
-      box-sizing: border-box;
-      min-height: 100vh;
-      background-color: white;
-    }
 
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>One World One Centre...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+ <style>
     .page {
       position: relative;
       min-height: 70vh;
@@ -35,15 +36,6 @@
       padding-top: 1rem;
     }
 
-    .wizard {
-      background-color: white;
-      border-radius: 0.5rem;
-      padding: 2rem;
-      margin: 2rem auto;
-      max-width: 1100px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
     @media print {
       body { margin: 0 }
       .wizard { display: none }
@@ -51,7 +43,6 @@
     }
   </style>
 </head>
-
 
 
 
@@ -902,93 +893,88 @@ function toggleOtherProg(id){
         .replace(/'/g, '&#039;');
     }
 
+    function generateFinal(){
+      const final = document.getElementById('finalArea')
+      final.innerHTML = ''
 
-    
-function generateFinal() {
-  const final = document.getElementById('finalArea');
+      // top-level table (using yellow-table class for consistent black borders + smaller font)
+      const tbl = document.createElement('table')
+      tbl.className = 'yellow-table w-full'
+      tbl.style.border = "1px solid #000"
 
-  // Remove only the existing table, NOT the entire area
-  const oldTable = final.querySelector('table.yellow-table');
-  if (oldTable) oldTable.remove();
+      // helper to return a cell where label is above the answer (same box)
+      function cellStacked(label, val, muted){
+        return `<td class="p-2" style="border:1px solid #000; vertical-align: top;">
+                  <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
+                  <div class="${muted? 'muted':''}">${val||''}</div>
+                </td>`
+      }
 
-  // main table
-  const tbl = document.createElement('table');
-  tbl.className = 'yellow-table w-full';
-  tbl.style.border = '1px solid #000';
-  tbl.style.borderCollapse = 'collapse';
-  tbl.style.tableLayout = 'fixed';
-  tbl.style.width = '100%';
+      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
+      function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val){
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          ${cellStacked(c1Label, c1Val)}
+          ${cellStacked(c2Label, c2Val)}
+          ${cellStacked(c3Label, c3Val)}
+          ${cellStacked(c4Label, c4Val)}
+        `
+        tbl.appendChild(tr)
+      }
 
-  // equal-width columns
-  const colgroup = document.createElement('colgroup');
-  for (let i = 0; i < 5; i++) {
-    const col = document.createElement('col');
-    col.style.width = '20%';
-    colgroup.appendChild(col);
-  }
-  tbl.appendChild(colgroup);
-
-  function cellStacked(label, val, muted) {
-    return `
-      <td class="p-2" style="border:1px solid #000; vertical-align: top; word-wrap:break-word;">
-        <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
-        <div class="${muted ? 'muted' : ''}">${val || ''}</div>
-      </td>`;
-  }
-
-  function addRow5(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      ${cellStacked(c1Label, c1Val)}
-      ${cellStacked(c2Label, c2Val)}
-      ${cellStacked(c3Label, c3Val)}
-      ${cellStacked(c4Label, c4Val)}
-      ${cellStacked(c5Label, c5Val)}
-    `;
-    tbl.appendChild(tr);
-  }
-
-  // ---- Row 1 ----
-  addRow5(
-    'DATE', escapeHtml(document.getElementById('date').value),
-    'TAKEN BY', escapeHtml(document.getElementById('takenBy').value),
-    'CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value),
-    'CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value),
-    'CONTACT RELATIONSHIP', escapeHtml(getContactRelationship())
-  );
-
-  // ---- Row 2 ----
-  const sStatus = getRadioValue('studentStatus');
-  const sStatusOther = document.getElementById('studentStatusOther')?.value || '';
-  const imm = getRadioValue('immDoc');
-  const immOther = document.getElementById('immDocOther')?.value || '';
-  const expiry = escapeHtml(document.getElementById('expiry').value);
-  const landedDate = escapeHtml(document.getElementById('landed').value);
-  const prevAttendVal = getRadioValue('prevAttend');
-  let prevAttendText = '';
-
-  if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes';
-  else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No';
-
-  const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '');
-  const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '');
-
-  addRow5(
-    "STUDENT'S STATUS", statusText,
-    "IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)", immText,
-    'EXPIRY DATE (RC / SP / WP)', expiry,
-    'PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?', prevAttendText,
-    'DATE STUDENT(S) LANDED IN CANADA', landedDate
-  );
-
-  // append new table under existing page structure
-  final.appendChild(tbl);
-}
+// Create a single row with 5 cells: DATE, TAKEN BY, CONTACT NAME, CONTACT PHONE, CONTACT RELATIONSHIP
+const trContactRel = document.createElement('tr');
+trContactRel.innerHTML = `
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">DATE</div><div>${escapeHtml(document.getElementById('date').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">TAKEN BY</div><div>${escapeHtml(document.getElementById('takenBy').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT NAME/SURNAME</div><div>${escapeHtml(document.getElementById('contactName').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT PHONE #</div><div>${escapeHtml(document.getElementById('contactPhone').value)}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT RELATIONSHIP</div><div>${escapeHtml(getContactRelationship())}</div></td>
+`;
+tbl.appendChild(trContactRel);
 
 
 
 
-    
+      
+// immigration + student status row
+const sStatus = getRadioValue('studentStatus')
+const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
+const imm = getRadioValue('immDoc')
+const immOther = document.getElementById('immDocOther')?.value || ''
+
+const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '')
+const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '')
+const expiry = escapeHtml(document.getElementById('expiry').value)
+const landedDate = escapeHtml(document.getElementById('landed').value)
+
+// previous attendance
+const prevAttendVal = getRadioValue('prevAttend')
+let prevAttendText = ''
+if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
+else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
+
+// --- create proper row for data (not header) ---
+const tr = document.createElement('tr')
+tr.innerHTML = `
+  <td class="p-2 font-semibold" style="border:1px solid #000;">STUDENT'S STATUS</td>
+  <td class="p-2" style="border:1px solid #000;">${statusText}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</td>
+  <td class="p-2" style="border:1px solid #000;">${immText}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">EXPIRY DATE (RC / SP / WP)</td>
+  <td class="p-2" style="border:1px solid #000;">${expiry}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</td>
+  <td class="p-2" style="border:1px solid #000;">${prevAttendText}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">DATE STUDENT(S) LANDED IN CANADA</td>
+  <td class="p-2" style="border:1px solid #000;">${landedDate}</td>
+`
+tbl.appendChild(tr)
+
+
 
       // parents in a single row (4 cells)
       addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))

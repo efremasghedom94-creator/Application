@@ -1016,12 +1016,83 @@ tbl.appendChild(trParents);
 
       
 
-      // address row: apartment / family address + postal / family phone / home language + catholic
-      // we'll split across 4 stacked cells: Apt / Address+Postal (concatenated) / Family Phone / Home Lang + Catholic
-      const addressWithPostal = escapeHtml(document.getElementById('address').value) + (document.getElementById('postal').value ? ' / ' + escapeHtml(document.getElementById('postal').value) : '')
-      const cath = (function(){ const c=getRadioValue('catholic'); return c? (checkboxMark(c==='Yes')+' Yes   '+checkboxMark(c==='No')+' No') : '' })()
-      addRowStacked('APARTMENT #', escapeHtml(document.getElementById('apt').value), 'FAMILY ADDRESS / POSTAL CODE', addressWithPostal, 'FAMILY PHONE #', escapeHtml(document.getElementById('familyPhone').value), 'HOME LANGUAGE / CATHOLIC', escapeHtml(document.getElementById('homeLang').value) + '  ' + cath)
 
+
+
+
+// ====== ADDRESS SECTION ======
+
+// Row 4: Apartment # / Family Address / Postal Code
+const trAddress = document.createElement('tr');
+trAddress.innerHTML = `
+  <td colspan="5" style="padding:0; border:none;">
+    <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
+      <tr>
+        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+          <div class="font-semibold" style="margin-bottom:6px;">APARTMENT #</div>
+          <div>${escapeHtml(document.getElementById('apt').value)}</div>
+        </td>
+        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+          <div class="font-semibold" style="margin-bottom:6px;">FAMILY ADDRESS</div>
+          <div>${escapeHtml(document.getElementById('address').value)}</div>
+        </td>
+        <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
+          <div class="font-semibold" style="margin-bottom:6px;">POSTAL CODE</div>
+          <div>${escapeHtml(document.getElementById('postal').value)}</div>
+        </td>
+      </tr>
+    </table>
+  </td>
+`;
+tbl.appendChild(trAddress);
+
+
+// Row 5: Family Phone # / Home Language / Catholic
+const cath = (() => {
+  const c = getRadioValue('catholic');
+  return c
+    ? checkboxMark(c === 'Yes') + ' Yes   ' + checkboxMark(c === 'No') + ' No'
+    : '';
+})();
+
+const trContactInfo = document.createElement('tr');
+trContactInfo.innerHTML = `
+  <td colspan="5" style="padding:0; border:none;">
+    <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
+      <tr>
+        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+          <div class="font-semibold" style="margin-bottom:6px;">FAMILY PHONE #</div>
+          <div>${escapeHtml(document.getElementById('familyPhone').value)}</div>
+        </td>
+        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+          <div class="font-semibold" style="margin-bottom:6px;">HOME LANGUAGE</div>
+          <div>${escapeHtml(document.getElementById('homeLang').value)}</div>
+        </td>
+        <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
+          <div class="font-semibold" style="margin-bottom:6px;">CATHOLIC</div>
+          <div>${cath}</div>
+        </td>
+      </tr>
+    </table>
+  </td>
+`;
+tbl.appendChild(trContactInfo);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
       // students header row (single row spanning all columns)
       const header = document.createElement('tr')
       header.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">STUDENTS</td><td class="p-2" style="border:1px solid #000;" colspan="3"></td>`

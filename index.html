@@ -926,34 +926,18 @@ function toggleOtherProg(id){
       }
 
 
-function addRowStacked(...args) {
+// Updated helper: expect 5 label/value pairs (or 4 + filler)
+function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val){
   const tr = document.createElement('tr');
-  const pairs = [];
-
-  // group label/value pairs
-  for (let i = 0; i < args.length; i += 2) {
-    if (args[i] !== undefined && args[i + 1] !== undefined) {
-      pairs.push([args[i], args[i + 1]]);
-    }
-  }
-
-  const numCells = pairs.length;
-  const cellWidth = 100 / numCells; // evenly divide total width
-
-  let rowHTML = '';
-  for (const [label, val] of pairs) {
-    rowHTML += `
-      <td class="p-2" style="border:1px solid #000; width:${cellWidth}%; vertical-align: top;">
-        <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
-        <div>${val || ''}</div>
-      </td>
-    `;
-  }
-
-  tr.innerHTML = rowHTML;
+  tr.innerHTML = `
+    ${cellStacked(c1Label, c1Val)}
+    ${cellStacked(c2Label, c2Val)}
+    ${cellStacked(c3Label, c3Val)}
+    ${cellStacked(c4Label, c4Val)}
+    ${cellStacked(c5Label, c5Val)}
+  `;
   tbl.appendChild(tr);
 }
-
 
 
 // Create a single row with 5 cells: DATE, TAKEN BY, CONTACT NAME, CONTACT PHONE, CONTACT RELATIONSHIP
@@ -1001,32 +985,9 @@ tbl.appendChild(tr);
 
 
 
+      // parents in a single row (4 cells)
+      addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))
 
-const trParents = document.createElement('tr');
-trParents.innerHTML = `
-  <td colspan="1" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S SURNAME</div>
-    <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
-  </td>
-  <td colspan="1" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S GIVEN NAME</div>
-    <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
-  </td>
-  <td colspan="1" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S SURNAME</div>
-    <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
-  </td>
-  <td colspan="2" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S GIVEN NAME</div>
-    <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
-  </td>
-`;
-tbl.appendChild(trParents);
-
-
-
-
-      
       // address row: apartment / family address + postal / family phone / home language + catholic
       // we'll split across 4 stacked cells: Apt / Address+Postal (concatenated) / Family Phone / Home Lang + Catholic
       const addressWithPostal = escapeHtml(document.getElementById('address').value) + (document.getElementById('postal').value ? ' / ' + escapeHtml(document.getElementById('postal').value) : '')

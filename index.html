@@ -1235,12 +1235,28 @@ tbl.appendChild(trLimited);
 
       
 
-      const trNotes = document.createElement('tr')
-      trNotes.innerHTML = `
-        <td class="p-2 font-semibold" style="border:1px solid #000;" colspan="2">NOTES</td>
-        <td class="p-2" style="border:1px solid #000;" colspan="2">${escapeHtml(document.getElementById('notes').value)}</td>
-      `
-      tbl.appendChild(trNotes)
+// === ROW 8: Notes (Full-width Single Cell) ===
+const trNotes = document.createElement('tr');
+trNotes.innerHTML = `
+  <td colspan="5" style="
+    border:1px solid #000; 
+    padding:8px; 
+    font-weight:600;
+  ">
+    NOTES
+    <div style="
+      margin-top:6px; 
+      margin-left:24px; 
+      font-size:1em; 
+      color:#000; 
+      line-height:1.5;
+    ">
+      ${escapeHtml(document.getElementById('notes').value || '')}
+    </div>
+  </td>
+`;
+tbl.appendChild(trNotes);
+
 
       const trRev = document.createElement('tr')
       trRev.innerHTML = `<td class="p-2 text-xs italic text-right" style="border:1px solid #000;" colspan="4">Rev. 2021</td>`

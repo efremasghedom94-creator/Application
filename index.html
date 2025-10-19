@@ -919,17 +919,36 @@ function toggleOtherProg(id){
                 </td>`
       }
 
-      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
-      function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val){
-        const tr = document.createElement('tr')
-        tr.innerHTML = `
-          ${cellStacked(c1Label, c1Val)}
-          ${cellStacked(c2Label, c2Val)}
-          ${cellStacked(c3Label, c3Val)}
-          ${cellStacked(c4Label, c4Val)}
-        `
-        tbl.appendChild(tr)
-      }
+     // 🔧 UNIVERSAL ROW HELPER — works with any number of cells, stretches cleanly
+function addFlexibleRow(cells) {
+  const tr = document.createElement('tr');
+  const colCount = cells.length / 2; // every two entries = label + value
+
+  tr.innerHTML = `
+    <td colspan="5" style="padding:0; border:none;">
+      <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
+        <tr>
+          ${(() => {
+            const innerCells = [];
+            for (let i = 0; i < cells.length; i += 2) {
+              const label = cells[i];
+              const val = cells[i + 1];
+              innerCells.push(`
+                <td class="p-2" style="border-right:${i + 2 < cells.length ? '1px solid #000' : 'none'}; border-bottom:1px solid #000; width:${100 / colCount}%;">
+                  <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
+                  <div>${val || ''}</div>
+                </td>
+              `);
+            }
+            return innerCells.join('');
+          })()}
+        </tr>
+      </table>
+    </td>
+  `;
+  tbl.appendChild(tr);
+}
+
 
 // Create a single row with 5 cells: DATE, TAKEN BY, CONTACT NAME, CONTACT PHONE, CONTACT RELATIONSHIP
 const trContactRel = document.createElement('tr');

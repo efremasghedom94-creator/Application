@@ -368,7 +368,7 @@
     </div>
 
     <!-- EXPIRY DATE -->
-    <div class="col-span-3 mt-2">
+    <div class="col-span-4 mt-2">
       <label class="block text-sm">EXPIRY DATE (RC / SP / WP)</label>
       <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
     </div>
@@ -384,15 +384,12 @@
     </div>
 
     <!-- DATE STUDENT(S) LANDED -->
-    <div class="col-span-3 mt-2">
+    <div class="col-span-12 mt-2">
       <label class="block text-sm">DATE STUDENT(S) LANDED IN CANADA</label>
       <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
     </div>
   </div>
 
-
-
-  
   <!-- Navigation buttons -->
  <div class="nav-buttons">
   <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
@@ -796,81 +793,19 @@ function addStudent(prefill){
 
 
 
-   <!-- LAST GRADE COMPLETED -->
-<div class="col-span-4">
-  <label for="lastGrade" class="block text-sm mt-6">LAST GRADE COMPLETED</label>
-  <select id="lastGrade" name="lastGrade" class="border rounded p-3 w-72" onchange="toggleOtherGrade(this)">
-    <option value="" disabled selected hidden>-- Select Grade --</option>
-    <option value="Pre KG">Pre KG</option>
-    <option value="KG">KG</option>
-    <option value="Grade 1">Grade 1</option>
-    <option value="Grade 2">Grade 2</option>
-    <option value="Grade 3">Grade 3</option>
-    <option value="Grade 4">Grade 4</option>
-    <option value="Grade 5">Grade 5</option>
-    <option value="Grade 6">Grade 6</option>
-    <option value="Grade 7">Grade 7</option>
-    <option value="Grade 8">Grade 8</option>
-    <option value="Grade 9">Grade 9</option>
-    <option value="Grade 10">Grade 10</option>
-    <option value="Grade 11">Grade 11</option>
-    <option value="Grade 12">Grade 12</option>
-    <option value="Other">Other</option>
-  </select>
-
-  <!-- Show only if "Other" is selected -->
-  <input 
-    type="text" 
-    id="otherGrade" 
-    name="otherGrade" 
-    class="border rounded p-2 w-72 mt-2 hidden" 
-    placeholder="Please specify"
-  />
-</div>
-
-<!-- Initialize Select2 for dropdown direction fix -->
-<script>
-  $(document).ready(function() {
-    $('#lastGrade').select2({
-      dropdownParent: $(document.body),   // render dropdown in body
-      dropdownPosition: 'below',          // force downward opening
-      width: '288px',                     // matches Tailwind w-72
-      placeholder: '-- Select Grade --',  // adds placeholder
-      allowClear: true                    // allow clearing selection
-    });
-
-    // Optional: Show input if "Other" is chosen
-    $('#lastGrade').on('change', function() {
-      if ($(this).val() === 'Other') {
-        $('#otherGrade').removeClass('hidden');
-      } else {
-        $('#otherGrade').addClass('hidden').val('');
-      }
-    });
-  });
-</script>
-
-<style>
-  /* Ensure parent containers don't clip dropdowns */
-  .page {
-    overflow: visible !important;
-  }
-
-  /* Match your form styling */
-  .select2-container .select2-selection--single {
-    height: 42px;
-    border: 1px solid #d1d5db; /* Tailwind gray-300 */
-    border-radius: 0.375rem;
-    padding: 6px 10px;
-    background-color: #fff;
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 42px;
-    right: 10px;
-  }
-</style>
-
+    <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
+    <div class="grid grid-cols-12 gap-4 mt-4">
+      <div class="col-span-4">
+        <label class="text-sm">LAST GRADE COMPLETED</label>
+        <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
+          <option value="" disabled selected hidden>Select grade</option>
+          <option value="Pre KG">Pre KG</option>
+          <option value="KG">KG</option>
+          ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
+      </div>
 
       <div class="col-span-8">
         <label class="text-sm">PROGRAM</label>

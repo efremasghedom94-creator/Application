@@ -1213,14 +1213,22 @@ tdLimited.innerHTML = `
   </div>
   ${
     limitedDetails
-      ? `<div style="margin-top:6px; font-size:0.9em;">${limitedDetails}</div>`
+      ? `<div style="
+          margin-top:6px; 
+          font-size:0.9em; 
+          font-style:italic; 
+          color:#444; 
+          margin-left:20px; 
+          line-height:1.4;
+        ">
+          ${limitedDetails}
+        </div>`
       : ''
   }
 `;
 
 trLimited.appendChild(tdLimited);
 tbl.appendChild(trLimited);
-
 
       
 

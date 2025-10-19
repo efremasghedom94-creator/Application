@@ -235,45 +235,75 @@
   }
 </script>
 
-    <!-- CONTACT RELATIONSHIP -->
-    <div class="col-span-4">
-      <label for="contactRel" class="block text-sm mt-6">CONTACT RELATIONSHIP</label>
-      <select id="contactRel" name="contactRel" 
-              class="border rounded p-3 w-72" 
-              onchange="toggleOtherRelation(this)">
-        <option value="" disabled selected hidden>-- Select Relation --</option>
-        <option value="Mother">Mother</option>
-        <option value="Father">Father</option>
-        <option value="Sister">Sister</option>
-        <option value="Brother">Brother</option>
-        <option value="Step-Mother">Step-Mother</option>
-        <option value="Step-Father">Step-Father</option>
-        <option value="Half-Sister">Half-Sister</option>
-        <option value="Half-Brother">Half-Brother</option>
-        <option value="Uncle">Uncle</option>
-        <option value="Aunt">Aunt</option>
-        <option value="Cousin">Cousin</option>
-        <option value="Grandmother">Grandmother</option>
-        <option value="Grandfather">Grandfather</option>
-        <option value="Guardian">Guardian</option>
-        <option value="Sponsor">Sponsor</option>
-        <option value="Family Friend">Family Friend</option>
-        <option value="Neighbor">Neighbor</option>
-        <option value="Community Worker">Community Worker</option>
-        <option value="Social Worker">Social Worker</option>
-        <option value="Other">Other</option>
-    
-      </select>
+<!-- CONTACT RELATIONSHIP -->
+<div class="col-span-4">
+  <label for="contactRel" class="block text-sm mt-6">CONTACT RELATIONSHIP</label>
+  <select id="contactRel" name="contactRel" class="border rounded p-3 w-72" onchange="toggleOtherRelation(this)">
+    <option value="" disabled selected hidden>-- Select Relation --</option>
+    <option value="Mother">Mother</option>
+    <option value="Father">Father</option>
+    <option value="Sister">Sister</option>
+    <option value="Brother">Brother</option>
+    <option value="Step-Mother">Step-Mother</option>
+    <option value="Step-Father">Step-Father</option>
+    <option value="Half-Sister">Half-Sister</option>
+    <option value="Half-Brother">Half-Brother</option>
+    <option value="Uncle">Uncle</option>
+    <option value="Aunt">Aunt</option>
+    <option value="Cousin">Cousin</option>
+    <option value="Grandmother">Grandmother</option>
+    <option value="Grandfather">Grandfather</option>
+    <option value="Guardian">Guardian</option>
+    <option value="Sponsor">Sponsor</option>
+    <option value="Family Friend">Family Friend</option>
+    <option value="Neighbor">Neighbor</option>
+    <option value="Community Worker">Community Worker</option>
+    <option value="Social Worker">Social Worker</option>
+    <option value="Other">Other</option>
+  </select>
 
-      <!-- Show only if "Other" is selected -->
-      <input 
-        type="text" 
-        id="otherRelation" 
-        name="otherRelation" 
-        class="border rounded p-2 w-72 mt-2 hidden" 
-        placeholder="Please specify"
-      />
-    </div>
+  <!-- Show only if "Other" is selected -->
+  <input 
+    type="text" 
+    id="otherRelation" 
+    name="otherRelation" 
+    class="border rounded p-2 w-72 mt-2 hidden" 
+    placeholder="Please specify"
+  />
+</div>
+
+<!-- Initialize Select2 for dropdown direction fix -->
+<script>
+  $(document).ready(function() {
+    $('#contactRel').select2({
+      dropdownParent: $(document.body),   // render dropdown in body
+      dropdownPosition: 'below',          // prefer downward
+      width: '288px'                      // matches Tailwind w-72
+    });
+  });
+</script>
+
+<style>
+  /* Ensure parent containers don't clip dropdowns */
+  .page {
+    overflow: visible !important;
+  }
+
+  /* Style consistency with your theme */
+  .select2-container .select2-selection--single {
+    height: 42px;
+    border: 1px solid #d1d5db; /* Tailwind gray-300 */
+    border-radius: 0.375rem;
+    padding: 6px 10px;
+    background-color: #fff;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 42px;
+    right: 10px;
+  }
+</style>
+
   </div>
 
   <!-- Next button -->

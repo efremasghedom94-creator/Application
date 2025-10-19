@@ -963,28 +963,17 @@ function generateFinal() {
   tbl.appendChild(tr);
 
   // ✅ Third row (4 cells that fill 100%)
- const trParents = document.createElement('tr');
-trParents.innerHTML = `
-  <td class="p-2" style="border:1px solid #000; width:25%;">
-    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S SURNAME</div>
-    <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
-  </td>
-  <td class="p-2" style="border:1px solid #000; width:25%;">
-    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S GIVEN NAME</div>
-    <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
-  </td>
-  <td class="p-2" style="border:1px solid #000; width:25%;">
-    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S SURNAME</div>
-    <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
-  </td>
-  <td class="p-2" style="border:1px solid #000; width:25%;">
-    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S GIVEN NAME</div>
-    <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
-  </td>
-`;
-tbl.appendChild(trParents);
+  const trParents = document.createElement('tr');
+  trParents.innerHTML = `
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">FATHER'S SURNAME</div><div>${escapeHtml(document.getElementById('fatherSurname').value)}</div></td>
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">FATHER'S GIVEN NAME</div><div>${escapeHtml(document.getElementById('fatherGiven').value)}</div></td>
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">MOTHER'S SURNAME</div><div>${escapeHtml(document.getElementById('motherSurname').value)}</div></td>
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">MOTHER'S GIVEN NAME</div><div>${escapeHtml(document.getElementById('motherGiven').value)}</div></td>
+  `;
+  tbl.appendChild(trParents);
 
-
+  final.appendChild(tbl);
+}
 
 
       

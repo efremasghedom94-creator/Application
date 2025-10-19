@@ -912,10 +912,15 @@ function toggleOtherProg(id){
       const final = document.getElementById('finalArea')
       final.innerHTML = ''
 
-      // top-level table (using yellow-table class for consistent black borders + smaller font)
-      const tbl = document.createElement('table')
-      tbl.className = 'yellow-table w-full'
-      tbl.style.border = "1px solid #000"
+final.insertAdjacentHTML(
+    'beforeend',
+    '<h1 class="text-xl font-semibold mb-6 ml-6">INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS</h1>'
+  );
+
+  // Create the table after the title
+  const tbl = document.createElement('table');
+  tbl.className = 'yellow-table w-full';
+  tbl.style.border = "1px solid #000";
 
       // helper to return a cell where label is above the answer (same box)
       function cellStacked(label, val, muted){

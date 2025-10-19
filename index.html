@@ -1311,5 +1311,26 @@ tbl.appendChild(trNotes);
     window.generateFinal = generateFinal
 
   </script>
+  <script>
+  // Force dropdowns to open downward when possible
+  document.querySelectorAll('select').forEach(select => {
+    select.addEventListener('mousedown', e => {
+      // Temporarily remove it from overflow clipping
+      const parent = select.closest('.wizard, .page, .grid, .max-w-5xl');
+      if (parent) parent.style.overflow = 'visible';
+
+      // Force the browser to render dropdown downward first
+      select.size = 0; // reset any old behavior
+      setTimeout(() => { select.size = 0; }, 0);
+    });
+
+    select.addEventListener('blur', e => {
+      // Restore any previous overflow (clean-up)
+      const parent = select.closest('.wizard, .page, .grid, .max-w-5xl');
+      if (parent) parent.style.overflow = '';
+    });
+  });
+</script>
+
 </body>
 </html>

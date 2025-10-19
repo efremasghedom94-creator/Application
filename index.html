@@ -982,6 +982,20 @@ tr.innerHTML = `
   <td class="p-2" style="border:1px solid #000;">${landedDate}</td>
 `
 tbl.appendChild(tr)
+      // Add the second row with the specific data aligned under the headers
+const secondDataRow = document.createElement('tr');
+
+secondDataRow.innerHTML = `
+  <td class="p-2" style="border:1px solid #000;">${statusText}</td>
+  <td class="p-2" style="border:1px solid #000;">${immText}</td>
+  <td class="p-2" style="border:1px solid #000;">${expiry}</td>
+  <td class="p-2" style="border:1px solid #000;">${prevAttendText}</td>
+  <td class="p-2" style="border:1px solid #000;">${landedDate}</td>
+`;
+
+// Append the second row right after the first one
+tbl.appendChild(secondDataRow);
+
 
 
 

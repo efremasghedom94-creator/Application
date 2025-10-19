@@ -1175,19 +1175,37 @@ tbl.appendChild(studentCell);
 
       
 
-      // limited profile + notes
-      const limited = getRadioValue('limitedProfile')
-      const trLimited = document.createElement('tr')
-      trLimited.innerHTML = `
-        <td class="p-2 font-semibold" style="border:1px solid #000;" colspan="2">
-          POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
-        </td>
-        <td class="p-2" style="border:1px solid #000;" colspan="2">
-          ${checkboxMark(limited==='Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited==='No')} No
-          <div class="text-xs italic mt-1">If YES, describe for each student, Grade 1 – Grade 12, as relevant. Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin.</div>
-        </td>
-      `
-      tbl.appendChild(trLimited)
+ // === ROW 7: Potential Limited Formal Schooling Profile (Full-Width Independent Row) ===
+
+const limited = getRadioValue('limitedProfile');
+
+// Create full-width independent row
+const trLimited = document.createElement('tr');
+const tdLimited = document.createElement('td');
+
+tdLimited.colSpan = 5; // stretch full width like previous independent rows
+tdLimited.style.border = '1px solid #000';
+tdLimited.style.padding = '8px';
+
+// Build the cell’s internal structure
+tdLimited.innerHTML = `
+  <div style="font-weight:600; margin-bottom:6px;">
+    POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
+  </div>
+  <div style="margin-bottom:4px;">
+    ${checkboxMark(limited === 'Yes')} Yes&nbsp;&nbsp;
+    ${checkboxMark(limited === 'No')} No
+  </div>
+  <div style="font-size:0.85em; font-style:italic; line-height:1.3;">
+    If YES, describe for each student, Grade 1 – Grade 12, as relevant. 
+    Number of years as refugees, country of relocation, refugee camp name, 
+    nature of schooling, parent country of origin.
+  </div>
+`;
+
+trLimited.appendChild(tdLimited);
+tbl.appendChild(trLimited);
+
 
       const trNotes = document.createElement('tr')
       trNotes.innerHTML = `

@@ -902,6 +902,14 @@ function toggleOtherProg(id){
         .replace(/'/g, '&#039;');
     }
 
+
+
+
+
+
+
+
+    
     function generateFinal(){
       const final = document.getElementById('finalArea')
       final.innerHTML = ''
@@ -964,24 +972,15 @@ if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
 // --- create proper row for data (not header) ---
-const tr = document.createElement('tr')
+const tr = document.createElement('tr');
 tr.innerHTML = `
-  <td class="p-2 font-semibold" style="border:1px solid #000;">STUDENT'S STATUS</td>
-  <td class="p-2" style="border:1px solid #000;">${statusText}</td>
-
-  <td class="p-2 font-semibold" style="border:1px solid #000;">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</td>
-  <td class="p-2" style="border:1px solid #000;">${immText}</td>
-
-  <td class="p-2 font-semibold" style="border:1px solid #000;">EXPIRY DATE (RC / SP / WP)</td>
-  <td class="p-2" style="border:1px solid #000;">${expiry}</td>
-
-  <td class="p-2 font-semibold" style="border:1px solid #000;">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</td>
-  <td class="p-2" style="border:1px solid #000;">${prevAttendText}</td>
-
-  <td class="p-2 font-semibold" style="border:1px solid #000;">DATE STUDENT(S) LANDED IN CANADA</td>
-  <td class="p-2" style="border:1px solid #000;">${landedDate}</td>
-`
-tbl.appendChild(tr)
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">STUDENT'S STATUS</div><div>${statusText}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</div><div>${immText}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">EXPIRY DATE (RC / SP / WP)</div><div>${expiry}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</div><div>${prevAttendText}</div></td>
+  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">DATE STUDENT(S) LANDED IN CANADA</div><div>${landedDate}</div></td>
+`;
+tbl.appendChild(tr);
 
 
 

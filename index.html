@@ -907,8 +907,6 @@ function toggleOtherProg(id){
 
 
 
-
-
     
     function generateFinal(){
       const final = document.getElementById('finalArea')
@@ -927,18 +925,19 @@ function toggleOtherProg(id){
                 </td>`
       }
 
-      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
-    function addRowStacked5(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val){  
-    const tr = document.createElement('tr')  
-    tr.innerHTML = `  
-      ${cellStacked(c1Label, c1Val)}  
-      ${cellStacked(c2Label, c2Val)}  
-      ${cellStacked(c3Label, c3Val)}  
-      ${cellStacked(c4Label, c4Val)}  
-      ${cellStacked(c5Label, c5Val)}  
-    `  
-    tbl.appendChild(tr)  
-  }  
+
+     // Updated helper: expect 5 label/value pairs (or 4 + filler)
+function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    ${cellStacked(c1Label, c1Val)}
+    ${cellStacked(c2Label, c2Val)}
+    ${cellStacked(c3Label, c3Val)}
+    ${cellStacked(c4Label, c4Val)}
+    ${cellStacked(c5Label, c5Val)}
+  `;
+  tbl.appendChild(tr);
+}
 
 // Create a single row with 5 cells: DATE, TAKEN BY, CONTACT NAME, CONTACT PHONE, CONTACT RELATIONSHIP
 const trContactRel = document.createElement('tr');
@@ -985,13 +984,9 @@ tbl.appendChild(tr);
 
 
 
-    addRowStacked(
-  "FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value),
-  "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value),
-  "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value),
-  "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value),
-  "", "" // empty 5th cell value (optional label/value)
-);
+      // parents in a single row (4 cells)
+      addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))
+
       // address row: apartment / family address + postal / family phone / home language + catholic
       // we'll split across 4 stacked cells: Apt / Address+Postal (concatenated) / Family Phone / Home Lang + Catholic
       const addressWithPostal = escapeHtml(document.getElementById('address').value) + (document.getElementById('postal').value ? ' / ' + escapeHtml(document.getElementById('postal').value) : '')

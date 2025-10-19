@@ -793,77 +793,19 @@ function addStudent(prefill){
 
 
 
-   <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
-<div class="grid grid-cols-12 gap-4 mt-4">
-  <div class="col-span-4">
-    <label class="text-sm">LAST GRADE COMPLETED</label>
-    <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1 last-grade-dropdown" onchange="toggleOtherGrade(${id})">
-      <option value="" disabled selected hidden>Select grade</option>
-      <option value="Pre KG">Pre KG</option>
-      <option value="KG">KG</option>
-      ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
-      <option value="Other">Other</option>
-    </select>
-    <input 
-      type="text" 
-      id="s_${id}_lastgrade_spec" 
-      class="w-full border rounded p-2 mt-1 hidden" 
-      placeholder="Specify grade" 
-    />
-  </div>
-</div>
-
-<!-- Initialize Select2 for dynamic dropdowns -->
-<script>
-  $(document).ready(function() {
-    // Apply Select2 to any dropdown with class "last-grade-dropdown"
-    $(document).on('focus', '.last-grade-dropdown', function() {
-      if (!$(this).data('select2')) {
-        $(this).select2({
-          dropdownParent: $(document.body),   // ensures dropdown renders in body
-          dropdownPosition: 'below',          // force downward
-          width: '100%',                      // match Tailwind w-full
-          placeholder: 'Select grade',
-          allowClear: true
-        });
-      }
-    });
-
-    // Handle "Other" option dynamically
-    $(document).on('change', '.last-grade-dropdown', function() {
-      const id = $(this).attr('id').match(/\d+/)[0]; // extract student ID from "s_${id}_lastgrade"
-      const otherInput = $(`#s_${id}_lastgrade_spec`);
-
-      if ($(this).val() === 'Other') {
-        otherInput.removeClass('hidden');
-      } else {
-        otherInput.addClass('hidden').val('');
-      }
-    });
-  });
-</script>
-
-<style>
-  /* Prevent dropdown clipping */
-  .page {
-    overflow: visible !important;
-  }
-
-  /* Style consistency */
-  .select2-container .select2-selection--single {
-    height: 42px;
-    border: 1px solid #d1d5db; /* Tailwind gray-300 */
-    border-radius: 0.375rem;
-    padding: 6px 10px;
-    background-color: #fff;
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 42px;
-    right: 10px;
-  }
-</style>
-
+    <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
+    <div class="grid grid-cols-12 gap-4 mt-4">
+      <div class="col-span-4">
+        <label class="text-sm">LAST GRADE COMPLETED</label>
+        <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
+          <option value="" disabled selected hidden>Select grade</option>
+          <option value="Pre KG">Pre KG</option>
+          <option value="KG">KG</option>
+          ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
+      </div>
 
       <div class="col-span-8">
         <label class="text-sm">PROGRAM</label>

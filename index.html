@@ -926,37 +926,16 @@ function toggleOtherProg(id){
       }
 
 
-function addRowStacked(...args) {
+// Updated helper: expect 5 label/value pairs (or 4 + filler)
+function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val){
   const tr = document.createElement('tr');
-
-  // args are label/value pairs → group them into pairs
-  const pairs = [];
-  for (let i = 0; i < args.length; i += 2) {
-    if (args[i] !== undefined) pairs.push([args[i], args[i + 1]]);
-  }
-
-  // Build each cell based on number of pairs
-  let cells = '';
-  for (const [label, val] of pairs) {
-    cells += cellStacked(label, val);
-  }
-
-  tr.innerHTML = cells;
-
-  // If there are only 4 cells, make them evenly spaced
-  if (pairs.length === 4) {
-    tr.querySelectorAll('td').forEach(td => {
-      td.style.width = '25%';
-    });
-  }
-
-  // If there are 5 cells, make them evenly spaced too
-  if (pairs.length === 5) {
-    tr.querySelectorAll('td').forEach(td => {
-      td.style.width = '20%';
-    });
-  }
-
+  tr.innerHTML = `
+    ${cellStacked(c1Label, c1Val)}
+    ${cellStacked(c2Label, c2Val)}
+    ${cellStacked(c3Label, c3Val)}
+    ${cellStacked(c4Label, c4Val)}
+    ${cellStacked(c5Label, c5Val)}
+  `;
   tbl.appendChild(tr);
 }
 

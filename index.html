@@ -50,14 +50,34 @@
       .final-wrap { display: block }
     }
 
-    /* Add this to your stylesheet */
-select {
-  position: relative;
-  z-index: 10; /* makes sure it appears above other elements */
-}
-.final-wrap {
-  overflow: visible !important; /* ensure space for dropdown */
-}
+
+
+
+  /* Tailwind-compatible fix for dropdown behavior */
+  [x-cloak] { display: none !important; }
+
+  /* Allow dropdowns inside the final yellow form to open fully */
+  .final-wrap {
+    overflow: visible !important;
+  }
+
+  /* Ensure the dropdown appears above nearby elements */
+  select {
+    position: relative;
+    z-index: 10;
+    background-color: #FFF8CC; /* matches your yellow form */
+  }
+
+  /* Optional: add a subtle hover/focus effect for better UX */
+  select:hover,
+  select:focus {
+    background-color: #FFF4B2; /* slightly darker on hover */
+    outline: none;
+    border-color: #C7631C; /* matches your PDF button color */
+  }
+
+
+    
 
   </style>
   

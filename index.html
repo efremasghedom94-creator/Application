@@ -1001,9 +1001,32 @@ tbl.appendChild(tr);
 
 
 
-      // parents in a single row (4 cells)
-      addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))
 
+const trParents = document.createElement('tr');
+trParents.innerHTML = `
+  <td colspan="1" class="p-2" style="border:1px solid #000;">
+    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S SURNAME</div>
+    <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
+  </td>
+  <td colspan="1" class="p-2" style="border:1px solid #000;">
+    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S GIVEN NAME</div>
+    <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
+  </td>
+  <td colspan="1" class="p-2" style="border:1px solid #000;">
+    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S SURNAME</div>
+    <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
+  </td>
+  <td colspan="2" class="p-2" style="border:1px solid #000;">
+    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S GIVEN NAME</div>
+    <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
+  </td>
+`;
+tbl.appendChild(trParents);
+
+
+
+
+      
       // address row: apartment / family address + postal / family phone / home language + catholic
       // we'll split across 4 stacked cells: Apt / Address+Postal (concatenated) / Family Phone / Home Lang + Catholic
       const addressWithPostal = escapeHtml(document.getElementById('address').value) + (document.getElementById('postal').value ? ' / ' + escapeHtml(document.getElementById('postal').value) : '')

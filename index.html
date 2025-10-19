@@ -976,12 +976,16 @@ function generateFinal() {
   );
 
   // Append table to the final area
-  final.appendChild(tbl);
+final.appendChild(tbl);
+
+// After generating the yellow form, go to final page
+if (document.getElementById('pageFinal')) {
+  goTo('pageFinal'); // or whatever your final page's ID is
+}
+}
+
 
     
-  
-
-
 
 
       // parents in a single row (4 cells)

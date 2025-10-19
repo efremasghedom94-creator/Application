@@ -908,103 +908,72 @@ function toggleOtherProg(id){
 
 
     
-    function generateFinal(){
-      const final = document.getElementById('finalArea')
-      final.innerHTML = ''
+function generateFinal() {
+  const final = document.getElementById('finalArea');
+  final.innerHTML = '';
 
-      // top-level table (using yellow-table class for consistent black borders + smaller font)
-      const tbl = document.createElement('table')
-      tbl.className = 'yellow-table w-full'
-      tbl.style.border = "1px solid #000"
+  // Create table with flexible layout
+  const tbl = document.createElement('table');
+  tbl.className = 'yellow-table w-full';
+  tbl.style.cssText = `
+    border: 1px solid #000;
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto; /* important for dynamic cell widths */
+  `;
 
-      // helper to return a cell where label is above the answer (same box)
-      function cellStacked(label, val, muted){
-        return `<td class="p-2" style="border:1px solid #000; vertical-align: top;">
-                  <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
-                  <div class="${muted? 'muted':''}">${val||''}</div>
-                </td>`
-      }
+  // helper
+  function cellStacked(label, val, muted) {
+    return `<td class="p-2" style="border:1px solid #000; vertical-align: top;">
+              <div class="font-semibold" style="margin-bottom:6px;">${escapeHtml(label)}</div>
+              <div class="${muted ? 'muted' : ''}">${val || ''}</div>
+            </td>`;
+  }
 
+  // first two rows — unchanged
+  const trContactRel = document.createElement('tr');
+  trContactRel.innerHTML = `
+    ${cellStacked('DATE', document.getElementById('date').value)}
+    ${cellStacked('TAKEN BY', document.getElementById('takenBy').value)}
+    ${cellStacked('CONTACT NAME/SURNAME', document.getElementById('contactName').value)}
+    ${cellStacked('CONTACT PHONE #', document.getElementById('contactPhone').value)}
+    ${cellStacked('CONTACT RELATIONSHIP', getContactRelationship())}
+  `;
+  tbl.appendChild(trContactRel);
 
-// Updated helper: expect 5 label/value pairs (or 4 + filler)
-function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val){
+  const sStatus = getRadioValue('studentStatus');
+  const sStatusOther = document.getElementById('studentStatusOther')?.value || '';
+  const imm = getRadioValue('immDoc');
+  const immOther = document.getElementById('immDocOther')?.value || '';
+  const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '');
+  const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '');
+  const expiry = escapeHtml(document.getElementById('expiry').value);
+  const landedDate = escapeHtml(document.getElementById('landed').value);
+  const prevAttendVal = getRadioValue('prevAttend');
+  let prevAttendText = prevAttendVal === 'Yes' ? checkboxMark(true) + ' Yes' : prevAttendVal === 'No' ? checkboxMark(true) + ' No' : '';
+
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    ${cellStacked(c1Label, c1Val)}
-    ${cellStacked(c2Label, c2Val)}
-    ${cellStacked(c3Label, c3Val)}
-    ${cellStacked(c4Label, c4Val)}
-    ${cellStacked(c5Label, c5Val)}
+    ${cellStacked("STUDENT'S STATUS", statusText)}
+    ${cellStacked("IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)", immText)}
+    ${cellStacked("EXPIRY DATE (RC / SP / WP)", expiry)}
+    ${cellStacked("PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?", prevAttendText)}
+    ${cellStacked("DATE STUDENT(S) LANDED IN CANADA", landedDate)}
   `;
   tbl.appendChild(tr);
+
+  // ✅ Third row (4 cells that fill 100%)
+  const trParents = document.createElement('tr');
+  trParents.innerHTML = `
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">FATHER'S SURNAME</div><div>${escapeHtml(document.getElementById('fatherSurname').value)}</div></td>
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">FATHER'S GIVEN NAME</div><div>${escapeHtml(document.getElementById('fatherGiven').value)}</div></td>
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">MOTHER'S SURNAME</div><div>${escapeHtml(document.getElementById('motherSurname').value)}</div></td>
+    <td style="border:1px solid #000; width:25%;"><div class="font-semibold">MOTHER'S GIVEN NAME</div><div>${escapeHtml(document.getElementById('motherGiven').value)}</div></td>
+  `;
+  tbl.appendChild(trParents);
+
+  final.appendChild(tbl);
 }
-
-
-// Create a single row with 5 cells: DATE, TAKEN BY, CONTACT NAME, CONTACT PHONE, CONTACT RELATIONSHIP
-const trContactRel = document.createElement('tr');
-trContactRel.innerHTML = `
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">DATE</div><div>${escapeHtml(document.getElementById('date').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">TAKEN BY</div><div>${escapeHtml(document.getElementById('takenBy').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT NAME/SURNAME</div><div>${escapeHtml(document.getElementById('contactName').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT PHONE #</div><div>${escapeHtml(document.getElementById('contactPhone').value)}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">CONTACT RELATIONSHIP</div><div>${escapeHtml(getContactRelationship())}</div></td>
-`;
-tbl.appendChild(trContactRel);
-
-
-
-
-      
-// immigration + student status row
-const sStatus = getRadioValue('studentStatus')
-const sStatusOther = document.getElementById('studentStatusOther')?.value || ''
-const imm = getRadioValue('immDoc')
-const immOther = document.getElementById('immDocOther')?.value || ''
-
-const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '')
-const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '')
-const expiry = escapeHtml(document.getElementById('expiry').value)
-const landedDate = escapeHtml(document.getElementById('landed').value)
-
-// previous attendance
-const prevAttendVal = getRadioValue('prevAttend')
-let prevAttendText = ''
-if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
-else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
-
-// --- create proper row for data (not header) ---
-const tr = document.createElement('tr');
-tr.innerHTML = `
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">STUDENT'S STATUS</div><div>${statusText}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</div><div>${immText}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">EXPIRY DATE (RC / SP / WP)</div><div>${expiry}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</div><div>${prevAttendText}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">DATE STUDENT(S) LANDED IN CANADA</div><div>${landedDate}</div></td>
-`;
-tbl.appendChild(tr);
-
-
-const trParents = document.createElement('tr');
-trParents.innerHTML = `
-  <td colspan="1" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S SURNAME</div>
-    <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
-  </td>
-  <td colspan="1" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">FATHER'S GIVEN NAME</div>
-    <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
-  </td>
-  <td colspan="1" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S SURNAME</div>
-    <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
-  </td>
-  <td colspan="2" class="p-2" style="border:1px solid #000;">
-    <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S GIVEN NAME</div>
-    <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
-  </td>
-`;
-tbl.appendChild(trParents);
-
 
 
 

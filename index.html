@@ -50,36 +50,23 @@
       .final-wrap { display: block }
     }
 
+  </style>
 
 
 
-  /* Tailwind-compatible fix for dropdown behavior */
-  [x-cloak] { display: none !important; }
-
-  /* Allow dropdowns inside the final yellow form to open fully */
-  .final-wrap {
+<style>
+  /* Ensure dropdowns inside wizard forms can expand normally */
+  .wizard {
     overflow: visible !important;
   }
 
-  /* Ensure the dropdown appears above nearby elements */
-  select {
-    position: relative;
-    z-index: 10;
-    background-color: #FFF8CC; /* matches your yellow form */
+  /* (Optional) ensure parent wrappers don't clip the dropdown */
+  .max-w-5xl, .page, .grid {
+    overflow: visible !important;
   }
-
-  /* Optional: add a subtle hover/focus effect for better UX */
-  select:hover,
-  select:focus {
-    background-color: #FFF4B2; /* slightly darker on hover */
-    outline: none;
-    border-color: #C7631C; /* matches your PDF button color */
-  }
+</style>
 
 
-    
-
-  </style>
   
 </head>
 

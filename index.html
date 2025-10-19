@@ -1094,54 +1094,86 @@ tbl.appendChild(trContactInfo);
 
 
 
-      // For student details we will add a small nested table for consistent layout with the exact headers on a single row
-      const studentCell = document.createElement('tr')
-      const studentCellInner = document.createElement('td')
-      studentCellInner.colSpan = 4
-      studentCellInner.style.padding = '0'
-      studentCellInner.style.border = '1px solid #000'
+// === ROW 6: Student Details (Independent Full-Width Stretch) ===
 
-      let studentTableHtml = `<table class="yellow-table" style="width:100%; border:1px solid #000; border-collapse:collapse;">
-        <tr>
-          <th class="p-2" style="border:1px solid #000;">STUDENT'S SURNAME</th>
-          <th class="p-2" style="border:1px solid #000;">STUDENT'S GIVEN NAME</th>
-          <th class="p-2" style="border:1px solid #000;">GENDER</th>
-          <th class="p-2" style="border:1px solid #000;">DOB (MMM/DD/YYYY)</th>
-          <th class="p-2" style="border:1px solid #000;">BIRTH COUNTRY</th>
-          <th class="p-2" style="border:1px solid #000;">LAST GRADE COMPLETED</th>
-          <th class="p-2" style="border:1px solid #000;">SCHOOL YEAR</th>
-          <th class="p-2" style="border:1px solid #000;">PROGRAM</th>
-        </tr>`
+// Create wrapper row & cell
+const studentCell = document.createElement('tr');
+const studentCellInner = document.createElement('td');
+studentCellInner.colSpan = 5; // use full span for independent width
+studentCellInner.style.padding = '0';
+studentCellInner.style.border = 'none'; // outer border handled by nested table
 
-      for(let i=1;i<=studentCount;i++){
-        const surname = document.getElementById(`s_${i}_surname`)?.value || ''
-        const given = document.getElementById(`s_${i}_given`)?.value || ''
-        const gender = (function(){ const g = document.querySelector(`input[name='s_${i}_gender']:checked`); return g? g.value : '' })()
-        const dob = document.getElementById(`s_${i}_dob`)?.value || ''
-        const birth = document.getElementById(`s_${i}_birth`)?.value || ''
-        const last = document.getElementById(`s_${i}_lastgrade`)?.value || ''
-        const year = (function(){ const y = document.querySelector(`input[name='s_${i}_year']:checked`); return y? y.value : '' })()
-        const prog = (function(){ const p = document.querySelector(`input[name='s_${i}_prog']:checked`); return p? p.value : '' })()
-        const progSpec = document.getElementById(`s_${i}_prog_spec`)?.value || ''
+// Build nested student details table
+let studentTableHtml = `
+  <table class="yellow-table" style="width:100%; border-collapse:collapse; border:1px solid #000;">
+    <tr style="background-color:#fff8dc;"> <!-- optional light yellow -->
+      <th class="p-2" style="border:1px solid #000;">STUDENT'S SURNAME</th>
+      <th class="p-2" style="border:1px solid #000;">STUDENT'S GIVEN NAME</th>
+      <th class="p-2" style="border:1px solid #000;">GENDER</th>
+      <th class="p-2" style="border:1px solid #000;">DOB (MMM/DD/YYYY)</th>
+      <th class="p-2" style="border:1px solid #000;">BIRTH COUNTRY</th>
+      <th class="p-2" style="border:1px solid #000;">LAST GRADE COMPLETED</th>
+      <th class="p-2" style="border:1px solid #000;">SCHOOL YEAR</th>
+      <th class="p-2" style="border:1px solid #000;">PROGRAM</th>
+    </tr>`;
 
-        if(surname || given || birth || last){
-          studentTableHtml += `<tr>
-            <td class="p-2" style="border:1px solid #000;">${escapeHtml(surname)}</td>
-            <td class="p-2" style="border:1px solid #000;">${escapeHtml(given)}</td>
-            <td class="p-2 text-center" style="border:1px solid #000;">${checkboxMark(gender==='F')} F&nbsp;&nbsp;${checkboxMark(gender==='M')} M</td>
-            <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(dob)}</td>
-            <td class="p-2" style="border:1px solid #000;">${escapeHtml(birth)}</td>
-            <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(last)}</td>
-            <td class="p-2 text-center" style="border:1px solid #000;">${year==='ThisYear' ? 'This year' : (year==='NextYear' ? 'Next year' : '')}</td>
-            <td class="p-2 text-center" style="border:1px solid #000;">${prog==='Yes' ? 'Yes — ' + escapeHtml(progSpec) : (prog==='No' ? 'No' : '')}</td>
-          </tr>`
-        }
-      }
+// Generate student rows
+for (let i = 1; i <= studentCount; i++) {
+  const surname = document.getElementById(`s_${i}_surname`)?.value || '';
+  const given = document.getElementById(`s_${i}_given`)?.value || '';
+  const gender = (() => {
+    const g = document.querySelector(`input[name='s_${i}_gender']:checked`);
+    return g ? g.value : '';
+  })();
+  const dob = document.getElementById(`s_${i}_dob`)?.value || '';
+  const birth = document.getElementById(`s_${i}_birth`)?.value || '';
+  const last = document.getElementById(`s_${i}_lastgrade`)?.value || '';
+  const year = (() => {
+    const y = document.querySelector(`input[name='s_${i}_year']:checked`);
+    return y ? y.value : '';
+  })();
+  const prog = (() => {
+    const p = document.querySelector(`input[name='s_${i}_prog']:checked`);
+    return p ? p.value : '';
+  })();
+  const progSpec = document.getElementById(`s_${i}_prog_spec`)?.value || '';
 
-      studentTableHtml += `</table>`
-      studentCellInner.innerHTML = studentTableHtml
-      studentCell.appendChild(studentCellInner)
-      tbl.appendChild(studentCell)
+  // Only add non-empty rows
+  if (surname || given || birth || last) {
+    studentTableHtml += `
+      <tr>
+        <td class="p-2" style="border:1px solid #000;">${escapeHtml(surname)}</td>
+        <td class="p-2" style="border:1px solid #000;">${escapeHtml(given)}</td>
+        <td class="p-2 text-center" style="border:1px solid #000;">
+          ${checkboxMark(gender === 'F')} F&nbsp;&nbsp;${checkboxMark(gender === 'M')} M
+        </td>
+        <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(dob)}</td>
+        <td class="p-2" style="border:1px solid #000;">${escapeHtml(birth)}</td>
+        <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(last)}</td>
+        <td class="p-2 text-center" style="border:1px solid #000;">
+          ${year === 'ThisYear' ? 'This year' : (year === 'NextYear' ? 'Next year' : '')}
+        </td>
+        <td class="p-2 text-center" style="border:1px solid #000;">
+          ${prog === 'Yes' ? 'Yes — ' + escapeHtml(progSpec) : (prog === 'No' ? 'No' : '')}
+        </td>
+      </tr>`;
+  }
+}
+
+studentTableHtml += `</table>`;
+
+// Apply nested table inside main cell
+studentCellInner.innerHTML = studentTableHtml;
+studentCell.appendChild(studentCellInner);
+tbl.appendChild(studentCell);
+
+
+
+
+
+
+
+      
 
       // limited profile + notes
       const limited = getRadioValue('limitedProfile')

@@ -902,12 +902,6 @@ function toggleOtherProg(id){
         .replace(/'/g, '&#039;');
     }
 
-
-
-
-
-
-    
     function generateFinal(){
       const final = document.getElementById('finalArea')
       final.innerHTML = ''
@@ -925,20 +919,17 @@ function toggleOtherProg(id){
                 </td>`
       }
 
-
-// Updated helper: expect 5 label/value pairs (or 4 + filler)
-function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val, c5Label, c5Val){
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    ${cellStacked(c1Label, c1Val)}
-    ${cellStacked(c2Label, c2Val)}
-    ${cellStacked(c3Label, c3Val)}
-    ${cellStacked(c4Label, c4Val)}
-    ${cellStacked(c5Label, c5Val)}
-  `;
-  tbl.appendChild(tr);
-}
-
+      // row layout — make rows that contain 4 columns (label+value as stacked in each cell)
+      function addRowStacked(c1Label, c1Val, c2Label, c2Val, c3Label, c3Val, c4Label, c4Val){
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          ${cellStacked(c1Label, c1Val)}
+          ${cellStacked(c2Label, c2Val)}
+          ${cellStacked(c3Label, c3Val)}
+          ${cellStacked(c4Label, c4Val)}
+        `
+        tbl.appendChild(tr)
+      }
 
 // Create a single row with 5 cells: DATE, TAKEN BY, CONTACT NAME, CONTACT PHONE, CONTACT RELATIONSHIP
 const trContactRel = document.createElement('tr');
@@ -973,126 +964,40 @@ if (prevAttendVal === 'Yes') prevAttendText = checkboxMark(true) + ' Yes'
 else if (prevAttendVal === 'No') prevAttendText = checkboxMark(true) + ' No'
 
 // --- create proper row for data (not header) ---
-const tr = document.createElement('tr');
+const tr = document.createElement('tr')
 tr.innerHTML = `
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">STUDENT'S STATUS</div><div>${statusText}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</div><div>${immText}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">EXPIRY DATE (RC / SP / WP)</div><div>${expiry}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</div><div>${prevAttendText}</div></td>
-  <td class="p-2" style="border:1px solid #000;"><div class="font-semibold">DATE STUDENT(S) LANDED IN CANADA</div><div>${landedDate}</div></td>
-`;
-tbl.appendChild(tr);
+  <td class="p-2 font-semibold" style="border:1px solid #000;">STUDENT'S STATUS</td>
+  <td class="p-2" style="border:1px solid #000;">${statusText}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">IMMIGRATION DOCUMENT (OF NATURAL PARENT/GUARDIAN)</td>
+  <td class="p-2" style="border:1px solid #000;">${immText}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">EXPIRY DATE (RC / SP / WP)</td>
+  <td class="p-2" style="border:1px solid #000;">${expiry}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</td>
+  <td class="p-2" style="border:1px solid #000;">${prevAttendText}</td>
+
+  <td class="p-2 font-semibold" style="border:1px solid #000;">DATE STUDENT(S) LANDED IN CANADA</td>
+  <td class="p-2" style="border:1px solid #000;">${landedDate}</td>
+`
+tbl.appendChild(tr)
 
 
 
-const trParents = document.createElement('tr');
-trParents.innerHTML = `
-  <!-- outer TD has no border so inner table's border is the only one visible -->
-  <td colspan="5" style="padding:0; border: none;">
-    <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
-      <tr>
-        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
-          <div class="font-semibold" style="margin-bottom:6px;">FATHER'S SURNAME</div>
-          <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
-        </td>
-        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
-          <div class="font-semibold" style="margin-bottom:6px;">FATHER'S GIVEN NAME</div>
-          <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
-        </td>
-        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
-          <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S SURNAME</div>
-          <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
-        </td>
-        <td class="p-2" style="border-bottom:1px solid #000; width:25%;">
-          <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S GIVEN NAME</div>
-          <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
-        </td>
-      </tr>
-    </table>
-  </td>
-`;
-tbl.appendChild(trParents);
+      // parents in a single row (4 cells)
+      addRowStacked("FATHER'S SURNAME", escapeHtml(document.getElementById('fatherSurname').value), "FATHER'S GIVEN NAME", escapeHtml(document.getElementById('fatherGiven').value), "MOTHER'S SURNAME", escapeHtml(document.getElementById('motherSurname').value), "MOTHER'S GIVEN NAME", escapeHtml(document.getElementById('motherGiven').value))
 
+      // address row: apartment / family address + postal / family phone / home language + catholic
+      // we'll split across 4 stacked cells: Apt / Address+Postal (concatenated) / Family Phone / Home Lang + Catholic
+      const addressWithPostal = escapeHtml(document.getElementById('address').value) + (document.getElementById('postal').value ? ' / ' + escapeHtml(document.getElementById('postal').value) : '')
+      const cath = (function(){ const c=getRadioValue('catholic'); return c? (checkboxMark(c==='Yes')+' Yes   '+checkboxMark(c==='No')+' No') : '' })()
+      addRowStacked('APARTMENT #', escapeHtml(document.getElementById('apt').value), 'FAMILY ADDRESS / POSTAL CODE', addressWithPostal, 'FAMILY PHONE #', escapeHtml(document.getElementById('familyPhone').value), 'HOME LANGUAGE / CATHOLIC', escapeHtml(document.getElementById('homeLang').value) + '  ' + cath)
 
-      
-
-
-
-
-
-// ====== ADDRESS SECTION ======
-
-// Row 4: Apartment # / Family Address / Postal Code
-const trAddress = document.createElement('tr');
-trAddress.innerHTML = `
-  <td colspan="5" style="padding:0; border:none;">
-    <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
-      <tr>
-        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-          <div class="font-semibold" style="margin-bottom:6px;">APARTMENT #</div>
-          <div>${escapeHtml(document.getElementById('apt').value)}</div>
-        </td>
-        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-          <div class="font-semibold" style="margin-bottom:6px;">FAMILY ADDRESS</div>
-          <div>${escapeHtml(document.getElementById('address').value)}</div>
-        </td>
-        <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
-          <div class="font-semibold" style="margin-bottom:6px;">POSTAL CODE</div>
-          <div>${escapeHtml(document.getElementById('postal').value)}</div>
-        </td>
-      </tr>
-    </table>
-  </td>
-`;
-tbl.appendChild(trAddress);
-
-
-// Row 5: Family Phone # / Home Language / Catholic
-const cath = (() => {
-  const c = getRadioValue('catholic');
-  return c
-    ? checkboxMark(c === 'Yes') + ' Yes   ' + checkboxMark(c === 'No') + ' No'
-    : '';
-})();
-
-const trContactInfo = document.createElement('tr');
-trContactInfo.innerHTML = `
-  <td colspan="5" style="padding:0; border:none;">
-    <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
-      <tr>
-        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-          <div class="font-semibold" style="margin-bottom:6px;">FAMILY PHONE #</div>
-          <div>${escapeHtml(document.getElementById('familyPhone').value)}</div>
-        </td>
-        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-          <div class="font-semibold" style="margin-bottom:6px;">HOME LANGUAGE</div>
-          <div>${escapeHtml(document.getElementById('homeLang').value)}</div>
-        </td>
-        <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
-          <div class="font-semibold" style="margin-bottom:6px;">CATHOLIC</div>
-          <div>${cath}</div>
-        </td>
-      </tr>
-    </table>
-  </td>
-`;
-tbl.appendChild(trContactInfo);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      // students header row (single row spanning all columns)
+      const header = document.createElement('tr')
+      header.innerHTML = `<td class="p-2 font-semibold" style="border:1px solid #000;">STUDENTS</td><td class="p-2" style="border:1px solid #000;" colspan="3"></td>`
+      tbl.appendChild(header)
 
       // For student details we will add a small nested table for consistent layout with the exact headers on a single row
       const studentCell = document.createElement('tr')

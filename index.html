@@ -49,7 +49,18 @@
       .wizard { display: none }
       .final-wrap { display: block }
     }
+
+    /* Add this to your stylesheet */
+select {
+  position: relative;
+  z-index: 10; /* makes sure it appears above other elements */
+}
+.final-wrap {
+  overflow: visible !important; /* ensure space for dropdown */
+}
+
   </style>
+  
 </head>
 
 
@@ -272,18 +283,6 @@
         class="border rounded p-2 w-72 mt-2 hidden" 
         placeholder="Please specify"
       />
-      <style>
-  /* --- Fix dropdown opening direction --- */
-  .final-wrap {
-    overflow: visible !important; /* allow the dropdown to extend outside */
-  }
-
-  select {
-    position: relative;
-    z-index: 10; /* ensure dropdown appears above surrounding elements */
-  }
-</style>
-
     </div>
   </div>
 

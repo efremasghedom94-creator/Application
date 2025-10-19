@@ -988,21 +988,21 @@ tbl.appendChild(tr);
 const trParents = document.createElement('tr');
 trParents.innerHTML = `
   <td colspan="5" style="padding:0; border:1px solid #000;">
-    <table style="width:100%; border-collapse:collapse;">
+    <table style="width:100%; border-collapse:collapse; border-spacing:0;">
       <tr>
-        <td class="p-2" style="border:1px solid #000; width:25%;">
+        <td class="p-2" style="border:1px solid #000; border-left:none; width:25%;">
           <div class="font-semibold" style="margin-bottom:6px;">FATHER'S SURNAME</div>
           <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
         </td>
-        <td class="p-2" style="border:1px solid #000; width:25%;">
+        <td class="p-2" style="border-top:1px solid #000; border-bottom:1px solid #000; border-left:1px solid #000; width:25%;">
           <div class="font-semibold" style="margin-bottom:6px;">FATHER'S GIVEN NAME</div>
           <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
         </td>
-        <td class="p-2" style="border:1px solid #000; width:25%;">
+        <td class="p-2" style="border-top:1px solid #000; border-bottom:1px solid #000; border-left:1px solid #000; width:25%;">
           <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S SURNAME</div>
           <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
         </td>
-        <td class="p-2" style="border:1px solid #000; width:25%;">
+        <td class="p-2" style="border-top:1px solid #000; border-bottom:1px solid #000; border-left:1px solid #000; border-right:none; width:25%;">
           <div class="font-semibold" style="margin-bottom:6px;">MOTHER'S GIVEN NAME</div>
           <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
         </td>
@@ -1011,6 +1011,7 @@ trParents.innerHTML = `
   </td>
 `;
 tbl.appendChild(trParents);
+
 
       
 

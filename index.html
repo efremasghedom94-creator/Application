@@ -49,20 +49,6 @@
       .wizard { display: none }
       .final-wrap { display: block }
     }
-    .page { overflow: visible !important; }
-
-.select2-container .select2-selection--single {
-  height: 42px;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  padding: 6px 10px;
-  background-color: #fff;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-  height: 42px;
-  right: 10px;
-}
   </style>
 </head>
 
@@ -70,7 +56,6 @@
 
 
 <style>
-  
   /* Make the yellow form exactly half of A4 size when printed */
   @media print {
     #finalArea {
@@ -102,7 +87,6 @@
     }
   }
 </style>
-
 
 
   
@@ -809,19 +793,19 @@ function addStudent(prefill){
 
 
 
-  <!-- LAST GRADE COMPLETED -->
-<div class="col-span-4">
-  <label class="text-sm">LAST GRADE COMPLETED</label>
-  <select id="s_${id}_lastgrade" class="last-grade-dropdown w-full border rounded p-2 mt-1">
-    <option value="" disabled selected hidden>Select grade</option>
-    <option value="Pre KG">Pre KG</option>
-    <option value="KG">KG</option>
-    ${Array.from({length:12}, (_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
-    <option value="Other">Other</option>
-  </select>
-  <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
-</div>
-
+    <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
+    <div class="grid grid-cols-12 gap-4 mt-4">
+      <div class="col-span-4">
+        <label class="text-sm">LAST GRADE COMPLETED</label>
+        <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
+          <option value="" disabled selected hidden>Select grade</option>
+          <option value="Pre KG">Pre KG</option>
+          <option value="KG">KG</option>
+          ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
+      </div>
 
       <div class="col-span-8">
         <label class="text-sm">PROGRAM</label>
@@ -893,43 +877,21 @@ function addStudent(prefill){
 
 
     function removeStudent(){ if(studentCount===0) return; const el=document.getElementById(`student-${studentCount}`); if(el) el.remove(); studentCount-- }
-    initLastGradeDropdown(document.getElementById(`s_${id}_lastgrade`));
-
 
     // start with 1 student by default
     addStudent()
 // Helper functions to toggle the "Other" fields
 
-/* initialize Select2 dropdown for last grade completed */
-function initLastGradeDropdown(el) {
-  const $el = $(el);
-
-  const idMatch = ($el.attr('id') || '').match(/^s_(\d+)_lastgrade$/);
-  if (!idMatch) return;
-  const studentId = idMatch[1];
-
-  if ($el.data('select2')) {
-    try { $el.select2('destroy'); } catch (e) {}
+function toggleOtherGrade(id){
+  const sel = document.getElementById(`s_${id}_lastgrade`);
+  const spec = document.getElementById(`s_${id}_lastgrade_spec`);
+  if(sel.value === 'Other'){
+    spec.classList.remove('hidden');
+  } else {
+    spec.classList.add('hidden');
+    spec.value = '';
   }
-
-  $el.select2({
-    dropdownParent: $(document.body),
-    width: '100%',
-    placeholder: 'Select grade',
-    allowClear: true
-  });
-
-  $el.off('.lastgrade').on('change.lastgrade', function() {
-    const val = $(this).val();
-    const $otherInput = $(`#s_${studentId}_lastgrade_spec`);
-    if (val === 'Other') {
-      $otherInput.removeClass('hidden');
-    } else {
-      $otherInput.addClass('hidden').val('');
-    }
-  });
 }
-
 
 function toggleProgramDropdown(id){
   const radios = document.getElementsByName(`s_${id}_progType`);

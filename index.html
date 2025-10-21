@@ -795,15 +795,22 @@ function addStudent(prefill){
 
     <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
     <div class="grid grid-cols-12 gap-4 mt-4">
-      <div class="col-span-4">
+     <div class="col-span-4 overflow-visible">
+
         <label class="text-sm">LAST GRADE COMPLETED</label>
-        <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
-          <option value="" disabled selected hidden>Select grade</option>
-          <option value="Pre KG">Pre KG</option>
-          <option value="KG">KG</option>
-          ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
-          <option value="Other">Other</option>
-        </select>
+<select
+  id="s_${id}_lastgrade"
+  class="w-full border rounded p-2 mt-1 relative z-50"
+  style="position: relative; z-index: 9999; overflow: visible;"
+  onchange="toggleOtherGrade(${id})"
+>
+  <option value="" disabled selected hidden>Select grade</option>
+  <option value="Pre KG">Pre KG</option>
+  <option value="KG">KG</option>
+  ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+  <option value="Other">Other</option>
+</select>
+
         <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
       </div>
 

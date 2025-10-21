@@ -1172,11 +1172,29 @@ for (let i = 1; i <= studentCount; i++) {
     const y = document.querySelector(`input[name='s_${i}_year']:checked`);
     return y ? y.value : '';
   })();
-  const prog = (() => {
-    const p = document.querySelector(`input[name='s_${i}_prog']:checked`);
-    return p ? p.value : '';
-  })();
-  const progSpec = document.getElementById(`s_${i}_prog_spec`)?.value || '';
+// --- Collect program info properly ---
+const progType = document.querySelector(`input[name='s_${i}_progType']:checked`)?.value || '';
+const specialProg = document.getElementById(`s_${i}_prog_dropdown`)?.value || '';
+const progSpec = document.getElementById(`s_${i}_prog_spec`)?.value || '';
+
+let finalProgram = '';
+if (progType === 'Regular') {
+  finalProgram = 'Regular';
+} else if (progType === 'Special') {
+  if (specialProg === 'Other') {
+    finalProgram = `Special - ${progSpec || 'Other'}`;
+  } else if (specialProg) {
+    finalProgram = `Special - ${specialProg}`;
+  } else {
+    finalProgram = 'Special';
+  }
+}
+
+
+
+
+
+  
 
   // Only add non-empty rows
   if (surname || given || birth || last) {
@@ -1193,9 +1211,10 @@ for (let i = 1; i <= studentCount; i++) {
         <td class="p-2 text-center" style="border:1px solid #000;">
           ${year === 'ThisYear' ? 'This year' : (year === 'NextYear' ? 'Next year' : '')}
         </td>
-        <td class="p-2 text-center" style="border:1px solid #000;">
-          ${prog === 'Yes' ? 'Yes — ' + escapeHtml(progSpec) : (prog === 'No' ? 'No' : '')}
-        </td>
+       <td class="p-2 text-center" style="border:1px solid #000;">
+  ${escapeHtml(finalProgram)}
+</td>
+
       </tr>`;
   }
 }

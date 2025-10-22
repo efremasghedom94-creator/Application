@@ -1293,11 +1293,6 @@ tbl.appendChild(studentCell);
 const limited = getRadioValue('limitedProfile');
 const limitedDetails = escapeHtml(document.getElementById('limitedProfileDetails')?.value || '');
 
-// Choose color intensity for the instruction text
-// - Full black when "Yes"
-// - Dull gray when "No" or not selected
-const instructColor = limited === 'Yes' ? '#000' : '#666';
-
 // Create full-width independent row
 const trLimited = document.createElement('tr');
 const tdLimited = document.createElement('td');
@@ -1305,41 +1300,34 @@ tdLimited.colSpan = 5;
 tdLimited.style.border = '1px solid #000';
 tdLimited.style.padding = '8px';
 
-// Inline structure: Title + Yes/No + instruction (colored)
+// Build display: show title + checkboxes, and only show details if "Yes"
 tdLimited.innerHTML = `
-  <div class="no-wrap-block">
-    <div style="font-weight:600; margin-bottom:6px;">
-      POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
-    </div>
-    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
-      <div>
-        ${checkboxMark(limited === 'Yes')} Yes&nbsp;&nbsp;
-        ${checkboxMark(limited === 'No')} No
-      </div>
-      <div style="font-size:0.9em; color:${instructColor}; line-height:1.4;">
-        If YES, describe for each student, Grade 1–Grade 12, as relevant. 
-        Number of years as refugees, country of relocation, refugee camp name, 
-        nature of schooling, parent country of origin.
-      </div>
-    </div>
-    ${
-      limitedDetails
-        ? `<div style="
-            margin-top:6px; 
-            font-size:1em; 
-            color:#000; 
-            margin-left:24px; 
-            line-height:1.5;
-          ">
-            ${limitedDetails}
-          </div>`
-        : ''
-    }
+  <div style="font-weight:600; margin-bottom:6px;">
+    POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
   </div>
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:${limited === 'Yes' && limitedDetails ? '6px' : '0'};">
+    <div>${checkboxMark(limited === 'Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited === 'No')} No</div>
+  </div>
+  ${
+    limited === 'Yes' && limitedDetails
+      ? `<div style="
+          font-size:1em; 
+          color:#000; 
+          margin-left:24px; 
+          line-height:1.5;
+          white-space:normal;
+          word-wrap:break-word;
+          overflow-wrap:anywhere;
+        ">
+          ${limitedDetails}
+        </div>`
+      : ''
+  }
 `;
 
 trLimited.appendChild(tdLimited);
 tbl.appendChild(trLimited);
+
 
       
 

@@ -52,18 +52,26 @@
   </style>
 
 <style>
-  /* --- Text wrapping and overflow fix for the yellow form --- */
+  /* Wrapping fix for dynamic cells */
   table.yellow-table td div {
     white-space: normal !important;
     word-wrap: break-word !important;
     overflow-wrap: anywhere !important;
-    max-width: 220px; /* adjust as needed for your layout */
+    max-width: 220px;
+  }
+
+  /* Exclude this block so it keeps its original inline layout */
+  .no-wrap-block div {
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
   }
 
   table.yellow-table td {
     vertical-align: top !important;
   }
 </style>
+
 
 
   
@@ -1297,33 +1305,35 @@ tdLimited.style.padding = '8px';
 
 // Inline structure: Title + Yes/No + instruction (colored)
 tdLimited.innerHTML = `
-  <div style="font-weight:600; margin-bottom:6px;">
-    POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
-  </div>
-  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
-    <div>
-      ${checkboxMark(limited === 'Yes')} Yes&nbsp;&nbsp;
-      ${checkboxMark(limited === 'No')} No
+  <div class="no-wrap-block">
+    <div style="font-weight:600; margin-bottom:6px;">
+      POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
     </div>
-    <div style="font-size:0.9em; color:${instructColor}; line-height:1.4;">
-      If YES, describe for each student, Grade 1–Grade 12, as relevant. 
-      Number of years as refugees, country of relocation, refugee camp name, 
-      nature of schooling, parent country of origin.
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
+      <div>
+        ${checkboxMark(limited === 'Yes')} Yes&nbsp;&nbsp;
+        ${checkboxMark(limited === 'No')} No
+      </div>
+      <div style="font-size:0.9em; color:${instructColor}; line-height:1.4;">
+        If YES, describe for each student, Grade 1–Grade 12, as relevant. 
+        Number of years as refugees, country of relocation, refugee camp name, 
+        nature of schooling, parent country of origin.
+      </div>
     </div>
+    ${
+      limitedDetails
+        ? `<div style="
+            margin-top:6px; 
+            font-size:1em; 
+            color:#000; 
+            margin-left:24px; 
+            line-height:1.5;
+          ">
+            ${limitedDetails}
+          </div>`
+        : ''
+    }
   </div>
-  ${
-    limitedDetails
-      ? `<div style="
-          margin-top:6px; 
-          font-size:1em; 
-          color:#000; 
-          margin-left:24px; 
-          line-height:1.5;
-        ">
-          ${limitedDetails}
-        </div>`
-      : ''
-  }
 `;
 
 trLimited.appendChild(tdLimited);

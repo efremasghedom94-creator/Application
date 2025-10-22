@@ -52,7 +52,7 @@
   </style>
 
 <style>
-  /* Wrapping fix for dynamic cells */
+  /* Wrapping fix for dynamic cells (applies to all unless excluded) */
   table.yellow-table td div {
     white-space: normal !important;
     word-wrap: break-word !important;
@@ -60,16 +60,18 @@
     max-width: 220px;
   }
 
-  /* Exclude this block so it keeps its original inline layout */
-  .no-wrap-block div {
+  /* Exclude specific "constant" sections from wrapping */
+  table.yellow-table td .no-wrap-block div {
     white-space: nowrap !important;
     word-wrap: normal !important;
     overflow-wrap: normal !important;
+    max-width: none !important;
   }
 
   table.yellow-table td {
     vertical-align: top !important;
   }
+
 </style>
 
 

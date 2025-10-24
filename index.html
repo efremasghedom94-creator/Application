@@ -552,8 +552,8 @@
 </section>
 
 <!-- Tom Select (searchable dropdown) -->
-<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
 <script>
   // --- Postal code formatting ---
@@ -571,27 +571,25 @@
 
   // --- Phone formatting ---
   function formatPhone(input) {
-    let value = input.value.replace(/\D/g, '');
-    if (value.length > 3 && value.length <= 6) {
-      input.value = `(${value.slice(0,3)}) ${value.slice(3)}`;
-    } else if (value.length > 6) {
-      input.value = `(${value.slice(0,3)}) ${value.slice(3,6)}-${value.slice(6,10)}`;
-    } else {
-      input.value = value;
-    }
+    let digits = input.value.replace(/\D/g, '').substring(0, 10);
+    let formatted = '';
+    if (digits.length > 0) formatted = '(' + digits.substring(0, 3);
+    if (digits.length >= 4) formatted += ') ' + digits.substring(3, 6);
+    if (digits.length >= 7) formatted += '-' + digits.substring(6, 10);
+    input.value = formatted;
   }
 
-  // --- Load full language list (ISO 639-3) ---
+  // --- Load full ISO 639-3 language list ---
   document.addEventListener('DOMContentLoaded', async () => {
     const selectElement = document.getElementById('homeLang');
-
     try {
-      const response = await fetch('https://cdn.jsdelivr.net/npm/iso-639-language-codes@2.1.0/dist/languages.json');
+      // Use a stable JSON source that returns a simple array of names
+      const response = await fetch('https://raw.githubusercontent.com/niklauzz/language-list-json/main/languages.json');
       const data = await response.json();
 
-      const options = Object.values(data).map(lang => ({
+      const options = data.map(lang => ({
         value: lang.name,
-        text: `${lang.name}${lang.nativeName ? ' (' + lang.nativeName + ')' : ''}`
+        text: lang.name
       }));
 
       new TomSelect(selectElement, {
@@ -608,49 +606,6 @@
   });
 </script>
 
-
-<script>
-  function formatPhone(input) {
-    // Strip out all non-digit characters
-    let digits = input.value.replace(/\D/g, '');
-
-    // Limit to 10 digits max
-    digits = digits.substring(0, 10);
-
-    // Build formatted string
-    let formatted = '';
-    if (digits.length > 0) {
-      formatted = '(' + digits.substring(0, 3);
-    }
-    if (digits.length >= 4) {
-      formatted += ') ' + digits.substring(3, 6);
-    }
-    if (digits.length >= 7) {
-      formatted += '-' + digits.substring(6, 10);
-    }
-
-    input.value = formatted;
-  }
-</script>
-
-      
-   <!-- PAGE 5 Students (dynamic add) -->
-      <section class="page hidden" data-step="5">
-        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
-        <div id="studentsContainer" class="space-y-4">
-          <!-- template inserted by JS -->
-        </div>
-        <div class="flex items-center gap-3 mt-3">
-          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
-          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
-        </div>
-
-<div class="nav-buttons">
-  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
-  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
-</div>
-
-      </section>
 
 
 <!-- PAGE 6 Schooling profile & notes -->

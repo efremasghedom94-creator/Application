@@ -1236,26 +1236,27 @@ tbl.appendChild(trAddress);
 
 
 
-      // Row 5: Family Phone # / Home Language / Catholic
+// --- Catholic Section Inline ---
 const cath = (() => {
   const selected = getRadioValue('catholic'); // 'Yes', 'No', or ''
   const inputText = escapeHtml(document.getElementById('religionOther').value.trim());
-  
-  // Determine the label dynamically
+
+  // Determine label dynamically
   const label = selected === 'Yes' ? 'Additional Note' : 'Other Religion';
-  
+
   // Build inline display
   let result = `
     ${checkboxMark(selected === 'Yes')} Yes&nbsp;&nbsp;
     ${checkboxMark(selected === 'No')} No
   `;
-  
+
   if (inputText) {
-    result += `&nbsp;&nbsp;<strong>${label}:</strong> ${inputText}`;
+    result += `&nbsp;&nbsp;${label}: ${inputText}`;
   }
 
   return result;
 })();
+
 
 
 

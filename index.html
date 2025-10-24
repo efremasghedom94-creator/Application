@@ -1238,10 +1238,13 @@ tbl.appendChild(trAddress);
 
       // Row 5: Family Phone # / Home Language / Catholic
 const cath = (() => {
-  const c = getRadioValue('catholic');
-  return c
-    ? checkboxMark(c === 'Yes') + ' Yes   ' + checkboxMark(c === 'No') + ' No'
-    : '';
+  const selected = getRadioValue('catholic'); // returns 'Yes', 'No', or ''
+  const yesChecked = selected === 'Yes';
+  const noChecked = selected === 'No';
+  return (
+    checkboxMark(yesChecked) + ' Yes&nbsp;&nbsp;&nbsp;' +
+    checkboxMark(noChecked) + ' No'
+  );
 })();
 
 

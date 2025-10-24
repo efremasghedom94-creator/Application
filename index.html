@@ -607,7 +607,7 @@
       select.appendChild(opt);
     });
 
-  // Initialize Tom Select
+ // Initialize Tom Select
 new TomSelect(select, {
   placeholder: "Select or type multiple languages...",
   maxOptions: 500,
@@ -619,11 +619,9 @@ new TomSelect(select, {
     return function(item) {
       return regex.test(item.text) ? 1 : 0;
     };
-  },
-  onItemAdd: function(value, item) {
-    this.clearSearch(); // <-- clears the input after selecting/adding a language
   }
 });
+
 
 </script>
 

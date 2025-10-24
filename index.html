@@ -800,6 +800,16 @@
 </div>
 
 
+<!-- Custom confirmation popup (initially hidden) -->
+<div id="confirmPopup" class="hidden mt-2 flex justify-center">
+  <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 rounded shadow-md max-w-sm text-center">
+    <p class="font-medium mb-2">Are you sure you want to start a new form?<br>All current data will be lost.</p>
+    <div class="flex justify-center gap-3">
+      <button id="confirmYes" class="px-3 py-1 bg-red-600 text-white rounded">Yes</button>
+      <button id="confirmNo" class="px-3 py-1 bg-gray-400 text-white rounded">No</button>
+    </div>
+  </div>
+</div>
 
 
 
@@ -1488,9 +1498,21 @@ tbl.appendChild(trNotes);
         document.getElementById('finalWrap').classList.add('hidden')
         window.scrollTo({top:0,behavior:'smooth'})
       }
-      // --- start new form button ---
-document.getElementById('newFormBtn').onclick = () => {
-  if (!confirm('Are you sure you want to start a new form? All current data will be lost.')) return;
+
+
+      // --- Custom colorful "Start New Form" confirmation ---
+const newFormBtn = document.getElementById('newFormBtn');
+const confirmPopup = document.getElementById('confirmPopup');
+const confirmYes = document.getElementById('confirmYes');
+const confirmNo = document.getElementById('confirmNo');
+
+newFormBtn.onclick = () => {
+  confirmPopup.classList.toggle('hidden');
+  window.scrollTo({ top: newFormBtn.offsetTop - 100, behavior: 'smooth' });
+};
+
+confirmYes.onclick = () => {
+  confirmPopup.classList.add('hidden');
 
   // Reset all form fields
   document.querySelectorAll('input, textarea, select').forEach(el => {
@@ -1521,6 +1543,11 @@ document.getElementById('newFormBtn').onclick = () => {
   goTo(1);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
+confirmNo.onclick = () => {
+  confirmPopup.classList.add('hidden');
+};
+
 
 
 // --- Share as PDF (silent, clean version) ---

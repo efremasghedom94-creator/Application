@@ -795,16 +795,10 @@
   <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
   <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
   <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
-  <div class="relative">
-    <button id="shareBtn" class="px-4 py-2 bg-indigo-600 text-white rounded">Share</button>
-    <div id="shareMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50">
-      <button id="shareOutlook" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Share via Outlook</button>
-      <button id="shareTeams" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Share via Teams</button>
-      <button id="shareOther" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Other...</button>
-    </div>
-  </div>
+  <button id="shareBtn" class="px-4 py-2 bg-indigo-600 text-white rounded">Share</button>
   <button id="newFormBtn" class="px-4 py-2 bg-red-600 text-white rounded">Start New Form</button>
 </div>
+
 
 
 
@@ -1528,72 +1522,74 @@ document.getElementById('newFormBtn').onclick = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// --- Share menu logic ---
-const shareBtn = document.getElementById('shareBtn');
-const shareMenu = document.getElementById('shareMenu');
+// --- Share as PDF logic ---
+document.getElementById('shareBtn').onclick = async () => {
+  const element = document.getElementById('finalArea');
+  if (!element) {
+    console.error('Final form area not found!');
+    return;
+  }
 
-const shareTitle = 'One World One Centre Student Intake Form';
-const shareText = 'Here is the student intake form I filled out.';
-const shareUrl = window.location.href;
+  // Show loading toast
+  showToast('Preparing PDF for sharing...');
 
-// Toggle dropdown menu
-shareBtn.onclick = (e) => {
-  e.stopPropagation();
-  shareMenu.classList.toggle('hidden');
-};
+  // Convert to PDF Blob
+  const opt = {
+    margin: 0.5,
+    filename: 'OneWorld_IntakeForm.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+  };
 
-// Hide menu when clicking outside
-document.addEventListener('click', () => shareMenu.classList.add('hidden'));
+  try {
+    const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
 
-// --- Outlook ---
-document.getElementById('shareOutlook').onclick = () => {
-  const subject = encodeURIComponent(shareTitle);
-  const body = encodeURIComponent(`${shareText}\n\n${shareUrl}`);
-  window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
-  shareMenu.classList.add('hidden');
-};
+    // Create a file for sharing
+    const pdfFile = new File([pdfBlob], 'OneWorld_IntakeForm.pdf', { type: 'application/pdf' });
 
-// --- Teams ---
-document.getElementById('shareTeams').onclick = () => {
-  const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareTitle)}`;
-  window.open(teamsUrl, '_blank');
-  shareMenu.classList.add('hidden');
-};
-
-// --- Other (uses Web Share or copy to clipboard) ---
-document.getElementById('shareOther').onclick = async () => {
-  shareMenu.classList.add('hidden');
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-    } catch (err) {
-      console.warn('Share canceled or failed:', err);
+    // Check for native share support
+    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      await navigator.share({
+        title: 'Student Intake Form',
+        text: 'Please find attached the One World One Centre Student Intake Form.',
+        files: [pdfFile],
+      });
+      showToast('PDF shared successfully!');
+    } else {
+      // Fallback: automatically download if share not supported
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'OneWorld_IntakeForm.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('PDF downloaded — share it manually.');
     }
-  } else {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      showToast('Link copied to clipboard!');
-    } catch {
-      showToast('Could not copy link. Please copy manually.');
-    }
+  } catch (err) {
+    console.error('Error sharing PDF:', err);
+    showToast('Error preparing or sharing PDF.');
   }
 };
 
-// --- Small toast message ---
+// --- Toast utility ---
 function showToast(msg) {
   const toast = document.createElement('div');
   toast.textContent = msg;
-  toast.style.position = 'fixed';
-  toast.style.bottom = '20px';
-  toast.style.left = '50%';
-  toast.style.transform = 'translateX(-50%)';
-  toast.style.background = '#C7631C'; // matches your form’s accent color
-  toast.style.color = 'white';
-  toast.style.padding = '10px 16px';
-  toast.style.borderRadius = '8px';
-  toast.style.fontSize = '14px';
-  toast.style.opacity = '0';
-  toast.style.transition = 'opacity 0.3s';
+  Object.assign(toast.style, {
+    position: 'fixed',
+    bottom: '20px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: '#C7631C',
+    color: 'white',
+    padding: '10px 16px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    opacity: '0',
+    transition: 'opacity 0.3s',
+    zIndex: '9999',
+  });
   document.body.appendChild(toast);
   requestAnimationFrame(() => (toast.style.opacity = '1'));
   setTimeout(() => {
@@ -1601,6 +1597,7 @@ function showToast(msg) {
     setTimeout(() => toast.remove(), 600);
   }, 2500);
 }
+
 
 
 

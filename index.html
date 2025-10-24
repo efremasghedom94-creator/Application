@@ -1238,15 +1238,32 @@ const cath = (() => {
     : '';
 })();
 
-// Collect all home language inputs (handles multiple)
-// Make sure every dynamic language input has class="homeLangInput"
-// Collect all selected home languages from Tom Select <select multiple>
+
+      
+// --- Collect all selected home languages (Tom Select compatible) ---
+let homeLangs = '';
+
 const homeLangSelect = document.getElementById('homeLang');
-let homeLangs = Array.from(homeLangSelect.selectedOptions)
-  .map(opt => opt.value.trim())
-  .filter(v => v !== '') // ignore empty
-  .join(', ');           // separate multiple languages by comma
-homeLangs = homeLangs || ''; // fallback if empty
+
+// Try to get Tom Select instance first
+if (homeLangSelect.tomselect) {
+  // This gives an array of selected values (including custom entries)
+  homeLangs = homeLangSelect.tomselect.getValue();
+  
+  // Convert to comma-separated string
+  if (Array.isArray(homeLangs)) {
+    homeLangs = homeLangs.join(', ');
+  }
+} else {
+  // Fallback if Tom Select isn't active
+  homeLangs = Array.from(homeLangSelect.selectedOptions)
+    .map(opt => opt.value.trim())
+    .filter(v => v !== '')
+    .join(', ');
+}
+
+// Safety fallback
+homeLangs = homeLangs || '';
 
 
 

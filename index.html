@@ -1238,14 +1238,23 @@ tbl.appendChild(trAddress);
 
       // Row 5: Family Phone # / Home Language / Catholic
 const cath = (() => {
-  const selected = getRadioValue('catholic'); // returns 'Yes', 'No', or ''
+  const selected = getRadioValue('catholic'); // 'Yes', 'No', or ''
+  const otherReligion = escapeHtml(document.getElementById('religionOther').value.trim());
   const yesChecked = selected === 'Yes';
   const noChecked = selected === 'No';
-  return (
+  
+  let result =
     checkboxMark(yesChecked) + ' Yes&nbsp;&nbsp;&nbsp;' +
-    checkboxMark(noChecked) + ' No'
-  );
+    checkboxMark(noChecked) + ' No';
+
+  // If "No" or nothing is selected and user typed something in "Other religion"
+  if (!yesChecked && otherReligion) {
+    result += `<br><strong>Other religion:</strong> ${otherReligion}`;
+  }
+
+  return result;
 })();
+
 
 
       

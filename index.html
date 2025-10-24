@@ -1495,140 +1495,132 @@ tbl.appendChild(trNotes);
 
       final.appendChild(tbl)
 
-      // show final and hide wizard
-      document.getElementById('wizardRoot').classList.add('hidden')
-      document.getElementById('finalWrap').classList.remove('hidden')
-
-      // pdf button logic
-      document.getElementById('pdfBtn').onclick = ()=>{
-        const opt = { margin:0.2, filename:'one-world-one-centre-intake.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'} }
-        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
-      }
-
-      // edit/back button
-      document.getElementById('editBtn').onclick = ()=>{
-        document.getElementById('wizardRoot').classList.remove('hidden')
-        document.getElementById('finalWrap').classList.add('hidden')
-        window.scrollTo({top:0,behavior:'smooth'})
-      }
-
-
  <script>
+  // --- Show final and hide wizard ---
+  document.getElementById('wizardRoot').classList.add('hidden');
+  document.getElementById('finalWrap').classList.remove('hidden');
 
-
-        
-// --- Custom colorful "Start New Form" confirmation ---
-const newFormBtn = document.getElementById('newFormBtn');
-const confirmPopup = document.getElementById('confirmPopup');
-const confirmYes = document.getElementById('confirmYes');
-const confirmNo = document.getElementById('confirmNo');
-
-newFormBtn.onclick = () => {
-  // Toggle popup visibility
-  confirmPopup.classList.toggle('hidden');
-
-  // Scroll to make sure popup is visible
-  window.scrollTo({ 
-    top: newFormBtn.offsetTop - 150, 
-    behavior: 'smooth' 
-  });
-};
-
-confirmYes.onclick = () => {
-  confirmPopup.classList.add('hidden');
-
-  // Reset all form fields
-  document.querySelectorAll('input, textarea, select').forEach(el => {
-    if (el.type === 'radio' || el.type === 'checkbox') {
-      el.checked = false;
-    } else if (el.tagName.toLowerCase() === 'select') {
-      el.selectedIndex = 0;
-    } else {
-      el.value = '';
-    }
-  });
-
-  // Reset Tom Select if active
-  const homeLangSelect = document.getElementById('homeLang');
-  if (homeLangSelect?.tomselect) {
-    homeLangSelect.tomselect.clear();
-  }
-
-  // Reset student list to one blank entry
-  const container = document.getElementById('studentsContainer');
-  container.innerHTML = '';
-  studentCount = 0;
-  addStudent();
-
-  // Return to first page
-  document.getElementById('wizardRoot').classList.remove('hidden');
-  document.getElementById('finalWrap').classList.add('hidden');
-  goTo(1);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-confirmNo.onclick = () => {
-  confirmPopup.classList.add('hidden');
-};
-};
-
-
-
-
-
-// --- Share as PDF (silent, clean version) ---
-document.getElementById('shareBtn').onclick = async () => {
-  const element = document.getElementById('finalArea');
-  if (!element) return;
-
-  const shareBtn = document.getElementById('shareBtn');
-  shareBtn.disabled = true;
-  shareBtn.textContent = 'Preparing...';
-
-  const opt = {
-    margin: 0.5,
-    filename: 'OneWorld_IntakeForm.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+  // --- PDF button logic ---
+  document.getElementById('pdfBtn').onclick = () => {
+    const opt = {
+      margin: 0.2,
+      filename: 'one-world-one-centre-intake.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(document.getElementById('finalArea')).save();
   };
 
-  try {
-    const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
-    const pdfFile = new File([pdfBlob], 'OneWorld_IntakeForm.pdf', { type: 'application/pdf' });
+  // --- Edit/back button ---
+  document.getElementById('editBtn').onclick = () => {
+    document.getElementById('wizardRoot').classList.remove('hidden');
+    document.getElementById('finalWrap').classList.add('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    // Try native sharing first
-    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-      await navigator.share({
-        title: 'Student Intake Form',
-        text: 'Please find attached the One World One Centre Student Intake Form.',
-        files: [pdfFile],
-      });
-    } else {
-      // Fallback: download automatically
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'OneWorld_IntakeForm.pdf';
-      link.click();
-      URL.revokeObjectURL(url);
+  // --- Custom colorful "Start New Form" confirmation ---
+  const newFormBtn = document.getElementById('newFormBtn');
+  const confirmPopup = document.getElementById('confirmPopup');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+
+  newFormBtn.onclick = () => {
+    // Toggle popup visibility
+    confirmPopup.classList.toggle('hidden');
+
+    // Scroll to make sure popup is visible
+    window.scrollTo({
+      top: newFormBtn.offsetTop - 150,
+      behavior: 'smooth'
+    });
+  };
+
+  confirmYes.onclick = () => {
+    confirmPopup.classList.add('hidden');
+
+    // Reset all form fields
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+      if (el.type === 'radio' || el.type === 'checkbox') {
+        el.checked = false;
+      } else if (el.tagName.toLowerCase() === 'select') {
+        el.selectedIndex = 0;
+      } else {
+        el.value = '';
+      }
+    });
+
+    // Reset Tom Select if active
+    const homeLangSelect = document.getElementById('homeLang');
+    if (homeLangSelect?.tomselect) {
+      homeLangSelect.tomselect.clear();
     }
-  } catch (err) {
-    console.error('Error sharing PDF:', err);
-  } finally {
-    shareBtn.disabled = false;
-    shareBtn.textContent = 'Share';
-  }
-};
 
+    // Reset student list to one blank entry
+    const container = document.getElementById('studentsContainer');
+    container.innerHTML = '';
+    studentCount = 0;
+    addStudent();
 
+    // Return to first page
+    document.getElementById('wizardRoot').classList.remove('hidden');
+    document.getElementById('finalWrap').classList.add('hidden');
+    goTo(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
+  confirmNo.onclick = () => {
+    confirmPopup.classList.add('hidden');
+  };
 
+  // --- Share as PDF (silent, clean version) ---
+  document.getElementById('shareBtn').onclick = async () => {
+    const element = document.getElementById('finalArea');
+    if (!element) return;
+
+    const shareBtn = document.getElementById('shareBtn');
+    shareBtn.disabled = true;
+    shareBtn.textContent = 'Preparing...';
+
+    const opt = {
+      margin: 0.5,
+      filename: 'OneWorld_IntakeForm.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
+      const pdfFile = new File([pdfBlob], 'OneWorld_IntakeForm.pdf', { type: 'application/pdf' });
+
+      // Try native sharing first
+      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        await navigator.share({
+          title: 'Student Intake Form',
+          text: 'Please find attached the One World One Centre Student Intake Form.',
+          files: [pdfFile]
+        });
+      } else {
+        // Fallback: download automatically
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'OneWorld_IntakeForm.pdf';
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error('Error sharing PDF:', err);
+    } finally {
+      shareBtn.disabled = false;
+      shareBtn.textContent = 'Share';
     }
+  };
 
-    // Expose generate function for the button and ensure print button works (print uses browser)
-    window.generateFinal = generateFinal
+  // Expose generate function for the button and ensure print button works (print uses browser)
+  window.generateFinal = generateFinal;
+</script>
 
-  </script>
 </body>
 </html>

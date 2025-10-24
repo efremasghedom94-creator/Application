@@ -787,6 +787,7 @@
         <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
         <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
         <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
+        <button id="newFormBtn" class="px-4 py-2 bg-red-700 text-white rounded">Start New Form</button>
 
       </div>
     </div>
@@ -1201,12 +1202,6 @@ trParents.innerHTML = `
 tbl.appendChild(trParents);
 
 
-      
-
-
-
-
-
 // ====== ADDRESS SECTION ======
 
 // Row 4: Apartment # / Family Address / Postal Code
@@ -1233,10 +1228,6 @@ trAddress.innerHTML = `
 `;
 tbl.appendChild(trAddress);
 
-
-
-
-
 // --- Catholic Section with text below ---
 const cath = (() => {
   const selected = getRadioValue('catholic'); // 'Yes', 'No', or ''
@@ -1257,12 +1248,6 @@ const cath = (() => {
 
   return result;
 })();
-
-
-
-
-
-
 
       
 // --- Collect all selected home languages (Tom Select compatible) ---
@@ -1290,8 +1275,6 @@ if (homeLangSelect.tomselect) {
 // Safety fallback
 homeLangs = homeLangs || '';
 
-
-
 // Now generate the table
 const trContactInfo = document.createElement('tr');
 trContactInfo.innerHTML = `
@@ -1315,23 +1298,6 @@ trContactInfo.innerHTML = `
   </td>
 `;
 tbl.appendChild(trContactInfo);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // === ROW 6: Student Details (Independent Full-Width Stretch) ===
 
@@ -1376,7 +1342,6 @@ for (let i = 1; i <= studentCount; i++) {
     return y ? y.value : '';
   })();
 // --- Collect program info properly ---
-// --- Collect program info properly ---
 const progType = document.querySelector(`input[name="s_${i}_progType"]:checked`)?.value || '';
 const dropdown = document.getElementById(`s_${i}_prog_dropdown`);
 const specialProg = dropdown && !dropdown.classList.contains('hidden') ? dropdown.value : '';
@@ -1399,12 +1364,6 @@ if (progType === 'Regular') {
 } else {
   finalProgram = ''; // if nothing selected
 }
-
-
-
-
-
-  
 
   // Only add non-empty rows
   if (surname || given || birth || last) {
@@ -1435,16 +1394,6 @@ studentTableHtml += `</table>`;
 studentCellInner.innerHTML = studentTableHtml;
 studentCell.appendChild(studentCellInner);
 tbl.appendChild(studentCell);
-
-
-
-
-
-
-
-      
-
-
 
 // === ROW 7: Potential Limited Formal Schooling Profile (Full-width Independent Row) ===
 
@@ -1484,13 +1433,6 @@ tdLimited.innerHTML = `
 trLimited.appendChild(tdLimited);
 tbl.appendChild(trLimited);
 
-
-      
-
-
-
-      
-
 // === ROW 8: Notes (Full-width Single Cell) ===
 const trNotes = document.createElement('tr');
 trNotes.innerHTML = `
@@ -1514,8 +1456,6 @@ trNotes.innerHTML = `
 tbl.appendChild(trNotes);
 
 
-   
-
       final.appendChild(tbl)
 
       // show final and hide wizard
@@ -1534,6 +1474,40 @@ tbl.appendChild(trNotes);
         document.getElementById('finalWrap').classList.add('hidden')
         window.scrollTo({top:0,behavior:'smooth'})
       }
+      // --- start new form button ---
+document.getElementById('newFormBtn').onclick = () => {
+  if (!confirm('Are you sure you want to start a new form? All current data will be lost.')) return;
+
+  // Reset all form fields
+  document.querySelectorAll('input, textarea, select').forEach(el => {
+    if (el.type === 'radio' || el.type === 'checkbox') {
+      el.checked = false;
+    } else if (el.tagName.toLowerCase() === 'select') {
+      el.selectedIndex = 0;
+    } else {
+      el.value = '';
+    }
+  });
+
+  // Reset Tom Select if active
+  const homeLangSelect = document.getElementById('homeLang');
+  if (homeLangSelect?.tomselect) {
+    homeLangSelect.tomselect.clear();
+  }
+
+  // Reset student list to one blank entry
+  const container = document.getElementById('studentsContainer');
+  container.innerHTML = '';
+  studentCount = 0;
+  addStudent();
+
+  // Return to first page
+  document.getElementById('wizardRoot').classList.remove('hidden');
+  document.getElementById('finalWrap').classList.add('hidden');
+  goTo(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
     }
 
     // Expose generate function for the button and ensure print button works (print uses browser)

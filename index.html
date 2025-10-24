@@ -607,46 +607,20 @@
       select.appendChild(opt);
     });
 
+// Initialize Tom Select
 new TomSelect(select, {
   placeholder: "Select or type multiple languages...",
   maxOptions: 500,
-  create: true,
+  create: true, // allow adding new custom entries
   persist: true,
-  plugins: ['remove_button'],
+  plugins: ['remove_button'], // show "x" to remove a selected language
   score: function(search) {
     const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     return function(item) {
       return regex.test(item.text) ? 1 : 0;
     };
-  },
-
-  // Called when an existing item is selected (added to the list)
-  onItemAdd: function(value, item) {
-    const self = this;
-    // small timeout to ensure Tom Select internal handlers finish first
-    setTimeout(() => {
-      // directly clear the visible textbox input(s)
-      if (self.control_input) { self.control_input.value = ''; }   // primary
-      if (self.input) { self.input.value = ''; }                  // fallback
-      // refresh & close to remove any lingering dropdown/options
-      try { self.refreshOptions(false); } catch(e) {}
-      try { self.close(); } catch(e) {}
-      // put focus back so user can type another quickly
-      try { if (self.control_input) self.control_input.focus(); } catch(e) {}
-    }, 0);
-  },
-
-  // Called when a new custom option is created (create: true)
-  onOptionAdd: function(value, data) {
-    const self = this;
-    setTimeout(() => {
-      if (self.control_input) { self.control_input.value = ''; }
-      if (self.input) { self.input.value = ''; }
-      try { self.refreshOptions(false); } catch(e) {}
-      try { self.close(); } catch(e) {}
-      try { if (self.control_input) self.control_input.focus(); } catch(e) {}
-    }, 0);
   }
+});
 });
 
 

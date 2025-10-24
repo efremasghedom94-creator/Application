@@ -607,21 +607,24 @@
       select.appendChild(opt);
     });
 
-    // Initialize Tom Select
-    new TomSelect(select, {
-      placeholder: "Select or type multiple languages...",
-      maxOptions: 500,
-      create: true, // allow adding new custom entries
-      persist: true,
-      plugins: ['remove_button'], // show "x" to remove a selected language
-      score: function(search) {
-        const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-        return function(item) {
-          return regex.test(item.text) ? 1 : 0;
-        };
-      }
-    });
-  });
+  // Initialize Tom Select
+new TomSelect(select, {
+  placeholder: "Select or type multiple languages...",
+  maxOptions: 500,
+  create: true, // allow adding new custom entries
+  persist: true,
+  plugins: ['remove_button'], // show "x" to remove a selected language
+  score: function(search) {
+    const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    return function(item) {
+      return regex.test(item.text) ? 1 : 0;
+    };
+  },
+  onItemAdd: function(value, item) {
+    this.clearSearch(); // <-- clears the input after selecting/adding a language
+  }
+});
+
 </script>
 
    <!-- PAGE 5 Students (dynamic add) -->

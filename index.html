@@ -1167,13 +1167,22 @@ trAddress.innerHTML = `
 tbl.appendChild(trAddress);
 
 
-// Row 5: Family Phone # / Home Language / Catholic
+
+
+      // Row 5: Family Phone # / Home Language / Catholic
 const cath = (() => {
   const c = getRadioValue('catholic');
   return c
     ? checkboxMark(c === 'Yes') + ' Yes   ' + checkboxMark(c === 'No') + ' No'
     : '';
 })();
+
+// Collect all home language inputs (handles multiple)
+const langInputs = document.querySelectorAll('#languageContainer input[type="text"]');
+const homeLangs = Array.from(langInputs)
+  .map(input => input.value.trim())
+  .filter(v => v !== '')
+  .join(', '); // or use '<br>' if you prefer line breaks instead of commas
 
 const trContactInfo = document.createElement('tr');
 trContactInfo.innerHTML = `
@@ -1186,7 +1195,7 @@ trContactInfo.innerHTML = `
         </td>
         <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
           <div class="font-semibold" style="margin-bottom:6px;">HOME LANGUAGE</div>
-          <div>${escapeHtml(document.getElementById('homeLang').value)}</div>
+          <div>${escapeHtml(homeLangs)}</div>
         </td>
         <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
           <div class="font-semibold" style="margin-bottom:6px;">CATHOLIC</div>

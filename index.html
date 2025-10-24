@@ -599,31 +599,88 @@
   document.addEventListener('DOMContentLoaded', () => {
     const select = document.getElementById('homeLang');
 
-    // Populate dropdown
-    languages.forEach(lang => {
-      const opt = document.createElement('option');
-      opt.value = lang;
-      opt.textContent = lang;
-      select.appendChild(opt);
-    });
+ languages.forEach(lang => {
+    const opt = document.createElement('option');
+    opt.value = lang;
+    opt.textContent = lang;
+    select.appendChild(opt);
+  });
 
-// Initialize Tom Select
-new TomSelect(select, {
-  placeholder: "Select or type multiple languages...",
-  maxOptions: 500,
-  create: true, // allow adding new custom entries
-  persist: true,
-  plugins: ['remove_button'], // show "x" to remove a selected language
-  score: function(search) {
-    const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    return function(item) {
-      return regex.test(item.text) ? 1 : 0;
-    };
+  // Initialize Tom Select and keep a reference
+  const ts = new TomSelect(select, {
+    placeholder: "Select or type multiple languages...",
+    maxOptions: 500,
+    create: true,
+    persist: true,
+    plugins: ['remove_button'],
+    score: function(search) {
+      const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      return function(item) {
+        return regex.test(item.text) ? 1 : 0;
+      };
+    },
+    // old-style callbacks (still useful)
+    onItemAdd: function(value, $item) {
+      safeClearAndClose(this);
+    },
+    onOptionAdd: function(value, data) {
+      safeClearAndClose(this);
+    }
+  });
+
+  // Robust helper that clears whatever input TomSelect has created,
+  // forces a refresh, closes dropdown, and returns focus to the control.
+  function safeClearAndClose(instance) {
+    // run on next tick so internal handlers finish first
+    setTimeout(() => {
+      try {
+        // 1) preferred API
+        if (typeof instance.setTextboxValue === 'function') {
+          try { instance.setTextboxValue(''); } catch(e) {}
+        }
+
+        // 2) direct internal references used across builds
+        if (instance.control_input) instance.control_input.value = '';
+        if (instance.input) instance.input.value = '';
+
+        // 3) find any visible textbox inside the TomSelect wrapper and clear it
+        try {
+          const wrapper = instance.wrapper || instance.control || instance.input && instance.input.parentNode;
+          if (wrapper) {
+            const textInput = wrapper.querySelector && (wrapper.querySelector('input[type="text"], input:not([type])'));
+            if (textInput) {
+              textInput.value = '';
+              // also update attribute in case some builds read it from attribute
+              textInput.setAttribute('value', '');
+            }
+          }
+        } catch(e) {}
+
+        // 4) refresh options, close dropdown, and focus
+        try { instance.refreshOptions(false); } catch(e) {}
+        try { instance.close(); } catch(e) {}
+        try {
+          // focus whichever input we found (priority: control_input, input, wrapper input)
+          if (instance.control_input) instance.control_input.focus();
+          else if (instance.input) instance.input.focus();
+          else {
+            const wrapper = instance.wrapper || instance.control || document.querySelector('.ts-control');
+            const textInput = wrapper && wrapper.querySelector && wrapper.querySelector('input[type="text"], input:not([type])');
+            if (textInput) textInput.focus();
+          }
+        } catch(e) {}
+      } catch (err) {
+        // silent fail — nothing critical, but do not throw
+        console.warn('safeClearAndClose error', err);
+      }
+    }, 0);
   }
-});
-});
 
-
+  // Extra safety: listen for native DOM 'change' events on the original <select>
+  // and clear the tomselect input as soon as selection changes (covers some edge-cases)
+  select.addEventListener('change', () => safeClearAndClose(ts));
+});
+</script>
 
 
 </script>

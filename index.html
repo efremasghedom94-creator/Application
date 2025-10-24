@@ -624,7 +624,23 @@
   });
 </script>
 
+   <!-- PAGE 5 Students (dynamic add) -->
+      <section class="page hidden" data-step="5">
+        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
+        <div id="studentsContainer" class="space-y-4">
+          <!-- template inserted by JS -->
+        </div>
+        <div class="flex items-center gap-3 mt-3">
+          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
+          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
+        </div>
 
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
+</div>
+
+      </section>
 
 
 <!-- PAGE 6 Schooling profile & notes -->

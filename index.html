@@ -482,9 +482,10 @@
 
       </section>
 
-<!-- PAGE 4 Address & family --> 
+<!-- PAGE 4 Address & family -->
 <section class="page hidden" data-step="4">
   <h2 class="font-medium mb-3">Page 4</h2>
+
   <div class="grid grid-cols-12 gap-3">
     <!-- Apartment -->
     <div class="col-span-2">
@@ -492,13 +493,13 @@
       <input id="apt" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
-    <!-- Family address -->
+    <!-- Family Address -->
     <div class="col-span-8">
       <label class="block text-sm">FAMILY ADDRESS</label>
       <input id="address" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
-    <!-- Postal code -->
+    <!-- Postal Code -->
     <div class="col-span-2">
       <label class="block text-sm">POSTAL CODE</label>
       <input 
@@ -510,7 +511,7 @@
       />
     </div>
 
-    <!-- Family phone -->
+    <!-- Family Phone -->
     <div class="col-span-2 mt-2">
       <label class="block text-sm">FAMILY PHONE #</label>
       <input 
@@ -523,13 +524,14 @@
       />
     </div>
 
-    <!-- Home language -->
+    <!-- Home Language Dropdown (multi + custom) -->
     <div class="col-span-6 mt-2">
-      <label class="block text-sm">HOME LANGUAGE</label>
-      <select id="homeLang" class="w-full border rounded p-2 mt-1"></select>
+      <label class="block text-sm">HOME LANGUAGE(S)</label>
+      <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
+      <p class="text-xs text-gray-600 mt-1">You may select or type more than one language.</p>
     </div>
 
-    <!-- Catholic section -->
+    <!-- Catholic Section -->
     <div class="col-span-12 mt-2">
       <label class="block text-sm">CATHOLIC</label>
       <div class="mt-1 flex items-center gap-6">
@@ -552,11 +554,11 @@
 </section>
 
 <!-- Tom Select (searchable dropdown) -->
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
 <script>
-  // --- Postal code formatting ---
+  // --- Postal Code Format ---
   function enforcePostalFormat(input) {
     let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     let formatted = '';
@@ -569,42 +571,59 @@
     input.value = formatted;
   }
 
-  // --- Phone formatting ---
+  // --- Phone Format ---
   function formatPhone(input) {
-    let digits = input.value.replace(/\D/g, '').substring(0, 10);
-    let formatted = '';
-    if (digits.length > 0) formatted = '(' + digits.substring(0, 3);
-    if (digits.length >= 4) formatted += ') ' + digits.substring(3, 6);
-    if (digits.length >= 7) formatted += '-' + digits.substring(6, 10);
-    input.value = formatted;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 3 && value.length <= 6) {
+      input.value = '(' + value.slice(0,3) + ') ' + value.slice(3);
+    } else if (value.length > 6) {
+      input.value = '(' + value.slice(0,3) + ') ' + value.slice(3,6) + '-' + value.slice(6,10);
+    } else {
+      input.value = value;
+    }
   }
 
-  // --- Load full ISO 639-3 language list ---
-  document.addEventListener('DOMContentLoaded', async () => {
-    const selectElement = document.getElementById('homeLang');
-    try {
-      // Use a stable JSON source that returns a simple array of names
-      const response = await fetch('https://raw.githubusercontent.com/niklauzz/language-list-json/main/languages.json');
-      const data = await response.json();
+  // --- Offline Language List (compact horizontal) ---
+  const languages = [
+    "English","Tigrinya","Amharic","Arabic","French","Spanish","Somali","Swahili","Hindi","Mandarin Chinese","Cantonese","Portuguese",
+    "Tagalog","Italian","German","Russian","Punjabi","Urdu","Bengali","Korean","Japanese","Vietnamese","Cree","Ojibwe","Inuktitut",
+    "Persian (Farsi)","Kurdish","Pashto","Ukrainian","Polish","Turkish","Greek","Tamil","Malayalam","Telugu","Gujarati","Thai",
+    "Indonesian","Malay","Burmese","Sinhalese","Nepali","Dari","Hebrew","Armenian","Albanian","Serbian","Croatian","Bosnian",
+    "Bulgarian","Romanian","Dutch","Swedish","Finnish","Norwegian","Danish","Czech","Slovak","Hungarian","Latvian","Lithuanian",
+    "Estonian","Haitian Creole","Afrikaans","Zulu","Xhosa","Shona","Twi","Ewe","Yoruba","Igbo","Hausa","Oromo","Tigré","Nuer",
+    "Dinka","Acholi","Somali Bantu","Khmer","Lao","Mongolian","Kazakh","Uzbek","Tajik","Azerbaijani","Georgian","Macedonian",
+    "Catalan","Basque","Galician","Samoan","Tongan","Fijian","Maori","Other"
+  ];
 
-      const options = data.map(lang => ({
-        value: lang.name,
-        text: lang.name
-      }));
+  // --- Initialize Tom Select with multi-select, custom entry, and anchored search ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('homeLang');
 
-      new TomSelect(selectElement, {
-        options: options,
-        searchField: ['text'],
-        placeholder: "Select or search a language…",
-        maxOptions: 1000,
-        sortField: { field: "text", direction: "asc" },
-        create: false
-      });
-    } catch (err) {
-      console.error('Error loading languages:', err);
-    }
+    // Populate dropdown
+    languages.forEach(lang => {
+      const opt = document.createElement('option');
+      opt.value = lang;
+      opt.textContent = lang;
+      select.appendChild(opt);
+    });
+
+    // Initialize Tom Select
+    new TomSelect(select, {
+      placeholder: "Select or type multiple languages...",
+      maxOptions: 500,
+      create: true, // allow adding new custom entries
+      persist: true,
+      plugins: ['remove_button'], // show "x" to remove a selected language
+      score: function(search) {
+        const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        return function(item) {
+          return regex.test(item.text) ? 1 : 0;
+        };
+      }
+    });
   });
 </script>
+
 
 
 

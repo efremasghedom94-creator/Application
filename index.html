@@ -1236,15 +1236,14 @@ tbl.appendChild(trAddress);
 
 
 
-// --- Catholic Section Inline ---
-// --- Catholic Section with text below ---
+
 // --- Catholic Section with text below ---
 const cath = (() => {
   const selected = getRadioValue('catholic'); // 'Yes', 'No', or ''
   const inputText = escapeHtml(document.getElementById('religionOther').value.trim());
 
   // Determine label dynamically
-  const label = selected === 'Yes' ? 'Additional Note' : 'Other Religion';
+  const label = selected === 'Yes' ? 'Additional Note' : 'Religion';
 
   // Build display
   let result = `

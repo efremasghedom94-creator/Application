@@ -1522,18 +1522,16 @@ document.getElementById('newFormBtn').onclick = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// --- Share as PDF logic ---
+
+// --- Share as PDF (silent, clean version) ---
 document.getElementById('shareBtn').onclick = async () => {
   const element = document.getElementById('finalArea');
-  if (!element) {
-    console.error('Final form area not found!');
-    return;
-  }
+  if (!element) return;
 
-  // Show loading toast
-  showToast('Preparing PDF for sharing...');
+  const shareBtn = document.getElementById('shareBtn');
+  shareBtn.disabled = true;
+  shareBtn.textContent = 'Preparing...';
 
-  // Convert to PDF Blob
   const opt = {
     margin: 0.5,
     filename: 'OneWorld_IntakeForm.pdf',
@@ -1544,59 +1542,31 @@ document.getElementById('shareBtn').onclick = async () => {
 
   try {
     const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
-
-    // Create a file for sharing
     const pdfFile = new File([pdfBlob], 'OneWorld_IntakeForm.pdf', { type: 'application/pdf' });
 
-    // Check for native share support
+    // Try native sharing first
     if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
       await navigator.share({
         title: 'Student Intake Form',
         text: 'Please find attached the One World One Centre Student Intake Form.',
         files: [pdfFile],
       });
-      showToast('PDF shared successfully!');
     } else {
-      // Fallback: automatically download if share not supported
+      // Fallback: download automatically
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
       link.download = 'OneWorld_IntakeForm.pdf';
       link.click();
       URL.revokeObjectURL(url);
-      showToast('PDF downloaded — share it manually.');
     }
   } catch (err) {
     console.error('Error sharing PDF:', err);
-    showToast('Error preparing or sharing PDF.');
+  } finally {
+    shareBtn.disabled = false;
+    shareBtn.textContent = 'Share';
   }
 };
-
-// --- Toast utility ---
-function showToast(msg) {
-  const toast = document.createElement('div');
-  toast.textContent = msg;
-  Object.assign(toast.style, {
-    position: 'fixed',
-    bottom: '20px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    background: '#C7631C',
-    color: 'white',
-    padding: '10px 16px',
-    borderRadius: '8px',
-    fontSize: '14px',
-    opacity: '0',
-    transition: 'opacity 0.3s',
-    zIndex: '9999',
-  });
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => (toast.style.opacity = '1'));
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    setTimeout(() => toast.remove(), 600);
-  }, 2500);
-}
 
 
 

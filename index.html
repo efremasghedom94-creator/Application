@@ -1237,6 +1237,7 @@ tbl.appendChild(trAddress);
 
 
 // --- Catholic Section Inline ---
+// --- Catholic Section with text below ---
 const cath = (() => {
   const selected = getRadioValue('catholic'); // 'Yes', 'No', or ''
   const inputText = escapeHtml(document.getElementById('religionOther').value.trim());
@@ -1244,18 +1245,19 @@ const cath = (() => {
   // Determine label dynamically
   const label = selected === 'Yes' ? 'Additional Note' : 'Other Religion';
 
-  // Build inline display
+  // Build display
   let result = `
     ${checkboxMark(selected === 'Yes')} Yes&nbsp;&nbsp;
     ${checkboxMark(selected === 'No')} No
   `;
 
   if (inputText) {
-    result += `&nbsp;&nbsp;${label}: ${inputText}`;
+    result += `<br>${label}: ${inputText}`; // typed text on new line
   }
 
   return result;
 })();
+
 
 
 

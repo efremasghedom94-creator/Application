@@ -787,6 +787,7 @@
         <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
         <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
         <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
+        <button id="shareBtn" class="px-4 py-2 bg-indigo-600 text-white rounded">Share</button>
         <button id="newFormBtn" class="px-4 py-2 bg-red-700 text-white rounded">Start New Form</button>
 
       </div>
@@ -1507,6 +1508,30 @@ document.getElementById('newFormBtn').onclick = () => {
   goTo(1);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
+      // --- share button ---
+document.getElementById('shareBtn').onclick = async () => {
+  const shareData = {
+    title: 'One World One Centre Student Intake Form',
+    text: 'Here is the student intake form I filled out.',
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      alert('Form shared successfully!');
+    } catch (err) {
+      console.error('Share canceled or failed:', err);
+    }
+  } else {
+    // fallback for browsers without Web Share API
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => alert('Link copied to clipboard!'))
+      .catch(() => alert('Could not copy link. Please copy manually.'));
+  }
+};
+
 
     }
 

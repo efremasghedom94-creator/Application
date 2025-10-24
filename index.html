@@ -1178,18 +1178,16 @@ const cath = (() => {
 })();
 
 // Collect all home language inputs (handles multiple)
-const langInputs = document.querySelectorAll('#languageContainer input[type="text"]');
+// Make sure every dynamic language input has class="homeLangInput"
+// Collect all selected home languages from Tom Select <select multiple>
+const homeLangSelect = document.getElementById('homeLang');
+let homeLangs = Array.from(homeLangSelect.selectedOptions)
+  .map(opt => opt.value.trim())
+  .filter(v => v !== '') // ignore empty
+  .join(', ');           // separate multiple languages by comma
+homeLangs = homeLangs || ''; // fallback if empty
 
-let homeLangs = '';
-if (langInputs.length > 0) {
-  homeLangs = Array.from(langInputs)
-    .map(input => input.value.trim())
-    .filter(v => v !== '') // ignore empty
-    .join(', ');           // or use '<br>' for line breaks
-}
 
-// Fallback: if no languages were added (shouldn't happen), leave empty
-homeLangs = homeLangs || '';
 
 // Now generate the table
 const trContactInfo = document.createElement('tr');

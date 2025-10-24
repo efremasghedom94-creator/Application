@@ -1240,17 +1240,18 @@ tbl.appendChild(trAddress);
 const cath = (() => {
   const selected = getRadioValue('catholic'); // 'Yes', 'No', or ''
   const inputText = escapeHtml(document.getElementById('religionOther').value.trim());
-  const yesChecked = selected === 'Yes';
-  const noChecked = selected === 'No';
   
-  let label = yesChecked ? 'Additional Note' : 'Other religion';
+  // Determine the label dynamically
+  const label = selected === 'Yes' ? 'Additional Note' : 'Other Religion';
   
-  let result =
-    checkboxMark(yesChecked) + ' Yes&nbsp;&nbsp;&nbsp;' +
-    checkboxMark(noChecked) + ' No';
+  // Build inline display
+  let result = `
+    ${checkboxMark(selected === 'Yes')} Yes&nbsp;&nbsp;
+    ${checkboxMark(selected === 'No')} No
+  `;
   
   if (inputText) {
-    result += `&nbsp;&nbsp;&nbsp;<strong>${label}:</strong> ${inputText}`;
+    result += `&nbsp;&nbsp;<strong>${label}:</strong> ${inputText}`;
   }
 
   return result;

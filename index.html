@@ -607,21 +607,32 @@
       select.appendChild(opt);
     });
 
-// Initialize Tom Select
 new TomSelect(select, {
   placeholder: "Select or type multiple languages...",
   maxOptions: 500,
   create: true, // allow adding new custom entries
   persist: true,
-  plugins: ['remove_button'], // show "x" to remove a selected language
+  plugins: ['remove_button'],
   score: function(search) {
     const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     return function(item) {
       return regex.test(item.text) ? 1 : 0;
     };
+  },
+  onItemAdd: function() {
+    // clear the text from the input box immediately after selecting
+    this.setTextboxValue('');
+    this.refreshOptions(false);
+    this.close(); // 👈 close dropdown after adding
+  },
+  onOptionAdd: function() {
+    // clear when a custom option is created
+    this.setTextboxValue('');
+    this.refreshOptions(false);
+    this.close(); // 👈 close dropdown after creating custom item
   }
 });
-});
+
 
 
 

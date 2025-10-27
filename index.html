@@ -1545,58 +1545,45 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const focusable = Array.from(document.querySelectorAll('input, select, textarea'));
-  
-  focusable.forEach((el, index) => {
-    el.addEventListener('keydown', (e) => {
-      const colCount = 12; // Adjust if using grid-cols-12 layout
-      const currentIndex = focusable.indexOf(el);
+  document.addEventListener('DOMContentLoaded', () => {
+    const inputs = Array.from(document.querySelectorAll('input, select, textarea'));
 
-      switch (e.key) {
-        case 'Enter':
+    inputs.forEach((input, index) => {
+      input.addEventListener('keydown', (e) => {
+        // Move right with Enter or ArrowRight
+        if (e.key === 'Enter' || e.key === 'ArrowRight') {
           e.preventDefault();
-          if (currentIndex + 1 < focusable.length) {
-            focusable[currentIndex + 1].focus();
-          }
-          break;
+          const next = inputs[index + 1];
+          if (next) next.focus();
+        }
 
-        case 'ArrowRight':
+        // Move left with ArrowLeft
+        if (e.key === 'ArrowLeft') {
           e.preventDefault();
-          if (currentIndex + 1 < focusable.length) {
-            focusable[currentIndex + 1].focus();
-          }
-          break;
+          const prev = inputs[index - 1];
+          if (prev) prev.focus();
+        }
 
-        case 'ArrowLeft':
+        // Move up (previous row)
+        if (e.key === 'ArrowUp') {
           e.preventDefault();
-          if (currentIndex > 0) {
-            focusable[currentIndex - 1].focus();
-          }
-          break;
+          const currentRect = input.getBoundingClientRect();
+          const above = inputs.findLast(el => el.getBoundingClientRect().bottom < currentRect.top);
+          if (above) above.focus();
+        }
 
-        case 'ArrowDown':
+        // Move down (next row)
+        if (e.key === 'ArrowDown') {
           e.preventDefault();
-          // Move roughly one row down
-          let downTarget = currentIndex + Math.floor(focusable.length / colCount);
-          if (downTarget < focusable.length) {
-            focusable[downTarget].focus();
-          }
-          break;
-
-        case 'ArrowUp':
-          e.preventDefault();
-          // Move roughly one row up
-          let upTarget = currentIndex - Math.floor(focusable.length / colCount);
-          if (upTarget >= 0) {
-            focusable[upTarget].focus();
-          }
-          break;
-      }
+          const currentRect = input.getBoundingClientRect();
+          const below = inputs.find(el => el.getBoundingClientRect().top > currentRect.bottom);
+          if (below) below.focus();
+        }
+      });
     });
   });
-});
 </script>
+
 
 
 

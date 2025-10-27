@@ -224,7 +224,7 @@
     <!-- DATE -->
     <div class="col-span-2">
       <label class="block text-sm">DATE</label>
-      <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
+      <input id="date" type="date" class="w-full border rounded p-2 mt-1" data-preserve-keys="true" />
     </div>
 
     <!-- TAKEN BY -->
@@ -1545,187 +1545,230 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
-  <script>
-document.addEventListener('keydown', function(e) {
-  const focusableSelectors = 'input, select, textarea, button, [contenteditable="true"], a[href]';
-  const visibleSelector = '.page:not([hidden]) ' + focusableSelectors;
+<script>
+(function () {
+  // Global keyboard navigation handler
+  document.addEventListener('keydown', function (e) {
+    const focusableSelectors = 'input, select, textarea, button, [contenteditable="true"], a[href]';
+    const visibleSelector = '.page:not([hidden]) ' + focusableSelectors;
+    const excludedSelector = '.nav-control, .skip-keynav, [data-skip-nav="true"]';
 
-  // Elements that should be excluded from being part of the keyboard-navigation sequence:
-  // Add class="nav-control" OR data-skip-nav="true" OR class="skip-keynav" to Next/Back buttons
-  const excludedSelector = '.nav-control, .skip-keynav, [data-skip-nav="true"]';
+    // Gather focusable elements on the visible page, excluding flagged controls
+    const focusableElements = Array.from(document.querySelectorAll(visibleSelector))
+      .filter(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
 
-  // Build list of focusables on visible page, excluding disabled/hidden and those flagged to skip
-  const focusableElements = Array.from(document.querySelectorAll(visibleSelector))
-    .filter(el =>
-      !el.disabled &&
-      el.offsetParent !== null &&
-      !el.matches(excludedSelector)
-    );
+    if (!focusableElements.length) return;
 
-  if (!focusableElements.length) return;
+    const currentEl = document.activeElement;
 
-  const currentEl = document.activeElement;
+    // If current element or its ancestor is explicitly excluded, let native behavior occur
+    if (currentEl && currentEl.matches && currentEl.matches(excludedSelector)) return;
+    if (e.target && e.target.closest && e.target.closest(excludedSelector)) return;
 
-  // If the currently focused element is flagged to skip navigation, do nothing here
-  if (currentEl && currentEl.matches && currentEl.matches(excludedSelector)) {
-    return; // allow default behavior (buttons will activate)
-  }
+    const currentIndex = focusableElements.indexOf(currentEl);
+    const total = focusableElements.length;
 
-  // If the target element (where the keydown originated) is inside an excluded container, ignore
-  if (e.target && e.target.closest && e.target.closest(excludedSelector)) return;
-
-  const currentIndex = focusableElements.indexOf(currentEl);
-  const total = focusableElements.length;
-
-  // Helper to focus with wrap-around
-  function focusAt(index) {
-    const i = (index + total) % total;
-    focusableElements[i].focus();
-  }
-
-  // Function to switch page
-  function switchPage(newStep) {
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(p => p.setAttribute('hidden', ''));
-    const targetPage = document.querySelector(`.page[data-step="${newStep}"]`);
-    if (targetPage) {
-      targetPage.removeAttribute('hidden');
-      // Focus first input on new page (but skip excluded ones)
-      const firstInput = Array.from(targetPage.querySelectorAll(focusableSelectors))
-        .find(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
-      if (firstInput) firstInput.focus();
-    }
-  }
-
-  // Utility: determine whether we should *not* intercept Arrow / Enter for the active element
-  function shouldIgnoreKeyHandling(el, key) {
-    if (!el) return false;
-    const tag = (el.tagName || '').toLowerCase();
-
-    // Always ignore if element is a button/link (so pressing Enter activates it)
-    if (tag === 'button' || el.getAttribute('role') === 'button' || tag === 'a') return true;
-
-    // Text entry cases: let native behavior occur
-    if (tag === 'textarea' || el.isContentEditable) {
-      // Allow Enter/newline in textareas and contenteditable
-      if (key === 'Enter') return true;
-      // Arrow keys in textarea should move caret — ignore intercept
-      if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') return true;
+    function focusAt(index) {
+      const i = (index + total) % total;
+      focusableElements[i].focus();
     }
 
-    // Number inputs: let ArrowUp/Down change value natively
-    if (tag === 'input') {
-      const type = (el.getAttribute('type') || '').toLowerCase();
-      if (['number', 'range', 'date', 'time', 'datetime-local'].includes(type) &&
-          (key === 'ArrowUp' || key === 'ArrowDown')) return true;
-
-      // If input explicitly has attribute data-preserve-keys, don't intercept
-      if (el.hasAttribute('data-preserve-keys')) return true;
-    }
-
-    // Selects: allow native Arrow behavior
-    if (tag === 'select' && (key === 'ArrowUp' || key === 'ArrowDown' || key === 'Enter')) return true;
-
-    return false;
-  }
-
-  // If the active element should be allowed native handling for this key, bail out
-  if (shouldIgnoreKeyHandling(currentEl, e.key)) {
-    return; // don't preventDefault or change focus — let the element handle it
-  }
-
-  // Horizontal navigation (→ / Enter / ←)
-  if (e.key === 'Enter' || e.key === 'ArrowRight') {
-    e.preventDefault();
-    if (currentIndex === -1) {
-      // nothing focused in our focusableElements list — focus first
-      focusAt(0);
-      return;
-    }
-
-    if (currentIndex === total - 1) {
-      // At last input, move to next page if exists
-      const currentPage = document.querySelector('.page:not([hidden])');
-      const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
-      const totalPages = document.querySelectorAll('.page').length;
-      if (currentPageNumber < totalPages) {
-        switchPage(currentPageNumber + 1);
+    function switchPage(newStep) {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(p => p.setAttribute('hidden', ''));
+      const targetPage = document.querySelector(`.page[data-step="${newStep}"]`);
+      if (targetPage) {
+        targetPage.removeAttribute('hidden');
+        const firstInput = Array.from(targetPage.querySelectorAll(focusableSelectors))
+          .find(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
+        if (firstInput) firstInput.focus();
       }
-    } else {
-      focusAt(currentIndex + 1);
     }
-  } else if (e.key === 'ArrowLeft') {
-    e.preventDefault();
-    if (currentIndex === -1) {
-      focusAt(0);
+
+    // Caret helpers for text inputs
+    function caretAtStart(el) {
+      try { return el.selectionStart === 0; } catch { return false; }
+    }
+    function caretAtEnd(el) {
+      try { return el.selectionEnd === el.value.length; } catch { return false; }
+    }
+
+    // Decide whether to ignore handling for this element+key (let native behavior run)
+    function shouldIgnoreKeyHandling(el, key) {
+      if (!el) return false;
+      const tag = (el.tagName || '').toLowerCase();
+
+      // Buttons/links/role=button — let Enter activate
+      if (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button') return true;
+
+      // Text areas and contenteditable — let native typing and arrows behave
+      if (tag === 'textarea' || el.isContentEditable) {
+        if (['Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key)) return true;
+      }
+
+      if (tag === 'input') {
+        const type = (el.getAttribute('type') || '').toLowerCase();
+
+        // If input explicitly requests native key behavior, allow it
+        if (el.hasAttribute && el.hasAttribute('data-preserve-keys')) return true;
+
+        // For numeric/date/time/range inputs: we will suppress native up/down value changes
+        // (so we return false here to indicate *do not* ignore — handler will preventDefault)
+        if (['number','date','time','datetime-local','range'].includes(type)) {
+          if (key === 'ArrowUp' || key === 'ArrowDown') return false;
+        }
+
+        // For other input types, allow handler to inspect caret/position (don't auto-ignore)
+      }
+
+      return false;
+    }
+
+    if (shouldIgnoreKeyHandling(currentEl, e.key)) {
+      // let native behavior occur
       return;
     }
 
-    if (currentIndex === 0) {
-      // At first input, move to previous page if exists
-      const currentPage = document.querySelector('.page:not([hidden])');
-      const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
-      if (currentPageNumber > 1) {
-        switchPage(currentPageNumber - 1);
-        // focus last input of previous page (skip excluded)
-        const prevPage = document.querySelector(`.page[data-step="${currentPageNumber - 1}"]`);
-        if (prevPage) {
-          const inputs = Array.from(prevPage.querySelectorAll(focusableSelectors))
-            .filter(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
-          if (inputs.length) inputs[inputs.length -1].focus();
+    // Date-part group navigation (works if you use .date-group/.date-part inputs)
+    function tryDatePartJump(el, key) {
+      if (!el || !el.classList) return false;
+      if (!el.classList.contains('date-part')) return false;
+
+      const group = el.closest('.date-group');
+      if (!group) return false;
+
+      const parts = Array.from(group.querySelectorAll('.date-part'));
+      const idx = parts.indexOf(el);
+      if (idx === -1) return false;
+
+      if (key === 'ArrowRight' || key === 'Enter') {
+        if (caretAtEnd(el)) {
+          e.preventDefault();
+          if (idx < parts.length - 1) {
+            parts[idx + 1].focus();
+            try { parts[idx + 1].setSelectionRange(0, 0); } catch {}
+            return true;
+          }
         }
       }
-    } else {
-      focusAt(currentIndex - 1);
+
+      if (key === 'ArrowLeft') {
+        if (caretAtStart(el)) {
+          e.preventDefault();
+          if (idx > 0) {
+            parts[idx - 1].focus();
+            try { parts[idx - 1].setSelectionRange(parts[idx - 1].value.length, parts[idx - 1].value.length); } catch {}
+            return true;
+          }
+        }
+      }
+
+      if (key === 'ArrowUp' || key === 'ArrowDown') {
+        e.preventDefault();
+        moveVertically(key === 'ArrowUp' ? 'up' : 'down', focusableElements);
+        return true;
+      }
+
+      return false;
     }
-  }
 
-  // Vertical up/down movement with wrap-around
-  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-    // if arrow handling should be ignored for this element we already returned above
-    e.preventDefault();
-    moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
-  }
+    // Horizontal navigation: Enter / Right => forward, Left => back
+    if (e.key === 'Enter' || e.key === 'ArrowRight') {
+      // If inside date-part, attempt to jump to next part first
+      if (tryDatePartJump(currentEl, e.key)) return;
 
-  function moveVertically(direction, focusables) {
-    // If nothing focused in our list, focus first/last depending on direction
-    if (document.activeElement === document.body || focusables.indexOf(document.activeElement) === -1) {
-      if (direction === 'up') focusables[focusables.length - 1].focus();
-      else focusables[0].focus();
+      e.preventDefault();
+      if (currentIndex === -1) {
+        focusAt(0);
+        return;
+      }
+      if (currentIndex === total - 1) {
+        const currentPage = document.querySelector('.page:not([hidden])');
+        const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
+        const totalPages = document.querySelectorAll('.page').length;
+        if (currentPageNumber < totalPages) switchPage(currentPageNumber + 1);
+      } else {
+        focusAt(currentIndex + 1);
+      }
       return;
-    }
+    } else if (e.key === 'ArrowLeft') {
+      if (tryDatePartJump(currentEl, 'ArrowLeft')) return;
 
-    const currentRect = document.activeElement.getBoundingClientRect();
-    const candidates = [];
-
-    focusables.forEach(el => {
-      if (el === document.activeElement) return;
-      const rect = el.getBoundingClientRect();
-      if (direction === 'up') {
-        if (rect.bottom <= currentRect.top) {
-          candidates.push({el, distance: currentRect.top - rect.bottom});
+      e.preventDefault();
+      if (currentIndex === -1) {
+        focusAt(0);
+        return;
+      }
+      if (currentIndex === 0) {
+        const currentPage = document.querySelector('.page:not([hidden])');
+        const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
+        if (currentPageNumber > 1) {
+          switchPage(currentPageNumber - 1);
+          const prevPage = document.querySelector(`.page[data-step="${currentPageNumber - 1}"]`);
+          if (prevPage) {
+            const inputs = Array.from(prevPage.querySelectorAll(focusableSelectors))
+              .filter(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
+            if (inputs.length) inputs[inputs.length - 1].focus();
+          }
         }
       } else {
-        if (rect.top >= currentRect.bottom) {
-          candidates.push({el, distance: rect.top - currentRect.bottom});
+        focusAt(currentIndex - 1);
+      }
+      return;
+    }
+
+    // Vertical navigation: Up/Down — suppress native increment for number/date inputs
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      const tag = (currentEl && currentEl.tagName || '').toLowerCase();
+      if (tag === 'input') {
+        const type = (currentEl.getAttribute('type') || '').toLowerCase();
+        if (['number','date','time','datetime-local','range'].includes(type)) {
+          // Prevent browser from changing the value and move focus vertically instead
+          e.preventDefault();
+          moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
+          return;
         }
       }
-    });
 
-    if (candidates.length) {
-      candidates.sort((a, b) => a.distance - b.distance);
-      candidates[0].el.focus();
-    } else {
-      // No candidate found, wrap to first or last element depending on direction
-      if (direction === 'up') {
-        focusables[focusables.length - 1].focus();
+      // If in date-part, tryDatePartJump already handled up/down earlier.
+      e.preventDefault();
+      moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
+      return;
+    }
+
+    // Vertical movement helper (find element above/below based on bounding rect)
+    function moveVertically(direction, focusables) {
+      if (document.activeElement === document.body || focusables.indexOf(document.activeElement) === -1) {
+        if (direction === 'up') focusables[focusables.length - 1].focus();
+        else focusables[0].focus();
+        return;
+      }
+
+      const currentRect = document.activeElement.getBoundingClientRect();
+      const candidates = [];
+
+      focusables.forEach(el => {
+        if (el === document.activeElement) return;
+        const rect = el.getBoundingClientRect();
+        if (direction === 'up') {
+          if (rect.bottom <= currentRect.top) candidates.push({ el, distance: currentRect.top - rect.bottom });
+        } else {
+          if (rect.top >= currentRect.bottom) candidates.push({ el, distance: rect.top - currentRect.bottom });
+        }
+      });
+
+      if (candidates.length) {
+        candidates.sort((a, b) => a.distance - b.distance);
+        candidates[0].el.focus();
       } else {
-        focusables[0].focus();
+        if (direction === 'up') focusables[focusables.length - 1].focus();
+        else focusables[0].focus();
       }
     }
-  }
-});
+  }); // end keydown listener
+})();
 </script>
+
 
 
 

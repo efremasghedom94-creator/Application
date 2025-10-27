@@ -350,6 +350,7 @@
   <!-- Next button -->
 <div class="nav-buttons justify-end">
   <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
+  <button class="nav-control">Next</button>
 </div>
 
 </section>
@@ -1541,14 +1542,39 @@ document.getElementById('shareBtn').onclick = async () => {
   </script>
 
 
-<script>
+
+
+
+
+  <script>
 document.addEventListener('keydown', function(e) {
-  const focusableSelectors = 'input, select, textarea, button';
-  const focusableElements = Array.from(document.querySelectorAll('.page:not([hidden]) ' + focusableSelectors))
-    .filter(el => !el.disabled && el.offsetParent !== null);
+  const focusableSelectors = 'input, select, textarea, button, [contenteditable="true"], a[href]';
+  const visibleSelector = '.page:not([hidden]) ' + focusableSelectors;
+
+  // Elements that should be excluded from being part of the keyboard-navigation sequence:
+  // Add class="nav-control" OR data-skip-nav="true" OR class="skip-keynav" to Next/Back buttons
+  const excludedSelector = '.nav-control, .skip-keynav, [data-skip-nav="true"]';
+
+  // Build list of focusables on visible page, excluding disabled/hidden and those flagged to skip
+  const focusableElements = Array.from(document.querySelectorAll(visibleSelector))
+    .filter(el =>
+      !el.disabled &&
+      el.offsetParent !== null &&
+      !el.matches(excludedSelector)
+    );
+
   if (!focusableElements.length) return;
-  
+
   const currentEl = document.activeElement;
+
+  // If the currently focused element is flagged to skip navigation, do nothing here
+  if (currentEl && currentEl.matches && currentEl.matches(excludedSelector)) {
+    return; // allow default behavior (buttons will activate)
+  }
+
+  // If the target element (where the keydown originated) is inside an excluded container, ignore
+  if (e.target && e.target.closest && e.target.closest(excludedSelector)) return;
+
   const currentIndex = focusableElements.indexOf(currentEl);
   const total = focusableElements.length;
 
@@ -1565,18 +1591,63 @@ document.addEventListener('keydown', function(e) {
     const targetPage = document.querySelector(`.page[data-step="${newStep}"]`);
     if (targetPage) {
       targetPage.removeAttribute('hidden');
-      // Focus first input on new page
-      const firstInput = targetPage.querySelector(focusableSelectors);
+      // Focus first input on new page (but skip excluded ones)
+      const firstInput = Array.from(targetPage.querySelectorAll(focusableSelectors))
+        .find(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
       if (firstInput) firstInput.focus();
     }
+  }
+
+  // Utility: determine whether we should *not* intercept Arrow / Enter for the active element
+  function shouldIgnoreKeyHandling(el, key) {
+    if (!el) return false;
+    const tag = (el.tagName || '').toLowerCase();
+
+    // Always ignore if element is a button/link (so pressing Enter activates it)
+    if (tag === 'button' || el.getAttribute('role') === 'button' || tag === 'a') return true;
+
+    // Text entry cases: let native behavior occur
+    if (tag === 'textarea' || el.isContentEditable) {
+      // Allow Enter/newline in textareas and contenteditable
+      if (key === 'Enter') return true;
+      // Arrow keys in textarea should move caret — ignore intercept
+      if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') return true;
+    }
+
+    // Number inputs: let ArrowUp/Down change value natively
+    if (tag === 'input') {
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if (['number', 'range', 'date', 'time', 'datetime-local'].includes(type) &&
+          (key === 'ArrowUp' || key === 'ArrowDown')) return true;
+
+      // If input explicitly has attribute data-preserve-keys, don't intercept
+      if (el.hasAttribute('data-preserve-keys')) return true;
+    }
+
+    // Selects: allow native Arrow behavior
+    if (tag === 'select' && (key === 'ArrowUp' || key === 'ArrowDown' || key === 'Enter')) return true;
+
+    return false;
+  }
+
+  // If the active element should be allowed native handling for this key, bail out
+  if (shouldIgnoreKeyHandling(currentEl, e.key)) {
+    return; // don't preventDefault or change focus — let the element handle it
   }
 
   // Horizontal navigation (→ / Enter / ←)
   if (e.key === 'Enter' || e.key === 'ArrowRight') {
     e.preventDefault();
+    if (currentIndex === -1) {
+      // nothing focused in our focusableElements list — focus first
+      focusAt(0);
+      return;
+    }
+
     if (currentIndex === total - 1) {
       // At last input, move to next page if exists
-      const currentPageNumber = parseInt(document.querySelector('.page:not([hidden])').getAttribute('data-step'));
+      const currentPage = document.querySelector('.page:not([hidden])');
+      const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
       const totalPages = document.querySelectorAll('.page').length;
       if (currentPageNumber < totalPages) {
         switchPage(currentPageNumber + 1);
@@ -1586,15 +1657,24 @@ document.addEventListener('keydown', function(e) {
     }
   } else if (e.key === 'ArrowLeft') {
     e.preventDefault();
+    if (currentIndex === -1) {
+      focusAt(0);
+      return;
+    }
+
     if (currentIndex === 0) {
       // At first input, move to previous page if exists
-      const currentPageNumber = parseInt(document.querySelector('.page:not([hidden])').getAttribute('data-step'));
+      const currentPage = document.querySelector('.page:not([hidden])');
+      const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
       if (currentPageNumber > 1) {
         switchPage(currentPageNumber - 1);
-        // focus last input of previous page
+        // focus last input of previous page (skip excluded)
         const prevPage = document.querySelector(`.page[data-step="${currentPageNumber - 1}"]`);
-        const inputs = Array.from(prevPage.querySelectorAll(focusableSelectors));
-        if (inputs.length) inputs[inputs.length -1].focus();
+        if (prevPage) {
+          const inputs = Array.from(prevPage.querySelectorAll(focusableSelectors))
+            .filter(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
+          if (inputs.length) inputs[inputs.length -1].focus();
+        }
       }
     } else {
       focusAt(currentIndex - 1);
@@ -1603,11 +1683,19 @@ document.addEventListener('keydown', function(e) {
 
   // Vertical up/down movement with wrap-around
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    // if arrow handling should be ignored for this element we already returned above
     e.preventDefault();
     moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
   }
 
   function moveVertically(direction, focusables) {
+    // If nothing focused in our list, focus first/last depending on direction
+    if (document.activeElement === document.body || focusables.indexOf(document.activeElement) === -1) {
+      if (direction === 'up') focusables[focusables.length - 1].focus();
+      else focusables[0].focus();
+      return;
+    }
+
     const currentRect = document.activeElement.getBoundingClientRect();
     const candidates = [];
 
@@ -1631,16 +1719,15 @@ document.addEventListener('keydown', function(e) {
     } else {
       // No candidate found, wrap to first or last element depending on direction
       if (direction === 'up') {
-        // focus last
         focusables[focusables.length - 1].focus();
       } else {
-        // focus first
         focusables[0].focus();
       }
     }
   }
 });
 </script>
+
 
 
 

@@ -789,32 +789,14 @@
       
 
 
-
-
 <div class="mt-4 flex justify-center gap-3">
-  <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
-  <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
-  <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
-  <button id="shareBtn" class="px-4 py-2 bg-indigo-600 text-white rounded">Share</button>
-  <button id="newFormBtn" class="px-4 py-2 bg-red-600 text-white rounded">Start New Form</button>
-</div>
+        <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
+        <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
+        <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
+        <button id="shareBtn" class="px-4 py-2 bg-indigo-600 text-white rounded">Share</button>
+        <button id="newFormBtn" class="px-4 py-2 bg-red-700 text-white rounded">Start New Form</button>
 
-
-<!-- Custom confirmation popup (initially hidden) -->
-<div id="confirmPopup" class="hidden mt-2 flex justify-center">
-  <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 rounded shadow-md max-w-sm text-center">
-    <p class="font-medium mb-2">Are you sure you want to start a new form?<br>All current data will be lost.</p>
-    <div class="flex justify-center gap-3">
-      <button id="confirmYes" class="px-3 py-1 bg-red-600 text-white rounded">Yes</button>
-      <button id="confirmNo" class="px-3 py-1 bg-gray-400 text-white rounded">No</button>
-    </div>
-  </div>
-</div>
-
-
-
-
-      
+      </div>
     </div>
 
   </div> <!-- container -->
@@ -1556,52 +1538,31 @@ confirmNo.onclick = () => {
 };
 
 
-  // --- Share as PDF (silent, clean version) ---
-  document.getElementById('shareBtn').onclick = async () => {
-    const element = document.getElementById('finalArea');
-    if (!element) return;
-
-    const shareBtn = document.getElementById('shareBtn');
-    shareBtn.disabled = true;
-    shareBtn.textContent = 'Preparing...';
-
-    const opt = {
-      margin: 0.5,
-      filename: 'OneWorld_IntakeForm.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-
-    try {
-      const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
-      const pdfFile = new File([pdfBlob], 'OneWorld_IntakeForm.pdf', { type: 'application/pdf' });
-
-      // Try native sharing first
-      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-        await navigator.share({
-          title: 'Student Intake Form',
-          text: 'Please find attached the One World One Centre Student Intake Form.',
-          files: [pdfFile]
-        });
-      } else {
-        // Fallback: download automatically
-        const url = URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'OneWorld_IntakeForm.pdf';
-        link.click();
-        URL.revokeObjectURL(url);
-      }
-    } catch (err) {
-      console.error('Error sharing PDF:', err);
-    } finally {
-      shareBtn.disabled = false;
-      shareBtn.textContent = 'Share';
-    }
+      // --- share button ---
+document.getElementById('shareBtn').onclick = async () => {
+  const shareData = {
+    title: 'One World One Centre Student Intake Form',
+    text: 'Here is the student intake form I filled out.',
+    url: window.location.href
   };
 
-      }
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      alert('Form shared successfully!');
+    } catch (err) {
+      console.error('Share canceled or failed:', err);
+    }
+  } else {
+    // fallback for browsers without Web Share API
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => alert('Link copied to clipboard!'))
+      .catch(() => alert('Could not copy link. Please copy manually.'));
+  }
+};
+
+
+    }
       // Expose generate function for the button and ensure print button works (print uses browser)
   window.generateFinal = generateFinal;
 </script>

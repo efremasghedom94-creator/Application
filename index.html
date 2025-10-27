@@ -1544,59 +1544,58 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
-  <script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
   const focusable = Array.from(document.querySelectorAll('input, select, textarea'));
-  
+
   focusable.forEach((el, index) => {
     el.addEventListener('keydown', (e) => {
-      const colCount = 12; // Adjust if using grid-cols-12 layout
-      const currentIndex = focusable.indexOf(el);
+      const total = focusable.length;
+      let nextIndex;
 
       switch (e.key) {
         case 'Enter':
           e.preventDefault();
-          if (currentIndex + 1 < focusable.length) {
-            focusable[currentIndex + 1].focus();
-          }
+          // Move to next input, or wrap to the first one if at the end
+          nextIndex = (index + 1) % total;
+          focusable[nextIndex].focus();
           break;
 
         case 'ArrowRight':
           e.preventDefault();
-          if (currentIndex + 1 < focusable.length) {
-            focusable[currentIndex + 1].focus();
-          }
+          // Move to next input (wrap to first if at the end)
+          nextIndex = (index + 1) % total;
+          focusable[nextIndex].focus();
           break;
 
         case 'ArrowLeft':
           e.preventDefault();
-          if (currentIndex > 0) {
-            focusable[currentIndex - 1].focus();
-          }
+          // Move to previous input (wrap to last if at the beginning)
+          nextIndex = (index - 1 + total) % total;
+          focusable[nextIndex].focus();
           break;
 
         case 'ArrowDown':
           e.preventDefault();
-          // Move roughly one row down
-          let downTarget = currentIndex + Math.floor(focusable.length / colCount);
-          if (downTarget < focusable.length) {
-            focusable[downTarget].focus();
-          }
+          // Move a few inputs down (based on layout density)
+          nextIndex = index + 3; // tweak if you want a different "row height"
+          if (nextIndex >= total) nextIndex = nextIndex % total;
+          focusable[nextIndex].focus();
           break;
 
         case 'ArrowUp':
           e.preventDefault();
-          // Move roughly one row up
-          let upTarget = currentIndex - Math.floor(focusable.length / colCount);
-          if (upTarget >= 0) {
-            focusable[upTarget].focus();
-          }
+          // Move a few inputs up
+          nextIndex = index - 3;
+          if (nextIndex < 0) nextIndex = total + nextIndex;
+          focusable[nextIndex].focus();
           break;
       }
     });
   });
 });
 </script>
+
 
 </body>
 </html>

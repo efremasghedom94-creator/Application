@@ -1539,5 +1539,64 @@ document.getElementById('shareBtn').onclick = async () => {
     window.generateFinal = generateFinal
 
   </script>
+
+
+
+
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const focusable = Array.from(document.querySelectorAll('input, select, textarea'));
+  
+  focusable.forEach((el, index) => {
+    el.addEventListener('keydown', (e) => {
+      const colCount = 12; // Adjust if using grid-cols-12 layout
+      const currentIndex = focusable.indexOf(el);
+
+      switch (e.key) {
+        case 'Enter':
+          e.preventDefault();
+          if (currentIndex + 1 < focusable.length) {
+            focusable[currentIndex + 1].focus();
+          }
+          break;
+
+        case 'ArrowRight':
+          e.preventDefault();
+          if (currentIndex + 1 < focusable.length) {
+            focusable[currentIndex + 1].focus();
+          }
+          break;
+
+        case 'ArrowLeft':
+          e.preventDefault();
+          if (currentIndex > 0) {
+            focusable[currentIndex - 1].focus();
+          }
+          break;
+
+        case 'ArrowDown':
+          e.preventDefault();
+          // Move roughly one row down
+          let downTarget = currentIndex + Math.floor(focusable.length / colCount);
+          if (downTarget < focusable.length) {
+            focusable[downTarget].focus();
+          }
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          // Move roughly one row up
+          let upTarget = currentIndex - Math.floor(focusable.length / colCount);
+          if (upTarget >= 0) {
+            focusable[upTarget].focus();
+          }
+          break;
+      }
+    });
+  });
+});
+</script>
+
 </body>
 </html>

@@ -783,12 +783,6 @@
         <!-- final yellow table injected here -->
       </div>
 
-
-
-
-      
-
-
 <div class="mt-4 flex justify-center gap-3">
         <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
         <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
@@ -1465,43 +1459,25 @@ tbl.appendChild(trNotes);
 
       final.appendChild(tbl)
 
- <script>
-  // --- Show final and hide wizard ---
-  document.getElementById('wizardRoot').classList.add('hidden');
-  document.getElementById('finalWrap').classList.remove('hidden');
+      // show final and hide wizard
+      document.getElementById('wizardRoot').classList.add('hidden')
+      document.getElementById('finalWrap').classList.remove('hidden')
 
-  // --- PDF button logic ---
-  document.getElementById('pdfBtn').onclick = () => {
-    const opt = {
-      margin: 0.2,
-      filename: 'one-world-one-centre-intake.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(document.getElementById('finalArea')).save();
-  };
+      // pdf button logic
+      document.getElementById('pdfBtn').onclick = ()=>{
+        const opt = { margin:0.2, filename:'one-world-one-centre-intake.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'} }
+        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
+      }
 
-  // --- Edit/back button ---
-  document.getElementById('editBtn').onclick = () => {
-    document.getElementById('wizardRoot').classList.remove('hidden');
-    document.getElementById('finalWrap').classList.add('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-// --- Custom colorful "Start New Form" confirmation ---
-const newFormBtn = document.getElementById('newFormBtn');
-const confirmPopup = document.getElementById('confirmPopup');
-const confirmYes = document.getElementById('confirmYes');
-const confirmNo = document.getElementById('confirmNo');
-
-newFormBtn.onclick = () => {
-  confirmPopup.classList.toggle('hidden');
-  window.scrollTo({ top: newFormBtn.offsetTop - 100, behavior: 'smooth' });
-};
-
-confirmYes.onclick = () => {
-  confirmPopup.classList.add('hidden');
+      // edit/back button
+      document.getElementById('editBtn').onclick = ()=>{
+        document.getElementById('wizardRoot').classList.remove('hidden')
+        document.getElementById('finalWrap').classList.add('hidden')
+        window.scrollTo({top:0,behavior:'smooth'})
+      }
+      // --- start new form button ---
+document.getElementById('newFormBtn').onclick = () => {
+  if (!confirm('Are you sure you want to start a new form? All current data will be lost.')) return;
 
   // Reset all form fields
   document.querySelectorAll('input, textarea, select').forEach(el => {
@@ -1533,11 +1509,6 @@ confirmYes.onclick = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-confirmNo.onclick = () => {
-  confirmPopup.classList.add('hidden');
-};
-
-
       // --- share button ---
 document.getElementById('shareBtn').onclick = async () => {
   const shareData = {
@@ -1563,9 +1534,10 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
     }
-      // Expose generate function for the button and ensure print button works (print uses browser)
-  window.generateFinal = generateFinal;
-</script>
 
+    // Expose generate function for the button and ensure print button works (print uses browser)
+    window.generateFinal = generateFinal
+
+  </script>
 </body>
 </html>

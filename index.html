@@ -1545,68 +1545,72 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const inputs = Array.from(document.querySelectorAll('input, select, textarea'));
+document.addEventListener('DOMContentLoaded', () => {
+  // Select all interactive form fields
+  const inputs = Array.from(document.querySelectorAll('input, select, textarea'));
 
-    inputs.forEach((input, index) => {
-      input.addEventListener('keydown', (e) => {
-        let nextIndex = null;
+  inputs.forEach((input, index) => {
+    input.addEventListener('keydown', (e) => {
+      const total = inputs.length;
 
-        switch (e.key) {
-          case 'Enter':
-          case 'ArrowRight':
-            e.preventDefault();
-            nextIndex = (index + 1) % inputs.length; // loops forward
-            inputs[nextIndex].focus();
-            break;
+      // Move right / next
+      if (e.key === 'Enter' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = (index + 1) % total; // loops to first
+        inputs[next].focus();
+      }
 
-          case 'ArrowLeft':
-            e.preventDefault();
-            nextIndex = (index - 1 + inputs.length) % inputs.length; // loops backward
-            inputs[nextIndex].focus();
-            break;
+      // Move left / previous
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = (index - 1 + total) % total; // loops to last
+        inputs[prev].focus();
+      }
 
-          case 'ArrowUp':
-            e.preventDefault();
-            moveVertical(index, 'up', inputs);
-            break;
+      // Move down (next row)
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        let target = findClosestInput(inputs, index, 'down');
+        if (target) target.focus();
+      }
 
-          case 'ArrowDown':
-            e.preventDefault();
-            moveVertical(index, 'down', inputs);
-            break;
+      // Move up (previous row)
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        let target = findClosestInput(inputs, index, 'up');
+        if (target) target.focus();
+      }
+    });
+  });
+
+  // Function: find nearest input visually up or down
+  function findClosestInput(elements, currentIndex, direction) {
+    const current = elements[currentIndex];
+    const currentRect = current.getBoundingClientRect();
+    const currentY = currentRect.top + currentRect.height / 2;
+    const isDown = direction === 'down';
+
+    let best = null;
+    let minDistance = Infinity;
+
+    elements.forEach((el, i) => {
+      if (i === currentIndex) return;
+      const rect = el.getBoundingClientRect();
+      const elY = rect.top + rect.height / 2;
+      const verticalDistance = elY - currentY;
+
+      if ((isDown && verticalDistance > 0) || (!isDown && verticalDistance < 0)) {
+        const distance = Math.abs(verticalDistance);
+        if (distance < minDistance) {
+          minDistance = distance;
+          best = el;
         }
-      });
+      }
     });
 
-    // Helper function: move up/down visually
-    function moveVertical(currentIndex, direction, elements) {
-      const currentRect = elements[currentIndex].getBoundingClientRect();
-      const isDown = direction === 'down';
-
-      const candidates = elements
-        .map((el, i) => ({ el, rect: el.getBoundingClientRect(), i }))
-        .filter(obj =>
-          isDown
-            ? obj.rect.top > currentRect.bottom
-            : obj.rect.bottom < currentRect.top
-        );
-
-      if (candidates.length === 0) return;
-
-      // Find the closest vertically aligned element
-      const closest = candidates.reduce((prev, curr) => {
-        const prevDist = Math.abs(prev.rect.left - currentRect.left);
-        const currDist = Math.abs(curr.rect.left - currentRect.left);
-        if (Math.abs(curr.rect.top - currentRect.top) < Math.abs(prev.rect.top - currentRect.top)) {
-          return curr;
-        }
-        return prevDist < currDist ? prev : curr;
-      });
-
-      if (closest && closest.el) closest.el.focus();
-    }
-  });
+    return best;
+  }
+});
 </script>
 
 

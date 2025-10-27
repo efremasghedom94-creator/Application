@@ -1545,70 +1545,102 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Select all interactive form fields
-  const inputs = Array.from(document.querySelectorAll('input, select, textarea'));
+document.addEventListener('keydown', function(e) {
+  const currentPage = document.querySelector('.page:not([hidden])');
+  const focusableSelectors = 'input, select, textarea, button';
+  const focusableInputs = Array.from(currentPage.querySelectorAll(focusableSelectors))
+    .filter(el => !el.disabled && el.offsetParent !== null);
+  const currentActive = document.activeElement;
 
-  inputs.forEach((input, index) => {
-    input.addEventListener('keydown', (e) => {
-      const total = inputs.length;
+  // Only act if focus is inside our form area
+  if (!focusableInputs.length || !focusableInputs.includes(currentActive)) return;
 
-      // Move right / next
-      if (e.key === 'Enter' || e.key === 'ArrowRight') {
-        e.preventDefault();
-        const next = (index + 1) % total; // loops to first
-        inputs[next].focus();
+  const currentIndex = focusableInputs.indexOf(currentActive);
+
+  // Helper to move focus to a specific input index safely
+  function focusAt(index) {
+    if (index >= 0 && index < focusableInputs.length) {
+      focusableInputs[index].focus();
+    }
+  }
+
+  // Function to move to next/prev page
+  function goToPage(pageNum) {
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(p => p.setAttribute('hidden', ''));
+    const targetPage = document.querySelector(`.page[data-step="${pageNum}"]`);
+    if (targetPage) {
+      targetPage.removeAttribute('hidden');
+      // Focus the first focusable element on the page
+      const first = targetPage.querySelector(focusableSelectors);
+      if (first) first.focus();
+    }
+  }
+
+  // Handle navigation
+  if (e.key === 'Enter' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    // Move to next input, or next page if at last input
+    if (currentIndex === focusableInputs.length - 1) {
+      // Determine if there is a next page
+      const currentStep = parseInt(currentPage.getAttribute('data-step'));
+      const totalSteps = document.querySelectorAll('.page').length;
+      if (currentStep < totalSteps) {
+        goToPage(currentStep + 1);
       }
-
-      // Move left / previous
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const prev = (index - 1 + total) % total; // loops to last
-        inputs[prev].focus();
+    } else {
+      focusAt(currentIndex + 1);
+    }
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    // Move to previous input or previous page if at first input
+    if (currentIndex === 0) {
+      const currentStep = parseInt(currentPage.getAttribute('data-step'));
+      if (currentStep > 1) {
+        goToPage(currentStep - 1);
+        // Optionally focus last input of previous page
+        const prevPage = document.querySelector(`.page[data-step="${currentStep - 1}"]`);
+        const inputs = Array.from(prevPage.querySelectorAll(focusableSelectors))
+          .filter(el => !el.disabled && el.offsetParent !== null);
+        if (inputs.length) inputs[inputs.length - 1].focus();
       }
+    } else {
+      focusAt(currentIndex - 1);
+    }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    // Find closest element above in visual position
+    moveVertically('up', focusableInputs);
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    // Find closest element below in visual position
+    moveVertically('down', focusableInputs);
+  }
 
-      // Move down (next row)
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        let target = findClosestInput(inputs, index, 'down');
-        if (target) target.focus();
-      }
+  // Function for vertical movement based on position
+  function moveVertically(direction, focusables) {
+    const currentRect = document.activeElement.getBoundingClientRect();
+    let candidates = [];
 
-      // Move up (previous row)
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        let target = findClosestInput(inputs, index, 'up');
-        if (target) target.focus();
-      }
-    });
-  });
-
-  // Function: find nearest input visually up or down
-  function findClosestInput(elements, currentIndex, direction) {
-    const current = elements[currentIndex];
-    const currentRect = current.getBoundingClientRect();
-    const currentY = currentRect.top + currentRect.height / 2;
-    const isDown = direction === 'down';
-
-    let best = null;
-    let minDistance = Infinity;
-
-    elements.forEach((el, i) => {
-      if (i === currentIndex) return;
+    focusables.forEach(el => {
+      if (el === document.activeElement) return;
       const rect = el.getBoundingClientRect();
-      const elY = rect.top + rect.height / 2;
-      const verticalDistance = elY - currentY;
-
-      if ((isDown && verticalDistance > 0) || (!isDown && verticalDistance < 0)) {
-        const distance = Math.abs(verticalDistance);
-        if (distance < minDistance) {
-          minDistance = distance;
-          best = el;
+      if (direction === 'up') {
+        if (rect.bottom <= currentRect.top) {
+          candidates.push({el, distance: currentRect.top - rect.bottom});
+        }
+      } else {
+        if (rect.top >= currentRect.bottom) {
+          candidates.push({el, distance: rect.top - currentRect.bottom});
         }
       }
     });
 
-    return best;
+    if (candidates.length) {
+      // Pick the closest in the desired direction
+      candidates.sort((a, b) => a.distance - b.distance);
+      candidates[0].el.focus();
+    }
   }
 });
 </script>

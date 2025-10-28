@@ -1547,21 +1547,16 @@ document.getElementById('shareBtn').onclick = async () => {
 
 <script>
 (function () {
-  // Global keyboard navigation handler
   document.addEventListener('keydown', function (e) {
     const focusableSelectors = 'input, select, textarea, button, [contenteditable="true"], a[href]';
     const visibleSelector = '.page:not([hidden]) ' + focusableSelectors;
     const excludedSelector = '.nav-control, .skip-keynav, [data-skip-nav="true"]';
 
-    // Gather focusable elements on the visible page, excluding flagged controls
     const focusableElements = Array.from(document.querySelectorAll(visibleSelector))
       .filter(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
-
     if (!focusableElements.length) return;
 
     const currentEl = document.activeElement;
-
-    // If current element or its ancestor is explicitly excluded, let native behavior occur
     if (currentEl && currentEl.matches && currentEl.matches(excludedSelector)) return;
     if (e.target && e.target.closest && e.target.closest(excludedSelector)) return;
 
@@ -1571,6 +1566,21 @@ document.getElementById('shareBtn').onclick = async () => {
     function focusAt(index) {
       const i = (index + total) % total;
       focusableElements[i].focus();
+    }
+    function focusNextAfter(el) {
+      // find the next focusable after the last element of el's date-group (or after el)
+      const idx = focusableElements.indexOf(el);
+      if (idx === -1) return false;
+      const nextIdx = idx + 1;
+      if (nextIdx < focusableElements.length) { focusableElements[nextIdx].focus(); return true; }
+      return false;
+    }
+    function focusPrevBefore(el) {
+      const idx = focusableElements.indexOf(el);
+      if (idx === -1) return false;
+      const prevIdx = idx - 1;
+      if (prevIdx >= 0) { focusableElements[prevIdx].focus(); return true; }
+      return false;
     }
 
     function switchPage(newStep) {
@@ -1585,73 +1595,91 @@ document.getElementById('shareBtn').onclick = async () => {
       }
     }
 
-    // Caret helpers for text inputs
-    function caretAtStart(el) {
-      try { return el.selectionStart === 0; } catch { return false; }
-    }
-    function caretAtEnd(el) {
-      try { return el.selectionEnd === el.value.length; } catch { return false; }
-    }
+    function caretAtStart(el) { try { return el.selectionStart === 0; } catch { return false; } }
+    function caretAtEnd(el) { try { return el.selectionEnd === el.value.length; } catch { return false; } }
 
-    // Decide whether to ignore handling for this element+key (let native behavior run)
     function shouldIgnoreKeyHandling(el, key) {
       if (!el) return false;
       const tag = (el.tagName || '').toLowerCase();
-
-      // Buttons/links/role=button — let Enter activate
       if (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button') return true;
-
-      // Text areas and contenteditable — let native typing and arrows behave
       if (tag === 'textarea' || el.isContentEditable) {
         if (['Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key)) return true;
       }
-
       if (tag === 'input') {
-        const type = (el.getAttribute('type') || '').toLowerCase();
-
-        // If input explicitly requests native key behavior, allow it
         if (el.hasAttribute && el.hasAttribute('data-preserve-keys')) return true;
-
-        // For numeric/date/time/range inputs: we will suppress native up/down value changes
-        // (so we return false here to indicate *do not* ignore — handler will preventDefault)
+        const type = (el.getAttribute('type') || '').toLowerCase();
         if (['number','date','time','datetime-local','range'].includes(type)) {
           if (key === 'ArrowUp' || key === 'ArrowDown') return false;
         }
-
-        // For other input types, allow handler to inspect caret/position (don't auto-ignore)
       }
+      return false;
+    }
+    if (shouldIgnoreKeyHandling(currentEl, e.key)) return;
 
+    // Returns next focusable element after the date-group container (not just the current part).
+    function focusNextAfterDateGroup(group) {
+      // find the last .date-part in the group, then find next focusable after it
+      const parts = Array.from(group.querySelectorAll('.date-part'));
+      if (!parts.length) return false;
+      const last = parts[parts.length - 1];
+      const idx = focusableElements.indexOf(last);
+      if (idx === -1) return false;
+      if (idx + 1 < focusableElements.length) {
+        focusableElements[idx + 1].focus();
+        return true;
+      }
+      return false;
+    }
+    function focusPrevBeforeDateGroup(group) {
+      const parts = Array.from(group.querySelectorAll('.date-part'));
+      if (!parts.length) return false;
+      const first = parts[0];
+      const idx = focusableElements.indexOf(first);
+      if (idx === -1) return false;
+      if (idx - 1 >= 0) {
+        focusableElements[idx - 1].focus();
+        return true;
+      }
       return false;
     }
 
-    if (shouldIgnoreKeyHandling(currentEl, e.key)) {
-      // let native behavior occur
-      return;
-    }
-
-    // Date-part group navigation (works if you use .date-group/.date-part inputs)
+    // Improved date-part navigation:
     function tryDatePartJump(el, key) {
       if (!el || !el.classList) return false;
       if (!el.classList.contains('date-part')) return false;
-
       const group = el.closest('.date-group');
       if (!group) return false;
-
       const parts = Array.from(group.querySelectorAll('.date-part'));
       const idx = parts.indexOf(el);
       if (idx === -1) return false;
 
+      const maxAttr = el.getAttribute('maxlength');
+      const isFull = maxAttr ? (el.value ? el.value.length >= parseInt(maxAttr,10) : false) : false;
+
+      // RIGHT or ENTER: if caret at end OR field full OR Enter pressed => move forward
       if (key === 'ArrowRight' || key === 'Enter') {
-        if (caretAtEnd(el)) {
+        if (key === 'Enter' || caretAtEnd(el) || isFull) {
           e.preventDefault();
           if (idx < parts.length - 1) {
             parts[idx + 1].focus();
             try { parts[idx + 1].setSelectionRange(0, 0); } catch {}
             return true;
+          } else {
+            // last date-part (YYYY): move to next focusable after the date-group
+            if (focusNextAfterDateGroup(group)) return true;
+            // if no next focusable (end of page), try to switch page
+            const currentPage = document.querySelector('.page:not([hidden])');
+            const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
+            const totalPages = document.querySelectorAll('.page').length;
+            if (currentPageNumber < totalPages) {
+              switchPage(currentPageNumber + 1);
+              return true;
+            }
           }
         }
       }
 
+      // LEFT: if caret at start -> move back
       if (key === 'ArrowLeft') {
         if (caretAtStart(el)) {
           e.preventDefault();
@@ -1659,46 +1687,71 @@ document.getElementById('shareBtn').onclick = async () => {
             parts[idx - 1].focus();
             try { parts[idx - 1].setSelectionRange(parts[idx - 1].value.length, parts[idx - 1].value.length); } catch {}
             return true;
+          } else {
+            // first date-part: move to previous focusable before the date-group
+            if (focusPrevBeforeDateGroup(group)) return true;
+            // if none, try previous page
+            const currentPage = document.querySelector('.page:not([hidden])');
+            const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
+            if (currentPageNumber > 1) {
+              switchPage(currentPageNumber - 1);
+              const prevPage = document.querySelector(`.page[data-step="${currentPageNumber - 1}"]`);
+              if (prevPage) {
+                const inputs = Array.from(prevPage.querySelectorAll(focusableSelectors))
+                  .filter(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
+                if (inputs.length) inputs[inputs.length - 1].focus();
+              }
+              return true;
+            }
           }
         }
       }
 
-      if (key === 'ArrowUp' || key === 'ArrowDown') {
+      // UP/DOWN: do not change values — move parts vertically or wrap
+      if (key === 'ArrowUp') {
         e.preventDefault();
-        moveVertically(key === 'ArrowUp' ? 'up' : 'down', focusableElements);
+        if (idx > 0) {
+          parts[idx - 1].focus();
+          try { parts[idx - 1].setSelectionRange(parts[idx - 1].value.length, parts[idx - 1].value.length); } catch {}
+        } else {
+          // wrap to last in group
+          parts[parts.length - 1].focus();
+          try { parts[parts.length - 1].setSelectionRange(parts[parts.length - 1].value.length, parts[parts.length - 1].value.length); } catch {}
+        }
+        return true;
+      }
+      if (key === 'ArrowDown') {
+        e.preventDefault();
+        if (idx < parts.length - 1) {
+          parts[idx + 1].focus();
+          try { parts[idx + 1].setSelectionRange(0, 0); } catch {}
+        } else {
+          // wrap to first
+          parts[0].focus();
+          try { parts[0].setSelectionRange(0, 0); } catch {}
+        }
         return true;
       }
 
       return false;
     }
 
-    // Horizontal navigation: Enter / Right => forward, Left => back
+    // Horizontal nav
     if (e.key === 'Enter' || e.key === 'ArrowRight') {
-      // If inside date-part, attempt to jump to next part first
       if (tryDatePartJump(currentEl, e.key)) return;
-
       e.preventDefault();
-      if (currentIndex === -1) {
-        focusAt(0);
-        return;
-      }
+      if (currentIndex === -1) { focusAt(0); return; }
       if (currentIndex === total - 1) {
         const currentPage = document.querySelector('.page:not([hidden])');
         const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
         const totalPages = document.querySelectorAll('.page').length;
         if (currentPageNumber < totalPages) switchPage(currentPageNumber + 1);
-      } else {
-        focusAt(currentIndex + 1);
-      }
+      } else focusAt(currentIndex + 1);
       return;
     } else if (e.key === 'ArrowLeft') {
       if (tryDatePartJump(currentEl, 'ArrowLeft')) return;
-
       e.preventDefault();
-      if (currentIndex === -1) {
-        focusAt(0);
-        return;
-      }
+      if (currentIndex === -1) { focusAt(0); return; }
       if (currentIndex === 0) {
         const currentPage = document.querySelector('.page:not([hidden])');
         const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
@@ -1711,42 +1764,35 @@ document.getElementById('shareBtn').onclick = async () => {
             if (inputs.length) inputs[inputs.length - 1].focus();
           }
         }
-      } else {
-        focusAt(currentIndex - 1);
-      }
+      } else focusAt(currentIndex - 1);
       return;
     }
 
-    // Vertical navigation: Up/Down — suppress native increment for number/date inputs
+    // Vertical nav: Up/Down — prevent native increment on numeric/date inputs
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const tag = (currentEl && currentEl.tagName || '').toLowerCase();
       if (tag === 'input') {
         const type = (currentEl.getAttribute('type') || '').toLowerCase();
         if (['number','date','time','datetime-local','range'].includes(type)) {
-          // Prevent browser from changing the value and move focus vertically instead
           e.preventDefault();
-          moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
+          if (!tryDatePartJump(currentEl, e.key)) moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
           return;
         }
       }
-
-      // If in date-part, tryDatePartJump already handled up/down earlier.
+      if (tryDatePartJump(currentEl, e.key)) return;
       e.preventDefault();
       moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
       return;
     }
 
-    // Vertical movement helper (find element above/below based on bounding rect)
     function moveVertically(direction, focusables) {
       if (document.activeElement === document.body || focusables.indexOf(document.activeElement) === -1) {
         if (direction === 'up') focusables[focusables.length - 1].focus();
         else focusables[0].focus();
         return;
       }
-
       const currentRect = document.activeElement.getBoundingClientRect();
       const candidates = [];
-
       focusables.forEach(el => {
         if (el === document.activeElement) return;
         const rect = el.getBoundingClientRect();
@@ -1756,7 +1802,6 @@ document.getElementById('shareBtn').onclick = async () => {
           if (rect.top >= currentRect.bottom) candidates.push({ el, distance: rect.top - currentRect.bottom });
         }
       });
-
       if (candidates.length) {
         candidates.sort((a, b) => a.distance - b.distance);
         candidates[0].el.focus();
@@ -1765,7 +1810,7 @@ document.getElementById('shareBtn').onclick = async () => {
         else focusables[0].focus();
       }
     }
-  }); // end keydown listener
+  });
 })();
 </script>
 

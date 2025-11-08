@@ -1598,22 +1598,31 @@ document.getElementById('shareBtn').onclick = async () => {
     function caretAtStart(el) { try { return el.selectionStart === 0; } catch { return false; } }
     function caretAtEnd(el) { try { return el.selectionEnd === el.value.length; } catch { return false; } }
 
-    function shouldIgnoreKeyHandling(el, key) {
-      if (!el) return false;
-      const tag = (el.tagName || '').toLowerCase();
-      if (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button') return true;
-      if (tag === 'textarea' || el.isContentEditable) {
-        if (['Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key)) return true;
-      }
-      if (tag === 'input') {
-        if (el.hasAttribute && el.hasAttribute('data-preserve-keys')) return true;
-        const type = (el.getAttribute('type') || '').toLowerCase();
-        if (['number','date','time','datetime-local','range'].includes(type)) {
-          if (key === 'ArrowUp' || key === 'ArrowDown') return false;
-        }
-      }
-      return false;
+function shouldIgnoreKeyHandling(el, key) {
+  if (!el) return false;
+  const tag = (el.tagName || '').toLowerCase();
+  if (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button') return true;
+
+  if (tag === 'textarea' || el.isContentEditable) {
+    if (['Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key)) return true;
+  }
+
+  if (tag === 'input') {
+    const type = (el.getAttribute('type') || '').toLowerCase();
+
+    // ONLY preserve keys for inputs that explicitly asked for it and are NOT date inputs.
+    // This lets date inputs be handled by your navigation logic even if data-preserve-keys exists.
+    if (el.hasAttribute && el.hasAttribute('data-preserve-keys') && type !== 'date') return true;
+
+    // keep your existing numeric/date exceptions for up/down keys
+    if (['number','time','datetime-local','range'].includes(type)) {
+      if (key === 'ArrowUp' || key === 'ArrowDown') return false;
     }
+  }
+
+  return false;
+}
+
     if (shouldIgnoreKeyHandling(currentEl, e.key)) return;
 
     // Returns next focusable element after the date-group container (not just the current part).

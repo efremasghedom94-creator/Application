@@ -215,7 +215,6 @@
 
 
 
-
 <!-- PAGE 1 -->
 <section class="page" data-step="1">
   <h2 class="font-medium mb-3">Page 1</h2>
@@ -283,6 +282,7 @@
 </section>
 
 <style>
+  /* Subtle highlight on focused field */
   .focus-field:focus {
     outline: 2px solid #2563eb !important;
     background: #eef6ff !important;
@@ -306,7 +306,14 @@
     toggleOtherRelation(this);
   });
 
-  // Auto-format phone and jump
+  // Auto-jump on date selection
+  document.getElementById("date").addEventListener("change", function(){
+    const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
+    const next = fields.indexOf(this) + 1;
+    if(fields[next]) fields[next].focus();
+  });
+
+  // Auto-format + auto-jump phone
   document.getElementById("contactPhone").addEventListener("input", function(){
     let v = this.value.replace(/\D/g,"").slice(0,10);
     let f = "";
@@ -321,62 +328,32 @@
     }
   });
 
-  // Keyboard navigation
-  const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
-  
-  document.addEventListener("keydown", function(e){
+  // Global Keyboard Navigation
+  document.addEventListener("keydown", function(e) {
+    const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
     const active = document.activeElement;
     const idx = fields.indexOf(active);
 
-    if(idx < 0) return;
-
-    // Space moves to next page
     if(e.code === "Space" && !e.shiftKey){
       e.preventDefault();
       goTo(2);
       return;
     }
 
-    // ENTER / Right Arrow moves to next field
     if(e.code === "Enter" || e.code === "ArrowRight"){
       e.preventDefault();
-      fields[(idx+1)%fields.length].focus();
+      fields[(idx + 1) % fields.length].focus();
       return;
     }
 
-    // Left Arrow moves previous
     if(e.code === "ArrowLeft"){
       e.preventDefault();
-      fields[(idx-1+fields.length)%fields.length].focus();
-      return;
-    }
-
-    // Up/Down moves up/down rows
-    if(e.code === "ArrowDown"){
-      e.preventDefault();
-      fields[(idx+1)%fields.length].focus();
-      return;
-    }
-    if(e.code === "ArrowUp"){
-      e.preventDefault();
-      fields[(idx-1+fields.length)%fields.length].focus();
-      return;
-    }
-
-    // Special for date input: let up/down increment date parts
-    if(active.id === "date"){
-      if(e.code === "ArrowUp"){ e.preventDefault(); active.stepUp(); }
-      if(e.code === "ArrowDown"){ e.preventDefault(); active.stepDown(); }
-    }
-
-    // SELECT dropdown Enter opens dropdown
-    if(active.tagName==="SELECT" && e.code==="Enter"){
-      e.preventDefault();
-      active.size = active.options.length; // expand browser default dropdown
+      fields[(idx - 1 + fields.length) % fields.length].focus();
       return;
     }
   });
 </script>
+
 
 
 

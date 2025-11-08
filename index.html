@@ -375,6 +375,106 @@
   }
 </script>
 
+
+
+
+      
+
+<script>
+// ---------------------------------------------
+// 1) Make DATE input allow only 4-digit year entry & auto-jump
+// ---------------------------------------------
+const dateInput = document.getElementById("date");
+
+// Prevent typing more than 4 digits in year portion
+dateInput.addEventListener("input", function() {
+  // If browser allows text input into date, enforce year-length
+  // This only applies when typing manually
+  if (this.value && this.value.length >= 10) {
+    const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
+    const next = fields.indexOf(this) + 1;
+    if(fields[next]) fields[next].focus();
+  }
+});
+
+// ---------------------------------------------
+// 2) Fix Relationship dropdown Enter behavior & Arrow navigation
+// ---------------------------------------------
+let dropdownOpen = false;
+
+$('#contactRel').on('select2:open', function() {
+  dropdownOpen = true;
+});
+$('#contactRel').on('select2:close', function() {
+  dropdownOpen = false;
+});
+
+// override global key control when dropdown is open
+document.addEventListener("keydown", function(e) {
+  const active = document.activeElement;
+
+  // If SELECT2 is open: only allow Up/Down to move list – block moving fields
+  if(dropdownOpen){
+    if(e.code === "Enter"){
+      // Enter selects option normally inside Select2
+      return; 
+    }
+    if(e.code === "ArrowRight" || e.code === "ArrowLeft"){
+      e.preventDefault(); 
+      return;
+    }
+    if(e.code === "ArrowUp" || e.code === "ArrowDown"){
+      // Let Select2 handle Up/Down internally
+      return;
+    }
+    if(e.code === "Space"){
+      // Do NOT move to next page while dropdown is open
+      e.preventDefault();
+      return;
+    }
+  }
+});
+
+// ---------------------------------------------
+// 3) Arrow Up/Down now moves *up/down the form*, not sideways
+// ---------------------------------------------
+document.addEventListener("keydown", function(e) {
+  if(dropdownOpen) return; // skip movement while dropdown open
+
+  const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
+  const active = document.activeElement;
+  const idx = fields.indexOf(active);
+
+  if(idx < 0) return;
+
+  // ArrowDown moves forward
+  if(e.code === "ArrowDown"){
+    e.preventDefault();
+    fields[(idx + 1) % fields.length].focus();
+  }
+
+  // ArrowUp moves backward
+  if(e.code === "ArrowUp"){
+    e.preventDefault();
+    fields[(idx - 1 + fields.length) % fields.length].focus();
+  }
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
 <!-- PAGE 2 -->
 <section class="page hidden" data-step="2">
   <h2 class="font-medium mb-3">Page 2</h2>

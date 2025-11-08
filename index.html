@@ -1620,6 +1620,11 @@ document.getElementById('shareBtn').onclick = async () => {
     }
 
     if (shouldIgnoreKeyHandling(currentEl, e.key)) return;
+    // ✅ Prevent Enter from interfering with <select> dropdowns
+if (e.key === 'Enter' && currentEl && currentEl.tagName === 'SELECT') {
+  return; // let the native dropdown behavior happen
+}
+
 
     // ✅ Special handling for <input type="date">
     if (currentEl && currentEl.tagName === 'INPUT' && currentEl.type === 'date') {

@@ -355,6 +355,32 @@
   });
 
 
+// UP & DOWN ARROW MOVE ROWS
+document.addEventListener("keydown", function(e) {
+  const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
+  const active = document.activeElement;
+  const idx = fields.indexOf(active);
+
+  // Ignore arrows if dropdown is open
+  const selectIsOpen = document.querySelector(".select2-container--open");
+  if (selectIsOpen) return;
+
+  // Move UP
+  if (e.code === "ArrowUp") {
+    e.preventDefault();
+    const prev = fields[idx - 1];
+    if (prev) prev.focus();
+    return;
+  }
+
+  // Move DOWN
+  if (e.code === "ArrowDown") {
+    e.preventDefault();
+    const next = fields[idx + 1];
+    if (next) next.focus();
+    return;
+  }
+});
 
 </script>
 

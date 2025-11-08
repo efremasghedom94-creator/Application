@@ -1568,7 +1568,6 @@ document.getElementById('shareBtn').onclick = async () => {
       focusableElements[i].focus();
     }
     function focusNextAfter(el) {
-      // find the next focusable after the last element of el's date-group (or after el)
       const idx = focusableElements.indexOf(el);
       if (idx === -1) return false;
       const nextIdx = idx + 1;
@@ -1583,8 +1582,12 @@ document.getElementById('shareBtn').onclick = async () => {
       return false;
     }
 
+    // ✅ SAFE PAGE SWITCHING (prevents disappearing pages)
     function switchPage(newStep) {
       const pages = document.querySelectorAll('.page');
+      const totalPages = pages.length;
+      if (newStep < 1 || newStep > totalPages) return; // stop if outside valid range
+
       pages.forEach(p => p.setAttribute('hidden', ''));
       const targetPage = document.querySelector(`.page[data-step="${newStep}"]`);
       if (targetPage) {
@@ -1598,184 +1601,64 @@ document.getElementById('shareBtn').onclick = async () => {
     function caretAtStart(el) { try { return el.selectionStart === 0; } catch { return false; } }
     function caretAtEnd(el) { try { return el.selectionEnd === el.value.length; } catch { return false; } }
 
-function shouldIgnoreKeyHandling(el, key) {
-  if (!el) return false;
-  const tag = (el.tagName || '').toLowerCase();
-  if (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button') return true;
+    // ✅ Ignore keys for some elements
+    function shouldIgnoreKeyHandling(el, key) {
+      if (!el) return false;
+      const tag = (el.tagName || '').toLowerCase();
+      if (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button') return true;
 
-  if (tag === 'textarea' || el.isContentEditable) {
-    if (['Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key)) return true;
-  }
+      if (tag === 'textarea' || el.isContentEditable) {
+        if (['Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key)) return true;
+      }
 
-  if (tag === 'input') {
-    const type = (el.getAttribute('type') || '').toLowerCase();
-
-    // ONLY preserve keys for inputs that explicitly asked for it and are NOT date inputs.
-    // This lets date inputs be handled by your navigation logic even if data-preserve-keys exists.
-    if (el.hasAttribute && el.hasAttribute('data-preserve-keys') && type !== 'date') return true;
-
-    // keep your existing numeric/date exceptions for up/down keys
-    if (['number','time','datetime-local','range'].includes(type)) {
-      if (key === 'ArrowUp' || key === 'ArrowDown') return false;
+      if (tag === 'input') {
+        const type = (el.getAttribute('type') || '').toLowerCase();
+        // preserve keys only if not date
+        if (el.hasAttribute('data-preserve-keys') && type !== 'date') return true;
+      }
+      return false;
     }
-  }
-
-  return false;
-}
 
     if (shouldIgnoreKeyHandling(currentEl, e.key)) return;
 
-    // Returns next focusable element after the date-group container (not just the current part).
-    function focusNextAfterDateGroup(group) {
-      // find the last .date-part in the group, then find next focusable after it
-      const parts = Array.from(group.querySelectorAll('.date-part'));
-      if (!parts.length) return false;
-      const last = parts[parts.length - 1];
-      const idx = focusableElements.indexOf(last);
-      if (idx === -1) return false;
-      if (idx + 1 < focusableElements.length) {
-        focusableElements[idx + 1].focus();
-        return true;
-      }
-      return false;
-    }
-    function focusPrevBeforeDateGroup(group) {
-      const parts = Array.from(group.querySelectorAll('.date-part'));
-      if (!parts.length) return false;
-      const first = parts[0];
-      const idx = focusableElements.indexOf(first);
-      if (idx === -1) return false;
-      if (idx - 1 >= 0) {
-        focusableElements[idx - 1].focus();
-        return true;
-      }
-      return false;
-    }
-
-    // Improved date-part navigation:
-    function tryDatePartJump(el, key) {
-      if (!el || !el.classList) return false;
-      if (!el.classList.contains('date-part')) return false;
-      const group = el.closest('.date-group');
-      if (!group) return false;
-      const parts = Array.from(group.querySelectorAll('.date-part'));
-      const idx = parts.indexOf(el);
-      if (idx === -1) return false;
-
-      const maxAttr = el.getAttribute('maxlength');
-      const isFull = maxAttr ? (el.value ? el.value.length >= parseInt(maxAttr,10) : false) : false;
-
-      // RIGHT or ENTER: if caret at end OR field full OR Enter pressed => move forward
-      if (key === 'ArrowRight' || key === 'Enter') {
-        if (key === 'Enter' || caretAtEnd(el) || isFull) {
-          e.preventDefault();
-          if (idx < parts.length - 1) {
-            parts[idx + 1].focus();
-            try { parts[idx + 1].setSelectionRange(0, 0); } catch {}
-            return true;
-          } else {
-            // last date-part (YYYY): move to next focusable after the date-group
-            if (focusNextAfterDateGroup(group)) return true;
-            // if no next focusable (end of page), try to switch page
-            const currentPage = document.querySelector('.page:not([hidden])');
-            const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
-            const totalPages = document.querySelectorAll('.page').length;
-            if (currentPageNumber < totalPages) {
-              switchPage(currentPageNumber + 1);
-              return true;
-            }
-          }
-        }
-      }
-
-      // LEFT: if caret at start -> move back
-      if (key === 'ArrowLeft') {
-        if (caretAtStart(el)) {
-          e.preventDefault();
-          if (idx > 0) {
-            parts[idx - 1].focus();
-            try { parts[idx - 1].setSelectionRange(parts[idx - 1].value.length, parts[idx - 1].value.length); } catch {}
-            return true;
-          } else {
-            // first date-part: move to previous focusable before the date-group
-            if (focusPrevBeforeDateGroup(group)) return true;
-            // if none, try previous page
-            const currentPage = document.querySelector('.page:not([hidden])');
-            const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
-            if (currentPageNumber > 1) {
-              switchPage(currentPageNumber - 1);
-              const prevPage = document.querySelector(`.page[data-step="${currentPageNumber - 1}"]`);
-              if (prevPage) {
-                const inputs = Array.from(prevPage.querySelectorAll(focusableSelectors))
-                  .filter(el => !el.disabled && el.offsetParent !== null && !el.matches(excludedSelector));
-                if (inputs.length) inputs[inputs.length - 1].focus();
-              }
-              return true;
-            }
-          }
-        }
-      }
-
-      // UP/DOWN: do not change values — move parts vertically or wrap
-      if (key === 'ArrowUp') {
+    // ✅ Special handling for <input type="date">
+    if (currentEl && currentEl.tagName === 'INPUT' && currentEl.type === 'date') {
+      if (e.key === 'Enter' || e.key === 'ArrowRight') {
         e.preventDefault();
-        if (idx > 0) {
-          parts[idx - 1].focus();
-          try { parts[idx - 1].setSelectionRange(parts[idx - 1].value.length, parts[idx - 1].value.length); } catch {}
-        } else {
-          // wrap to last in group
-          parts[parts.length - 1].focus();
-          try { parts[parts.length - 1].setSelectionRange(parts[parts.length - 1].value.length, parts[parts.length - 1].value.length); } catch {}
-        }
-        return true;
+        focusNextAfter(currentEl);
+        return;
       }
-      if (key === 'ArrowDown') {
+      if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        if (idx < parts.length - 1) {
-          parts[idx + 1].focus();
-          try { parts[idx + 1].setSelectionRange(0, 0); } catch {}
-        } else {
-          // wrap to first
-          parts[0].focus();
-          try { parts[0].setSelectionRange(0, 0); } catch {}
-        }
-        return true;
+        focusPrevBefore(currentEl);
+        return;
       }
-
-      return false;
     }
 
-    // Special handling for <input type="date">
-if (currentEl && currentEl.tagName === 'INPUT' && currentEl.type === 'date') {
-  // When Enter or ArrowRight is pressed inside date input
-  if (e.key === 'Enter' || e.key === 'ArrowRight') {
-    e.preventDefault();
-    focusNextAfter(currentEl); // move to next focusable element
-    return;
-  }
-  // When ArrowLeft is pressed inside date input and caret is at start
-  if (e.key === 'ArrowLeft') {
-    e.preventDefault();
-    focusPrevBefore(currentEl); // move to previous focusable element
-    return;
-  }
-}
-
-
-    // Horizontal nav
+    // 🧭 Horizontal navigation
     if (e.key === 'Enter' || e.key === 'ArrowRight') {
-      if (tryDatePartJump(currentEl, e.key)) return;
       e.preventDefault();
       if (currentIndex === -1) { focusAt(0); return; }
+
+      // If last element on page
       if (currentIndex === total - 1) {
         const currentPage = document.querySelector('.page:not([hidden])');
         const currentPageNumber = parseInt(currentPage && currentPage.getAttribute('data-step')) || 0;
         const totalPages = document.querySelectorAll('.page').length;
-        if (currentPageNumber < totalPages) switchPage(currentPageNumber + 1);
-      } else focusAt(currentIndex + 1);
+        if (currentPageNumber < totalPages) {
+          switchPage(currentPageNumber + 1);
+        } else {
+          // ✅ stop if last page
+          return;
+        }
+      } else {
+        focusAt(currentIndex + 1);
+      }
       return;
-    } else if (e.key === 'ArrowLeft') {
-      if (tryDatePartJump(currentEl, 'ArrowLeft')) return;
+    }
+
+    // ⬅️ Left arrow navigation
+    if (e.key === 'ArrowLeft') {
       e.preventDefault();
       if (currentIndex === -1) { focusAt(0); return; }
       if (currentIndex === 0) {
@@ -1790,27 +1673,29 @@ if (currentEl && currentEl.tagName === 'INPUT' && currentEl.type === 'date') {
             if (inputs.length) inputs[inputs.length - 1].focus();
           }
         }
-      } else focusAt(currentIndex - 1);
+      } else {
+        focusAt(currentIndex - 1);
+      }
       return;
     }
 
-    // Vertical nav: Up/Down — prevent native increment on numeric/date inputs
+    // ⬆️⬇️ Vertical navigation
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const tag = (currentEl && currentEl.tagName || '').toLowerCase();
       if (tag === 'input') {
         const type = (currentEl.getAttribute('type') || '').toLowerCase();
         if (['number','date','time','datetime-local','range'].includes(type)) {
           e.preventDefault();
-          if (!tryDatePartJump(currentEl, e.key)) moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
+          moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
           return;
         }
       }
-      if (tryDatePartJump(currentEl, e.key)) return;
       e.preventDefault();
       moveVertically(e.key === 'ArrowUp' ? 'up' : 'down', focusableElements);
       return;
     }
 
+    // Helper: Move vertically between inputs
     function moveVertically(direction, focusables) {
       if (document.activeElement === document.body || focusables.indexOf(document.activeElement) === -1) {
         if (direction === 'up') focusables[focusables.length - 1].focus();
@@ -1839,6 +1724,7 @@ if (currentEl && currentEl.tagName === 'INPUT' && currentEl.type === 'date') {
   });
 })();
 </script>
+
 
 
 

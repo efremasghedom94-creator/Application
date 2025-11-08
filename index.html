@@ -1620,10 +1620,26 @@ document.getElementById('shareBtn').onclick = async () => {
     }
 
     if (shouldIgnoreKeyHandling(currentEl, e.key)) return;
-    // ✅ Prevent Enter from interfering with <select> dropdowns
-if (e.key === 'Enter' && currentEl && currentEl.tagName === 'SELECT') {
-  return; // let the native dropdown behavior happen
+  // ✅ Allow native dropdown behavior for <select> elements
+if (currentEl && currentEl.tagName === 'SELECT') {
+  // Let the browser handle Enter and Arrow keys for dropdown navigation
+  if (['Enter', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+    return; // do not run custom navigation
+  }
+
+  // Optional: if user presses ArrowLeft or ArrowRight, move out of the select
+  if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    focusNextAfter(currentEl);
+    return;
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    focusPrevBefore(currentEl);
+    return;
+  }
 }
+
 
 
     // ✅ Special handling for <input type="date">

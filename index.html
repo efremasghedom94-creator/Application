@@ -221,34 +221,34 @@
   <h2 class="font-medium mb-3">Page 1</h2>
 
   <div class="grid grid-cols-12 gap-3">
+    
     <!-- DATE -->
     <div class="col-span-2">
       <label class="block text-sm">DATE</label>
-      <input id="date" type="date" class="w-full border rounded p-2 mt-1" data-nav />
+      <input id="date" type="date" class="w-full border rounded p-2 mt-1 focus-field" data-nav />
     </div>
 
     <!-- TAKEN BY -->
     <div class="col-span-3">
       <label class="block text-sm">TAKEN BY</label>
-      <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1" placeholder="Name" data-nav />
+      <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1 focus-field" data-nav placeholder="Name" />
     </div>
 
-    <!-- CONTACT NAME / SURNAME -->
+    <!-- CONTACT NAME -->
     <div class="col-span-4">
       <label class="block text-sm">CONTACT NAME / SURNAME</label>
-      <input id="contactName" type="text" class="w-full border rounded p-2 mt-1" data-nav />
+      <input id="contactName" type="text" class="w-full border rounded p-2 mt-1 focus-field" data-nav />
     </div>
 
-    <!-- CONTACT PHONE # -->
+    <!-- CONTACT PHONE -->
     <div class="col-span-2">
       <label class="block text-sm">CONTACT PHONE #</label>
       <input 
         id="contactPhone" 
         type="text" 
         maxlength="14" 
-        class="w-full border rounded p-2 mt-1" 
+        class="w-full border rounded p-2 mt-1 focus-field"
         placeholder="(123) 456-7890"
-        oninput="formatPhone(this)" 
         data-nav
       />
     </div>
@@ -256,82 +256,103 @@
     <!-- CONTACT RELATIONSHIP -->
     <div class="col-span-4">
       <label for="contactRel" class="block text-sm mt-6">CONTACT RELATIONSHIP</label>
-      <select id="contactRel" name="contactRel" class="border rounded p-3 w-72" onchange="toggleOtherRelation(this)" data-nav>
+      <select id="contactRel" name="contactRel" class="border rounded p-3 w-72 focus-field" data-nav>
         <option value="" disabled selected hidden>-- Select Relation --</option>
         <option>Mother</option><option>Father</option><option>Sister</option><option>Brother</option>
         <option>Step-Mother</option><option>Step-Father</option><option>Half-Sister</option><option>Half-Brother</option>
-        <option>Uncle</option><option>Aunt</option><option>Cousin</option><option>Grandmother</option><option>Grandfather</option>
-        <option>Guardian</option><option>Sponsor</option><option>Family Friend</option><option>Neighbor</option>
-        <option>Community Worker</option><option>Social Worker</option><option>Other</option>
+        <option>Uncle</option><option>Aunt</option><option>Cousin</option><option>Grandmother</option>
+        <option>Grandfather</option><option>Guardian</option><option>Sponsor</option><option>Family Friend</option>
+        <option>Neighbor</option><option>Community Worker</option><option>Social Worker</option><option>Other</option>
       </select>
 
-      <!-- Show only if Other is selected -->
+      <!-- Only appears for Other -->
       <input 
         type="text" 
         id="otherRelation" 
-        name="otherRelation" 
-        class="border rounded p-2 w-72 mt-2 hidden" 
+        class="border rounded p-2 w-72 mt-2 hidden focus-field" 
         placeholder="Please specify"
         data-nav
       />
     </div>
+
   </div>
 
-  <div class="nav-buttons justify-end mt-4">
+  <div class="nav-buttons justify-end">
     <button type="button" class="px-4 py-2 bg-green-700 text-white rounded nav-control" onclick="goTo(2)">Next</button>
   </div>
 </section>
 
+<style>
+  /* Subtle highlight on focused field */
+  .focus-field:focus {
+    outline: 2px solid #2563eb !important;
+    background: #eef6ff !important;
+    transition: 0.15s;
+  }
+</style>
+
 <script>
-function formatPhone(input) {
-  let digits = input.value.replace(/\D/g, '').substring(0, 10);
-  let f = '';
-  if(digits.length > 0) f = '(' + digits.substring(0,3);
-  if(digits.length >= 4) f += ') ' + digits.substring(3,6);
-  if(digits.length >= 7) f += '-' + digits.substring(6,10);
-  input.value = f;
-}
-
-function toggleOtherRelation(select){
-  const box = document.getElementById('otherRelation');
-  if(select.value === 'Other'){ box.classList.remove('hidden'); box.focus(); }
-  else { box.classList.add('hidden'); box.value = ''; }
-}
-
-// Keyboard navigation
-const navFields = Array.from(document.querySelectorAll('[data-nav]'));
-
-function moveFocus(delta){
-  const idx = navFields.indexOf(document.activeElement);
-  if(idx === -1) return;
-  const next = (idx + delta + navFields.length) % navFields.length;
-  navFields[next].focus();
-}
-
-document.addEventListener('keydown', function(e){
-  const active = document.activeElement;
-
-  // Dropdown: let Enter open it normally
-  if(active.tagName === 'SELECT'){
-    if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
-      // Let browser open dropdown; do not move focus
-      return;
+  // Show/hide Other Relationship input
+  function toggleOtherRelation(select){
+    const box = document.getElementById("otherRelation");
+    if(select.value === "Other"){
+      box.classList.remove("hidden");
+      setTimeout(() => box.focus(), 10);
+    } else {
+      box.classList.add("hidden");
+      box.value = "";
     }
   }
+  document.getElementById("contactRel").addEventListener("change", function(){
+    toggleOtherRelation(this);
+  });
 
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    moveFocus(1);
-  }
-  if(e.key === 'ArrowDown'){
-    e.preventDefault();
-    moveFocus(1);
-  }
-  if(e.key === 'ArrowUp'){
-    e.preventDefault();
-    moveFocus(-1);
-  }
-});
+  // Auto-jump on date selection
+  document.getElementById("date").addEventListener("change", function(){
+    const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
+    const next = fields.indexOf(this) + 1;
+    if(fields[next]) fields[next].focus();
+  });
+
+  // Auto-format + auto-jump phone
+  document.getElementById("contactPhone").addEventListener("input", function(){
+    let v = this.value.replace(/\D/g,"").slice(0,10);
+    let f = "";
+    if(v.length > 0) f = "(" + v.slice(0,3);
+    if(v.length >= 4) f += ") " + v.slice(3,6);
+    if(v.length >= 7) f += "-" + v.slice(6);
+    this.value = f;
+    if(f.length === 14){
+      const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
+      const next = fields.indexOf(this) + 1;
+      if(fields[next]) fields[next].focus();
+    }
+  });
+
+  // Global Keyboard Navigation
+  document.addEventListener("keydown", function(e) {
+    const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
+    const active = document.activeElement;
+    const idx = fields.indexOf(active);
+
+    if(e.code === "Space" && !e.shiftKey){
+      e.preventDefault();
+      goTo(2);
+      return;
+    }
+
+    if(e.code === "Enter" || e.code === "ArrowRight"){
+      e.preventDefault();
+      fields[(idx + 1) % fields.length].focus();
+      return;
+    }
+
+    if(e.code === "ArrowLeft"){
+      e.preventDefault();
+      fields[(idx - 1 + fields.length) % fields.length].focus();
+      return;
+    }
+  });
 </script>
 
 

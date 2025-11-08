@@ -354,40 +354,7 @@
     }
   });
 
-  // Smart keyboard navigation inside the DATE field
-(function() {
-  const dateField = document.getElementById("date");
 
-  dateField.addEventListener("keydown", function(e) {
-    const fields = Array.from(document.querySelectorAll("[data-nav]:not(.hidden)"));
-    const idx = fields.indexOf(dateField);
-
-    // Caret position tracking (works only after user focuses inside field at least once)
-    const caretStart = this.selectionStart;
-    const caretEnd = this.selectionEnd;
-    const valueLength = this.value.length;
-
-    // RIGHT ARROW -> if caret is at end, move to next field
-    if (e.code === "ArrowRight" && caretEnd === valueLength) {
-      e.preventDefault();
-      if (fields[idx + 1]) fields[idx + 1].focus();
-      return;
-    }
-
-    // LEFT ARROW -> if caret at start, move to previous field
-    if (e.code === "ArrowLeft" && caretStart === 0) {
-      e.preventDefault();
-      if (fields[idx - 1]) fields[idx - 1].focus();
-      return;
-    }
-
-    // ENTER -> simply jump to next field (already your behavior)
-    if (e.code === "Enter") {
-      e.preventDefault();
-      if (fields[idx + 1]) fields[idx + 1].focus();
-    }
-  });
-})();
 
 </script>
 

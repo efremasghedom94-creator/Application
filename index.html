@@ -1736,6 +1736,23 @@ document.getElementById('shareBtn').onclick = async () => {
       return false;
     }
 
+    // Special handling for <input type="date">
+if (currentEl && currentEl.tagName === 'INPUT' && currentEl.type === 'date') {
+  // When Enter or ArrowRight is pressed inside date input
+  if (e.key === 'Enter' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    focusNextAfter(currentEl); // move to next focusable element
+    return;
+  }
+  // When ArrowLeft is pressed inside date input and caret is at start
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    focusPrevBefore(currentEl); // move to previous focusable element
+    return;
+  }
+}
+
+
     // Horizontal nav
     if (e.key === 'Enter' || e.key === 'ArrowRight') {
       if (tryDatePartJump(currentEl, e.key)) return;

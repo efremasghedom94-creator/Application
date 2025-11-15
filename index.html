@@ -217,127 +217,17 @@
   <h2 class="font-medium mb-3">Page 1</h2>
 
   <div class="grid grid-cols-12 gap-3">
- <!-- DATE FIELD (Option A: Text Input + Hidden Native Date Picker) -->
+<!-- Simple native date picker -->
 <div class="col-span-2">
   <label class="block text-sm">DATE</label>
-
-  <!-- Visible MM/DD/YYYY input -->
   <input 
-    id="date_display"
-    type="text"
-    class="w-full border rounded p-2 mt-1"
-    placeholder="MM/DD/YYYY"
-    maxlength="10"
-  />
-
-  <!-- Hidden native input (keeps the browser’s calendar) -->
-  <input 
-    id="date_native"
+    id="date"
     type="date"
-    class="hidden"
+    class="w-full border rounded p-2 mt-1"
+    min="2000-01-01"
+    max="2050-12-31"
   />
 </div>
-
-<script>
-  const display = document.getElementById("date_display");
-  const nativeInput = document.getElementById("date_native");
-
-  // When clicking the display field → open native calendar
-  display.addEventListener("click", () => nativeInput.showPicker());
-
-  // Convert native YYYY-MM-DD → MM/DD/YYYY and show it
-  nativeInput.addEventListener("change", () => {
-    const val = nativeInput.value; // yyyy-mm-dd
-    if (!val) return;
-    const [yyyy, mm, dd] = val.split("-");
-    display.value = `${mm}/${dd}/${yyyy}`;
-  });
-
-  // Auto-format as MM/DD/YYYY while typing
-  display.addEventListener("input", () => {
-    let v = display.value.replace(/\D/g, "").slice(0, 8);
-
-    if (v.length >= 3) v = v.slice(0, 2) + "/" + v.slice(2);
-    if (v.length >= 6) v = v.slice(0, 5) + "/" + v.slice(5);
-
-    display.value = v;
-    syncToNative();
-  });
-
-  // Sync formatted date → native YYYY-MM-DD input
-  function syncToNative() {
-    const v = display.value;
-    if (v.length !== 10) {
-      nativeInput.value = "";
-      return;
-    }
-    const [mm, dd, yyyy] = v.split("/").map(Number);
-
-    // Validate exact date (including Feb 29)
-    const dt = new Date(yyyy, mm - 1, dd);
-    if (
-      dt.getFullYear() === yyyy &&
-      dt.getMonth() === mm - 1 &&
-      dt.getDate() === dd
-    ) {
-      nativeInput.value = `${yyyy.toString().padStart(4,"0")}-${mm
-        .toString()
-        .padStart(2,"0")}-${dd.toString().padStart(2,"0")}`;
-    } else {
-      nativeInput.value = "";
-    }
-  }
-
-  // Keyboard navigation and arrow-based value control
-  display.addEventListener("keydown", function (e) {
-    const pos = this.selectionStart;
-
-    // LEFT/RIGHT navigation only inside field
-    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-      e.preventDefault();
-
-      if (e.key === "ArrowRight") {
-        if (pos === 2) this.setSelectionRange(3, 3);
-        else if (pos === 5) this.setSelectionRange(6, 6);
-        else this.setSelectionRange(pos + 1, pos + 1);
-      }
-
-      if (e.key === "ArrowLeft") {
-        if (pos === 6) this.setSelectionRange(5, 5);
-        else if (pos === 3) this.setSelectionRange(2, 2);
-        else this.setSelectionRange(pos - 1, pos - 1);
-      }
-      return;
-    }
-
-    // UP/DOWN arrow to change month/day/year
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      e.preventDefault();
-      adjustDate(e.key === "ArrowUp" ? 1 : -1);
-    }
-  });
-
-  // Adjust only the part the cursor is in (MM or DD or YYYY)
-  function adjustDate(direction) {
-    if (display.value.length !== 10) return;
-
-    const [mm, dd, yyyy] = display.value.split("/").map(Number);
-    let date = new Date(yyyy, mm - 1, dd);
-
-    const pos = display.selectionStart;
-
-    if (pos <= 2) date.setMonth(date.getMonth() + direction);      // Month
-    else if (pos <= 5) date.setDate(date.getDate() + direction);   // Day
-    else date.setFullYear(date.getFullYear() + direction);         // Year
-
-    const newMM = (date.getMonth() + 1).toString().padStart(2, "0");
-    const newDD = date.getDate().toString().padStart(2, "0");
-    const newYY = date.getFullYear();
-
-    display.value = `${newMM}/${newDD}/${newYY}`;
-    syncToNative();
-  }
-</script>
 
 
 

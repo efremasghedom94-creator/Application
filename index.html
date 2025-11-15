@@ -216,25 +216,19 @@
   <h2 class="font-medium mb-3">Page 1</h2>
 
   <div class="grid grid-cols-12 gap-3">
-<!-- DATE -->
 <div class="col-span-2">
-  <label class="block text-sm">DATE</label>
-  <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
+  <label class="block text-sm">DATE (YYYY-MM-DD)</label>
+  <input 
+    id="date" 
+    type="text"
+    class="w-full border rounded p-2 mt-1"
+    placeholder="YYYY-MM-DD"
+    pattern="\\d{4}-\\d{2}-\\d{2}"
+    maxlength="10"
+    oninput="this.value = this.value.replace(/[^0-9-]/g, '')"
+  />
 </div>
 
-<script>
-  document.getElementById("date").addEventListener("input", function () {
-    const value = this.value;
-    const year = value.split("-")[0];
-
-    // If year is not 4 digits, clear it or prevent submission
-    if (year.length !== 4) {
-      this.setCustomValidity("Year must be exactly 4 digits (YYYY).");
-    } else {
-      this.setCustomValidity("");
-    }
-  });
-</script>
 
 
     <!-- TAKEN BY -->

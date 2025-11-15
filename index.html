@@ -1544,6 +1544,102 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
+<script>
+/* ==========================================================
+   UNIVERSAL KEYBOARD NAVIGATION FOR ALL INPUTS
+   ========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Select all focusable fields (input, select, textarea, TS/Select2 included)
+  function getFields() {
+    return Array.from(document.querySelectorAll(`
+      input:not([type="hidden"]),
+      select,
+      textarea,
+      .ts-control,          /* TomSelect */
+      .select2-selection    /* Select2 */
+    `)).filter(el => !el.disabled && !el.classList.contains("hidden"));
+  }
+
+  function focusField(index) {
+    const fields = getFields();
+    if (index >= 0 && index < fields.length) {
+      const el = fields[index];
+
+      // Handle Select2
+      if (el.classList.contains("select2-selection")) {
+        el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        return;
+      }
+
+      // Handle TomSelect
+      if (el.classList.contains("ts-control")) {
+        el.querySelector("input")?.focus();
+        return;
+      }
+
+      // Normal fields
+      el.focus();
+    }
+  }
+
+  document.addEventListener("keydown", (e) => {
+    const fields = getFields();
+    const active = document.activeElement;
+
+    let index = fields.indexOf(active);
+    if (index === -1) {
+      // TomSelect internal input
+      const tsParent = active.closest(".ts-control");
+      if (tsParent) index = fields.indexOf(tsParent);
+
+      // Select2 search field
+      const s2Parent = active.closest(".select2-container");
+      if (s2Parent) {
+        index = fields.indexOf(
+          s2Parent.previousElementSibling?.nextElementSibling ??
+          s2Parent.previousElementSibling
+        );
+      }
+    }
+
+    if (index < 0) return;
+    
+    // === ENTER: Move Next ===
+    if (e.key === "Enter" && !active.classList.contains("ts-input")) {
+      e.preventDefault();
+      focusField(index + 1);
+      return;
+    }
+
+    // === SHIFT + ENTER: Move Prev ===
+    if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+      focusField(index - 1);
+      return;
+    }
+
+    // === ARROW RIGHT / DOWN: Next ===
+    if (["ArrowRight", "ArrowDown"].includes(e.key)) {
+      // Let arrows work normally inside text fields (left/right movement)
+      if (active.tagName === "INPUT" && active.type === "text") return;
+
+      e.preventDefault();
+      focusField(index + 1);
+      return;
+    }
+
+    // === ARROW LEFT / UP: Previous ===
+    if (["ArrowLeft", "ArrowUp"].includes(e.key)) {
+      if (active.tagName === "INPUT" && active.type === "text") return;
+
+      e.preventDefault();
+      focusField(index - 1);
+      return;
+    }
+  });
+});
+</script>
 
 
 

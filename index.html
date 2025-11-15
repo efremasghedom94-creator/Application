@@ -1543,105 +1543,214 @@ document.getElementById('shareBtn').onclick = async () => {
 
   
 <script>
-// Keyboard Navigation System
-class KeyboardNav {
+// Page 1 Keyboard Navigation
+class Page1KeyboardNav {
     constructor() {
-        this.currentPage = 1;
+        this.focusableElements = [];
+        this.currentIndex = 0;
         this.init();
     }
 
     init() {
-        document.addEventListener('keydown', (e) => this.handleKeys(e));
-        // Focus first field on load
-        setTimeout(() => this.focusFirstField(), 100);
+        // Get all focusable elements on page 1
+        const page1 = document.querySelector('[data-step="1"]');
+        if (!page1) return;
+
+        this.focusableElements = Array.from(page1.querySelectorAll(
+            'input:not([disabled]):not([type="hidden"]), select, textarea, button'
+        ));
+
+        // Add navigation attributes
+        this.focusableElements.forEach((el, index) => {
+            el.setAttribute('data-nav-index', index);
+            el.classList.add('keyboard-navigatable');
+        });
+
+        // Add event listeners
+        page1.addEventListener('keydown', (e) => this.handleKeydown(e));
+        
+        // Focus first element when page loads
+        setTimeout(() => {
+            if (this.focusableElements[0]) {
+                this.focusableElements[0].focus();
+                this.highlightCurrent();
+            }
+        }, 100);
+
+        console.log('Page 1 keyboard navigation loaded. Use arrow keys to navigate.');
     }
 
-    handleKeys(e) {
-        // Page navigation
-        if (e.shiftKey) {
-            if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                this.nextPage();
-                return;
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                this.prevPage();
-                return;
+    handleKeydown(e) {
+        // Only handle arrow keys when not in text input (except for navigation between fields)
+        if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Tab'].includes(e.key)) {
+            e.preventDefault();
+
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                case 'Tab':
+                    if (!e.shiftKey) this.moveToNext();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    if (e.shiftKey && e.key === 'Tab') break; // Let Shift+Tab work normally
+                    this.moveToPrevious();
+                    break;
             }
         }
+    }
 
-        // Quick generate from any page
-        if (e.ctrlKey && e.key === 'Enter') {
-            e.preventDefault();
-            if (typeof generateFinal === 'function') generateFinal();
-            return;
+    moveToNext() {
+        this.currentIndex = (this.currentIndex + 1) % this.focusableElements.length;
+        this.focusCurrent();
+    }
+
+    moveToPrevious() {
+        this.currentIndex = this.currentIndex === 0 ? 
+            this.focusableElements.length - 1 : this.currentIndex - 1;
+        this.focusCurrent();
+    }
+
+    focusCurrent() {
+        const currentElement = this.focusableElements[this.currentIndex];
+        if (currentElement) {
+            currentElement.focus();
+            this.highlightCurrent();
+            
+            // Special handling for Select2 dropdowns
+            if (currentElement.id === 'contactRel' && currentElement.parentNode.querySelector('.select2')) {
+                this.highlightSelect2(currentElement);
+            }
         }
-
-        // Escape from final form
-        if (e.key === 'Escape' && document.getElementById('finalWrap') && 
-            !document.getElementById('finalWrap').classList.contains('hidden')) {
-            document.getElementById('editBtn')?.click();
-        }
     }
 
-    nextPage() {
-        const next = this.currentPage < 6 ? this.currentPage + 1 : 1;
-        this.goToPage(next);
-    }
-
-    prevPage() {
-        const prev = this.currentPage > 1 ? this.currentPage - 1 : 6;
-        this.goToPage(prev);
-    }
-
-    goToPage(page) {
-        this.currentPage = page;
-        if (typeof goTo === 'function') goTo(page);
-        setTimeout(() => this.focusFirstField(), 150);
-    }
-
-    focusFirstField() {
-        const page = document.querySelector(`[data-step="${this.currentPage}"]`);
-        if (!page) return;
+    highlightCurrent() {
+        // Remove previous highlights
+        document.querySelectorAll('.keyboard-highlight').forEach(el => {
+            el.classList.remove('keyboard-highlight');
+        });
         
-        const firstField = page.querySelector('input, select, textarea');
-        if (firstField) firstField.focus();
+        // Remove Select2 highlights
+        document.querySelectorAll('.select2-highlight').forEach(el => {
+            el.classList.remove('select2-highlight');
+        });
+
+        const currentElement = this.focusableElements[this.currentIndex];
+        if (currentElement) {
+            currentElement.classList.add('keyboard-highlight');
+            
+            // Scroll into view if needed
+            currentElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center',
+                inline: 'nearest'
+            });
+        }
+    }
+
+    highlightSelect2(selectElement) {
+        const select2Container = selectElement.parentNode.querySelector('.select2');
+        if (select2Container) {
+            select2Container.classList.add('select2-highlight');
+        }
     }
 }
 
-// Initialize when ready
+// Initialize when page 1 is active
+function initPage1Keyboard() {
+    const page1 = document.querySelector('[data-step="1"]');
+    if (page1 && !page1.classList.contains('hidden')) {
+        window.page1Nav = new Page1KeyboardNav();
+    }
+}
+
+// Re-initialize when navigating to page 1
+const originalGoTo = window.goTo;
+window.goTo = function(step) {
+    originalGoTo(step);
+    if (step === 1) {
+        setTimeout(() => {
+            if (!window.page1Nav) {
+                window.page1Nav = new Page1KeyboardNav();
+            } else {
+                window.page1Nav.init(); // Re-initialize to capture any DOM changes
+            }
+        }, 150);
+    }
+};
+
+// Initialize on load if we're on page 1
 document.addEventListener('DOMContentLoaded', () => {
-    window.keyboardNav = new KeyboardNav();
-    
-    // Enhance existing navigation
-    const originalGoTo = window.goTo;
-    window.goTo = function(step) {
-        originalGoTo(step);
-        if (window.keyboardNav) {
-            window.keyboardNav.currentPage = step;
-            setTimeout(() => window.keyboardNav.focusFirstField(), 100);
-        }
-    };
+    setTimeout(() => {
+        initPage1Keyboard();
+    }, 200);
 });
 
-// Add focus styles
-const focusStyles = `
-.focusable:focus {
+// Re-initialize when dynamic content changes (like relationship dropdown)
+function observePage1Changes() {
+    const observer = new MutationObserver(() => {
+        if (window.page1Nav && document.querySelector('[data-step="1"]:not(.hidden)')) {
+            setTimeout(() => {
+                window.page1Nav.init();
+            }, 100);
+        }
+    });
+
+    const page1 = document.querySelector('[data-step="1"]');
+    if (page1) {
+        observer.observe(page1, {
+            childList: true,
+            subtree: true,
+            attributes: true
+        });
+    }
+}
+
+// Start observing after a delay
+setTimeout(observePage1Changes, 500);
+</script>
+
+<style>
+/* Keyboard navigation styles for Page 1 */
+.keyboard-highlight {
     outline: 3px solid #3b82f6 !important;
     outline-offset: 2px !important;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
-    z-index: 10;
+    border-color: #3b82f6 !important;
+    z-index: 1000 !important;
+    position: relative !important;
 }
-`;
-const style = document.createElement('style');
-style.textContent = focusStyles;
-document.head.appendChild(style);
 
-// Make all form elements focusable
-document.querySelectorAll('input, select, textarea, button').forEach(el => {
-    el.classList.add('focusable');
-});
-</script>
+.select2-highlight .select2-selection {
+    outline: 3px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+    border-color: #3b82f6 !important;
+}
+
+/* Ensure good contrast and visibility */
+.keyboard-navigatable:focus {
+    outline: 2px solid #2563eb !important;
+    outline-offset: 1px !important;
+}
+
+/* Style for the Next button when focused */
+.nav-buttons button:focus {
+    outline: 2px solid white !important;
+    outline-offset: 2px !important;
+    background-color: #059669 !important;
+}
+
+/* Better focus for date inputs */
+input[type="date"]:focus {
+    border-color: #3b82f6 !important;
+}
+
+/* Improved Select2 focus */
+.select2-container--default.select2-container--focus .select2-selection {
+    border-color: #3b82f6 !important;
+}
+</style>
 
 
 

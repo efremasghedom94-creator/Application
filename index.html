@@ -215,239 +215,292 @@
 <section class="page" data-step="1">
   <h2 class="font-medium mb-3">Page 1</h2>
 
-  <div class="grid grid-cols-12 gap-3" id="page1-grid">
+  <div class="grid grid-cols-12 gap-3">
     <!-- DATE -->
     <div class="col-span-2">
-      <label for="date" class="block text-sm">DATE</label>
-      <input id="date" type="date" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="0" />
+      <label class="block text-sm">DATE</label>
+      <input id="date" type="date" class="w-full border rounded p-2 mt-1" data-preserve-keys="true" />
     </div>
 
     <!-- TAKEN BY -->
     <div class="col-span-3">
-      <label for="takenBy" class="block text-sm">TAKEN BY</label>
-      <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="1" placeholder="Name" />
+      <label class="block text-sm">TAKEN BY</label>
+      <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1" placeholder="Name" />
     </div>
 
     <!-- CONTACT NAME / SURNAME -->
     <div class="col-span-4">
-      <label for="contactName" class="block text-sm">CONTACT NAME / SURNAME</label>
-      <input id="contactName" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="2" />
+      <label class="block text-sm">CONTACT NAME / SURNAME</label>
+      <input id="contactName" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
-    <!-- CONTACT PHONE # -->
-    <div class="col-span-2">
-      <label for="contactPhone" class="block text-sm">CONTACT PHONE #</label>
-      <input 
-        id="contactPhone" 
-        type="text" 
-        maxlength="14" 
-        class="w-full border rounded p-2 mt-1 focusable-cell" 
-        data-row="0" data-col="3"
-        placeholder="(123) 456-7890"
-        oninput="formatPhone(this)" 
-      />
-    </div>
+<!-- CONTACT PHONE # -->
+<div class="col-span-2">
+  <label class="block text-sm">CONTACT PHONE #</label>
+  <input 
+    id="contactPhone" 
+    type="text" 
+    maxlength="14" 
+    class="w-full border rounded p-2 mt-1" 
+    placeholder="(123) 456-7890"
+    oninput="formatPhone(this)" 
+  />
+</div>
 
-    <!-- CONTACT RELATIONSHIP -->
-    <div class="col-span-4">
-      <label for="contactRel" class="block text-sm mt-6">CONTACT RELATIONSHIP</label>
-      <select id="contactRel" name="contactRel" class="border rounded p-3 w-72 focusable-cell" data-row="1" data-col="0" onchange="toggleOtherRelation(this)">
-        <option value="" disabled selected hidden>-- Select Relation --</option>
-        <option value="Mother">Mother</option>
-        <option value="Father">Father</option>
-        <option value="Sister">Sister</option>
-        <option value="Brother">Brother</option>
-        <option value="Step-Mother">Step-Mother</option>
-        <option value="Step-Father">Step-Father</option>
-        <option value="Half-Sister">Half-Sister</option>
-        <option value="Half-Brother">Half-Brother</option>
-        <option value="Uncle">Uncle</option>
-        <option value="Aunt">Aunt</option>
-        <option value="Cousin">Cousin</option>
-        <option value="Grandmother">Grandmother</option>
-        <option value="Grandfather">Grandfather</option>
-        <option value="Guardian">Guardian</option>
-        <option value="Sponsor">Sponsor</option>
-        <option value="Family Friend">Family Friend</option>
-        <option value="Neighbor">Neighbor</option>
-        <option value="Community Worker">Community Worker</option>
-        <option value="Social Worker">Social Worker</option>
-        <option value="Other">Other</option>
-      </select>
+<script>
+  function formatPhone(input) {
+    // Strip out all non-digit characters
+    let digits = input.value.replace(/\D/g, '');
 
-      <!-- Show only if "Other" is selected -->
-      <input 
-        type="text" 
-        id="otherRelation" 
-        name="otherRelation" 
-        class="border rounded p-2 w-72 mt-2 hidden focusable-cell" 
-        data-row="1" data-col="1"
-        placeholder="Please specify"
-      />
-    </div>
+    // Limit to 10 digits max
+    digits = digits.substring(0, 10);
+
+    // Build formatted string step by step
+    let formatted = '';
+    if (digits.length > 0) {
+      formatted = '(' + digits.substring(0, 3);
+    }
+    if (digits.length >= 4) {
+      formatted += ') ' + digits.substring(3, 6);
+    }
+    if (digits.length >= 7) {
+      formatted += '-' + digits.substring(6, 10);
+    }
+
+    input.value = formatted;
+  }
+</script>
+
+<!-- CONTACT RELATIONSHIP -->
+<div class="col-span-4">
+  <label for="contactRel" class="block text-sm mt-6">CONTACT RELATIONSHIP</label>
+  <select id="contactRel" name="contactRel" class="border rounded p-3 w-72" onchange="toggleOtherRelation(this)">
+    <option value="" disabled selected hidden>-- Select Relation --</option>
+    <option value="Mother">Mother</option>
+    <option value="Father">Father</option>
+    <option value="Sister">Sister</option>
+    <option value="Brother">Brother</option>
+    <option value="Step-Mother">Step-Mother</option>
+    <option value="Step-Father">Step-Father</option>
+    <option value="Half-Sister">Half-Sister</option>
+    <option value="Half-Brother">Half-Brother</option>
+    <option value="Uncle">Uncle</option>
+    <option value="Aunt">Aunt</option>
+    <option value="Cousin">Cousin</option>
+    <option value="Grandmother">Grandmother</option>
+    <option value="Grandfather">Grandfather</option>
+    <option value="Guardian">Guardian</option>
+    <option value="Sponsor">Sponsor</option>
+    <option value="Family Friend">Family Friend</option>
+    <option value="Neighbor">Neighbor</option>
+    <option value="Community Worker">Community Worker</option>
+    <option value="Social Worker">Social Worker</option>
+    <option value="Other">Other</option>
+  </select>
+
+  <!-- Show only if "Other" is selected -->
+  <input 
+    type="text" 
+    id="otherRelation" 
+    name="otherRelation" 
+    class="border rounded p-2 w-72 mt-2 hidden" 
+    placeholder="Please specify"
+  />
+</div>
+
+<!-- Initialize Select2 for dropdown direction fix -->
+<script>
+  $(document).ready(function() {
+    $('#contactRel').select2({
+      dropdownParent: $(document.body),   // render dropdown in body
+      dropdownPosition: 'below',          // prefer downward
+      width: '288px'                      // matches Tailwind w-72
+    });
+  });
+</script>
+
+<style>
+  /* Ensure parent containers don't clip dropdowns */
+  .page {
+    overflow: visible !important;
+  }
+
+  /* Style consistency with your theme */
+  .select2-container .select2-selection--single {
+    height: 42px;
+    border: 1px solid #d1d5db; /* Tailwind gray-300 */
+    border-radius: 0.375rem;
+    padding: 6px 10px;
+    background-color: #fff;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 42px;
+    right: 10px;
+  }
+</style>
+
   </div>
 
   <!-- Next button -->
-  <div class="nav-buttons justify-end">
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded nav-control focusable-cell" data-row="2" data-col="0" onclick="goTo(2)" data-next="2">
-      Next
-    </button>
-  </div>
+<div class="nav-buttons justify-end">
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded nav-control" onclick="goTo(2)">Next</button>
+</div>
+
 </section>
+
+<script>
+  // Show/hide the "Other" input box for Contact Relationship
+  function toggleOtherRelation(select){
+    const otherBox = document.getElementById('otherRelation');
+    if(select.value === 'Other'){
+      otherBox.classList.remove('hidden');
+      otherBox.focus();
+    } else {
+      otherBox.classList.add('hidden');
+      otherBox.value = '';
+    }
+  }
+
+  // Clean value retrieval for yellow form
+  function getContactRelationship() {
+    const rel = document.getElementById('contactRel')?.value;
+    const other = document.getElementById('otherRelation')?.value;
+    return rel === 'Other' ? (other || 'Other') : (rel || '');
+  }
+</script>
 
 <!-- PAGE 2 -->
 <section class="page hidden" data-step="2">
   <h2 class="font-medium mb-3">Page 2</h2>
 
-  <div class="grid grid-cols-12 gap-3 mb-3" id="page2-grid">
+  <div class="grid grid-cols-12 gap-3 mb-3">
     <!-- STUDENT'S STATUS -->
     <div class="col-span-6">
-      <fieldset>
-        <legend class="block text-sm">STUDENT'S STATUS</legend>
-        <div class="mt-1 flex flex-wrap gap-3 items-center">
-          <label class="inline-flex items-center">
-            <input type="radio" name="studentStatus" value="PR" class="mr-2 focusable-cell" data-row="0" data-col="0" onchange="toggleOtherField('studentStatusOther', this)">PR
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="studentStatus" value="RC" class="mr-2 focusable-cell" data-row="0" data-col="1" onchange="toggleOtherField('studentStatusOther', this)">RC
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="studentStatus" value="SP" class="mr-2 focusable-cell" data-row="0" data-col="2" onchange="toggleOtherField('studentStatusOther', this)">SP
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="studentStatus" value="WP" class="mr-2 focusable-cell" data-row="0" data-col="3" onchange="toggleOtherField('studentStatusOther', this)">WP
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="studentStatus" value="Other" class="mr-2 focusable-cell" data-row="0" data-col="4" onchange="toggleOtherField('studentStatusOther', this)">Other
-          </label>
-          <!-- Hidden until "Other" -->
-          <input id="studentStatusOther" type="text" class="hidden border rounded p-2 ml-2 focusable-cell" data-row="0" data-col="5" placeholder="Specify" />
-        </div>
-      </fieldset>
+      <label class="block text-sm">STUDENT'S STATUS</label>
+      <div class="mt-1 flex flex-wrap gap-3 items-center">
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="PR" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">PR</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="RC" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">RC</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="SP" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">SP</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">WP</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">Other</label>
+        <!-- Hidden until "Other" -->
+        <input id="studentStatusOther" type="text" class="hidden border rounded p-2 ml-2" placeholder="Specify" />
+      </div>
     </div>
 
     <!-- IMMIGRATION DOCUMENT -->
     <div class="col-span-6">
-      <fieldset>
-        <legend class="block text-sm">IMMIGRATION DOCUMENT (OF NATURAL PARENT / GUARDIAN)</legend>
-        <div class="mt-1 flex flex-wrap gap-3 items-center">
-          <label class="inline-flex items-center">
-            <input type="radio" name="immDoc" value="PR" class="mr-2 focusable-cell" data-row="1" data-col="0" onchange="toggleOtherField('immDocOther', this)">PR
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="immDoc" value="RC" class="mr-2 focusable-cell" data-row="1" data-col="1" onchange="toggleOtherField('immDocOther', this)">RC
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="immDoc" value="SP" class="mr-2 focusable-cell" data-row="1" data-col="2" onchange="toggleOtherField('immDocOther', this)">SP
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="immDoc" value="WP" class="mr-2 focusable-cell" data-row="1" data-col="3" onchange="toggleOtherField('immDocOther', this)">WP
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="immDoc" value="Other" class="mr-2 focusable-cell" data-row="1" data-col="4" onchange="toggleOtherField('immDocOther', this)">Other
-          </label>
-          <!-- Hidden until "Other" -->
-          <input id="immDocOther" type="text" class="hidden border rounded p-2 ml-2 focusable-cell" data-row="1" data-col="5" placeholder="Specify" />
-        </div>
-      </fieldset>
+      <label class="block text-sm">IMMIGRATION DOCUMENT (OF NATURAL PARENT / GUARDIAN)</label>
+      <div class="mt-1 flex flex-wrap gap-3 items-center">
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="PR" class="mr-2" onchange="toggleOtherField('immDocOther', this)">PR</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="RC" class="mr-2" onchange="toggleOtherField('immDocOther', this)">RC</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="SP" class="mr-2" onchange="toggleOtherField('immDocOther', this)">SP</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-2" onchange="toggleOtherField('immDocOther', this)">WP</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-2" onchange="toggleOtherField('immDocOther', this)">Other</label>
+        <!-- Hidden until "Other" -->
+        <input id="immDocOther" type="text" class="hidden border rounded p-2 ml-2" placeholder="Specify" />
+      </div>
     </div>
 
     <!-- EXPIRY DATE -->
     <div class="col-span-4 mt-2">
-      <label for="expiry" class="block text-sm">EXPIRY DATE (RC / SP / WP)</label>
-      <input id="expiry" type="date" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="2" data-col="0" />
+      <label class="block text-sm">EXPIRY DATE (RC / SP / WP)</label>
+      <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
     </div>
 
     <!-- PREVIOUS ATTENDANCE -->
     <div class="col-span-12 mt-2">
-      <fieldset>
-        <legend class="block text-sm">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</legend>
-        <div class="mt-1 flex items-center gap-6">
-          <label class="inline-flex items-center">
-            <input type="radio" name="prevAttend" value="No" onchange="toggleAttendance(false)" class="mr-2 focusable-cell" data-row="3" data-col="0">No
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="prevAttend" value="Yes" onchange="toggleAttendance(true)" class="mr-2 focusable-cell" data-row="3" data-col="1">Yes
-          </label>
-        </div>
-        <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input focusable-cell" data-row="4" data-col="0" placeholder="If Yes: Where / Grade / For how long" disabled />
-      </fieldset>
+      <label class="block text-sm">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
+      <div class="mt-1 flex items-center gap-6">
+        <label class="inline-flex items-center"><input type="radio" name="prevAttend" value="No" onchange="toggleAttendance(false)" class="mr-2">No</label>
+        <label class="inline-flex items-center"><input type="radio" name="prevAttend" value="Yes" onchange="toggleAttendance(true)" class="mr-2">Yes</label>
+      </div>
+      <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="If Yes: Where / Grade / For how long" disabled />
     </div>
 
     <!-- DATE STUDENT(S) LANDED -->
     <div class="col-span-12 mt-2">
-      <label for="landed" class="block text-sm">DATE STUDENT(S) LANDED IN CANADA</label>
-      <input id="landed" type="date" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="5" data-col="0" />
+      <label class="block text-sm">DATE STUDENT(S) LANDED IN CANADA</label>
+      <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
     </div>
   </div>
 
   <!-- Navigation buttons -->
-  <div class="nav-buttons">
-    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded focusable-cell" data-row="6" data-col="0" onclick="goTo(1)" data-prev="1">
-      Back
-    </button>
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded focusable-cell" data-row="6" data-col="1" onclick="goTo(3)" data-next="3">
-      Next
-    </button>
-  </div>
+ <div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
 </section>
 
-<!-- PAGE 3 Parents -->
-<section class="page hidden" data-step="3">
-  <h2 class="font-medium mb-3">Page 3</h2>
-  <div class="grid grid-cols-12 gap-3" id="page3-grid">
-    <div class="col-span-3">
-      <label for="fatherSurname" class="block text-sm">FATHER'S SURNAME</label>
-      <input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="0" />
-    </div>
-    <div class="col-span-3">
-      <label for="fatherGiven" class="block text-sm">FATHER'S GIVEN NAME</label>
-      <input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="1" />
-    </div>
-    <div class="col-span-3">
-      <label for="motherSurname" class="block text-sm">MOTHER'S SURNAME</label>
-      <input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="2" />
-    </div>
-    <div class="col-span-3">
-      <label for="motherGiven" class="block text-sm">MOTHER'S GIVEN NAME</label>
-      <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="3" />
-    </div>
-  </div>
-  <div class="nav-buttons">
-    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded focusable-cell" data-row="1" data-col="0" onclick="goTo(2)" data-prev="2">
-      Back
-    </button>
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded focusable-cell" data-row="1" data-col="1" onclick="goTo(4)" data-next="4">
-      Next
-    </button>
-  </div>
-</section>
+<script>
+  function toggleOtherField(inputId, radio) {
+    const input = document.getElementById(inputId);
+    if (radio.value === "Other" && radio.checked) {
+      input.classList.remove("hidden");
+    } else {
+      input.classList.add("hidden");
+      input.value = "";
+    }
+  }
+</script>
+
+      
+      <!-- PAGE 3 Parents -->
+      <section class="page hidden" data-step="3">
+        <h2 class="font-medium mb-3">Page 3</h2>
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-3">
+            <label class="block text-sm">FATHER'S SURNAME</label>
+            <input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-sm">FATHER'S GIVEN NAME</label>
+            <input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-sm">MOTHER'S SURNAME</label>
+            <input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-sm">MOTHER'S GIVEN NAME</label>
+            <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+        </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(2)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
+</div>
+
+
+
+      </section>
 
 <!-- PAGE 4 Address & family -->
 <section class="page hidden" data-step="4">
   <h2 class="font-medium mb-3">Page 4</h2>
 
-  <div class="grid grid-cols-12 gap-3" id="page4-grid">
+  <div class="grid grid-cols-12 gap-3">
     <!-- Apartment -->
     <div class="col-span-2">
-      <label for="apt" class="block text-sm">APARTMENT #</label>
-      <input id="apt" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="0" />
+      <label class="block text-sm">APARTMENT #</label>
+      <input id="apt" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
     <!-- Family Address -->
     <div class="col-span-8">
-      <label for="address" class="block text-sm">FAMILY ADDRESS</label>
-      <input id="address" type="text" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="0" data-col="1" />
+      <label class="block text-sm">FAMILY ADDRESS</label>
+      <input id="address" type="text" class="w-full border rounded p-2 mt-1" />
     </div>
 
     <!-- Postal Code -->
     <div class="col-span-2">
-      <label for="postal" class="block text-sm">POSTAL CODE</label>
+      <label class="block text-sm">POSTAL CODE</label>
       <input 
         id="postal" 
         type="text" 
-        class="w-full border rounded p-2 mt-1 focusable-cell" 
-        data-row="0" data-col="2"
+        class="w-full border rounded p-2 mt-1" 
         maxlength="7"
         oninput="enforcePostalFormat(this)" 
       />
@@ -455,13 +508,12 @@
 
     <!-- Family Phone -->
     <div class="col-span-2 mt-2">
-      <label for="familyPhone" class="block text-sm">FAMILY PHONE #</label>
+      <label class="block text-sm">FAMILY PHONE #</label>
       <input 
         id="familyPhone" 
         type="text" 
         maxlength="14" 
-        class="w-full border rounded p-2 mt-1 focusable-cell" 
-        data-row="1" data-col="0"
+        class="w-full border rounded p-2 mt-1" 
         placeholder="(123) 456-7890"
         oninput="formatPhone(this)" 
       />
@@ -469,484 +521,252 @@
 
     <!-- Home Language Dropdown (multi + custom) -->
     <div class="col-span-6 mt-2 ml-4">
-      <label for="homeLang" class="block text-sm">HOME LANGUAGE(S)</label>
-      <select id="homeLang" multiple class="w-full border rounded p-2 mt-1 focusable-cell" data-row="1" data-col="1"></select>
+      <label class="block text-sm">HOME LANGUAGE(S)</label>
+      <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
+
     </div>
 
     <!-- Catholic Section -->
     <div class="col-span-12 mt-2">
-      <fieldset>
-        <legend class="block text-sm">CATHOLIC</legend>
-        <div class="mt-1 flex items-center gap-6">
-          <label class="inline-flex items-center">
-            <input type="radio" name="catholic" value="No" class="mr-2 focusable-cell" data-row="2" data-col="0">No
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="catholic" value="Yes" class="mr-2 focusable-cell" data-row="2" data-col="1">Yes
-          </label>
-        </div>
-        <input id="religionOther" type="text" class="mt-2 w-full border rounded p-2 focusable-cell" data-row="3" data-col="0" placeholder="If not Catholic, specify religion (optional)" />
-      </fieldset>
+      <label class="block text-sm">CATHOLIC</label>
+      <div class="mt-1 flex items-center gap-6">
+        <label class="inline-flex items-center">
+          <input type="radio" name="catholic" value="No" class="mr-2">No
+        </label>
+        <label class="inline-flex items-center">
+          <input type="radio" name="catholic" value="Yes" class="mr-2">Yes
+        </label>
+      </div>
+      <input id="religionOther" type="text" class="mt-2 w-full border rounded p-2" placeholder="If not Catholic, specify religion (optional)" />
     </div>
   </div>
 
   <!-- Navigation -->
   <div class="nav-buttons mt-4">
-    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded focusable-cell" data-row="4" data-col="0" onclick="goTo(3)" data-prev="3">
-      Back
-    </button>
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded focusable-cell" data-row="4" data-col="1" onclick="goTo(5)" data-next="5">
-      Next
-    </button>
+    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
+    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
   </div>
 </section>
 
-<!-- PAGE 5 Students (dynamic add) -->
-<section class="page hidden" data-step="5">
-  <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
-  <div id="studentsContainer" class="space-y-4">
-    <!-- template inserted by JS -->
-  </div>
-  <div class="flex items-center gap-3 mt-3">
-    <button class="px-3 py-2 bg-blue-600 text-white rounded focusable-cell" data-row="0" data-col="0" onclick="addStudent()" type="button" id="addStudentBtn">
-      Add Student
-    </button>
-    <button class="px-3 py-2 bg-red-500 text-white rounded focusable-cell" data-row="0" data-col="1" onclick="removeStudent()" type="button" id="removeStudentBtn">
-      Remove Last
-    </button>
-  </div>
-
-  <div class="nav-buttons">
-    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded focusable-cell" data-row="1" data-col="0" onclick="goTo(4)" data-prev="4">
-      Back
-    </button>
-    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded focusable-cell" data-row="1" data-col="1" onclick="goTo(6)" data-next="6">
-      Next
-    </button>
-  </div>
-</section>
-
-<!-- PAGE 6 Schooling profile & notes -->
-<section class="page hidden" data-step="6">
-  <h2 class="font-medium mb-3">Page 6</h2>
-  <div class="grid grid-cols-12 gap-3" id="page6-grid">
-    <div class="col-span-4">
-      <fieldset>
-        <legend class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</legend>
-        <div class="mt-1 flex items-center gap-6">
-          <label class="inline-flex items-center">
-            <input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)" class="mr-2 focusable-cell" data-row="0" data-col="0">No
-          </label>
-          <label class="inline-flex items-center">
-            <input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)" class="mr-2 focusable-cell" data-row="0" data-col="1">Yes
-          </label>
-        </div>
-      </fieldset>
-    </div>
-  </div>
-
-  <!-- Conditional box if "Yes" is chosen -->
-  <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
-    <label for="limitedProfileDetails" class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
-    <p class="text-xs italic text-gray-600">
-      Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin
-    </p>
-    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2 focusable-cell" data-row="1" data-col="0" placeholder="Provide details for each student"></textarea>
-  </div>
-
-  <!-- Note field -->
-  <div class="col-span-12 mt-4">
-    <label for="notes" class="block text-sm font-medium">NOTE:</label>
-    <textarea id="notes" class="w-full border rounded p-2 mt-1 focusable-cell" data-row="2" data-col="0" placeholder="Additional notes if relevant"></textarea>
-  </div>
-
-  <!-- Navigation -->
-  <div class="nav-buttons">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded focusable-cell" data-row="3" data-col="0" onclick="goTo(5)" data-prev="5">
-      Back
-    </button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded focusable-cell" data-row="3" data-col="1" onclick="generateFinal()" id="generateBtn">
-      Generate Yellow Form
-    </button>
-  </div>
-</section>
+<!-- Tom Select (searchable dropdown) -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
 <script>
-// Enhanced Keyboard Navigation System
-class GridNavigation {
-  constructor() {
-    this.currentPage = 1;
-    this.grids = {};
-    this.init();
+  // --- Postal Code Format ---
+  function enforcePostalFormat(input) {
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    let formatted = '';
+    if (value.length > 0) formatted += value[0].replace(/[^A-Z]/g, '');
+    if (value.length > 1) formatted += value[1].replace(/[^0-9]/g, '');
+    if (value.length > 2) formatted += value[2].replace(/[^A-Z]/g, '');
+    if (value.length > 3) formatted += ' ' + value[3].replace(/[^0-9]/g, '');
+    if (value.length > 4) formatted += value[4].replace(/[^A-Z]/g, '');
+    if (value.length > 5) formatted += value[5].replace(/[^0-9]/g, '');
+    input.value = formatted;
   }
 
-  init() {
-    this.setupEventListeners();
-    this.initializeAllGrids();
-  }
-
-  setupEventListeners() {
-    document.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
-    
-    // Prevent Enter from moving focus in most cases
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.target.matches('select, .ts-control input')) {
-        e.preventDefault();
-      }
-    });
-  }
-
-  initializeAllGrids() {
-    for (let page = 1; page <= 6; page++) {
-      this.buildGridForPage(page);
+  // --- Phone Format ---
+  function formatPhone(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 3 && value.length <= 6) {
+      input.value = '(' + value.slice(0,3) + ') ' + value.slice(3);
+    } else if (value.length > 6) {
+      input.value = '(' + value.slice(0,3) + ') ' + value.slice(3,6) + '-' + value.slice(6,10);
+    } else {
+      input.value = value;
     }
   }
 
-  buildGridForPage(pageNumber) {
-    const page = document.querySelector(`[data-step="${pageNumber}"]`);
-    if (!page) return;
-
-    const focusableCells = page.querySelectorAll('.focusable-cell');
-    const grid = {};
-    
-    focusableCells.forEach(cell => {
-      const row = parseInt(cell.getAttribute('data-row'));
-      const col = parseInt(cell.getAttribute('data-col'));
-      
-      if (!grid[row]) grid[row] = {};
-      grid[row][col] = cell;
-    });
-
-    this.grids[pageNumber] = grid;
-  }
-
-  getCurrentGrid() {
-    return this.grids[this.currentPage];
-  }
-
-  getCurrentPosition() {
-    const activeElement = document.activeElement;
-    if (!activeElement.classList.contains('focusable-cell')) return null;
-
-    const row = parseInt(activeElement.getAttribute('data-row'));
-    const col = parseInt(activeElement.getAttribute('data-col'));
-    
-    return { row, col, element: activeElement };
-  }
-
-  findNextCell(direction) {
-    const grid = this.getCurrentGrid();
-    if (!grid) return null;
-
-    const current = this.getCurrentPosition();
-    if (!current) return Object.values(grid)[0][0]; // Return first cell
-
-    let { row, col } = current;
-    const rows = Object.keys(grid).map(Number).sort((a, b) => a - b);
-
-    switch (direction) {
-      case 'right':
-        col++;
-        // If at end of row, move to first column of next row
-        if (!grid[row] || !grid[row][col]) {
-          col = 0;
-          row = this.getNextRow(rows, row, 1);
-        }
-        break;
-
-      case 'left':
-        col--;
-        // If at start of row, move to last column of previous row
-        if (col < 0 || !grid[row][col]) {
-          row = this.getNextRow(rows, row, -1);
-          col = this.getLastColumnInRow(grid, row);
-        }
-        break;
-
-      case 'down':
-        row = this.getNextRow(rows, row, 1);
-        // Find closest column in the new row
-        col = this.findClosestColumn(grid, row, col);
-        break;
-
-      case 'up':
-        row = this.getNextRow(rows, row, -1);
-        // Find closest column in the new row
-        col = this.findClosestColumn(grid, row, col);
-        break;
-    }
-
-    return grid[row] && grid[row][col] ? grid[row][col] : null;
-  }
-
-  getNextRow(rows, currentRow, direction) {
-    const currentIndex = rows.indexOf(currentRow);
-    let nextIndex = currentIndex + direction;
-    
-    // Loop around
-    if (nextIndex >= rows.length) nextIndex = 0;
-    if (nextIndex < 0) nextIndex = rows.length - 1;
-    
-    return rows[nextIndex];
-  }
-
-  getLastColumnInRow(grid, row) {
-    if (!grid[row]) return 0;
-    const columns = Object.keys(grid[row]).map(Number);
-    return Math.max(...columns);
-  }
-
-  findClosestColumn(grid, row, targetCol) {
-    if (!grid[row]) return 0;
-    const columns = Object.keys(grid[row]).map(Number);
-    
-    // Find closest column to targetCol
-    return columns.reduce((closest, col) => {
-      return Math.abs(col - targetCol) < Math.abs(closest - targetCol) ? col : closest;
-    });
-  }
-
-  moveFocus(direction) {
-    const nextCell = this.findNextCell(direction);
-    if (nextCell) {
-      nextCell.focus();
-    }
-  }
-
-  handleKeyNavigation(e) {
-    // Page navigation with Shift+Arrow
-    if (e.shiftKey) {
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        this.navigateToNextPage();
-        return;
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        this.navigateToPreviousPage();
-        return;
-      }
-    }
-
-    // Cell navigation with Arrow keys
-    if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
-      e.preventDefault();
-      
-      const directionMap = {
-        'ArrowRight': 'right',
-        'ArrowLeft': 'left',
-        'ArrowDown': 'down',
-        'ArrowUp': 'up'
-      };
-      
-      this.moveFocus(directionMap[e.key]);
-    }
-
-    // Space for page navigation (alternative)
-    if (e.key === ' ' && e.shiftKey) {
-      e.preventDefault();
-      this.navigateToNextPage();
-    }
-  }
-
-  navigateToNextPage() {
-    const nextPage = this.currentPage + 1;
-    if (nextPage <= 6) {
-      this.goToPage(nextPage);
-    }
-  }
-
-  navigateToPreviousPage() {
-    const prevPage = this.currentPage - 1;
-    if (prevPage >= 1) {
-      this.goToPage(prevPage);
-    }
-  }
-
-  goToPage(pageNumber) {
-    this.currentPage = pageNumber;
-    goTo(pageNumber);
-    
-    // Focus first cell on new page
-    setTimeout(() => {
-      const grid = this.getCurrentGrid();
-      if (grid) {
-        const firstRow = Math.min(...Object.keys(grid).map(Number));
-        const firstCol = Math.min(...Object.keys(grid[firstRow]).map(Number));
-        const firstCell = grid[firstRow][firstCol];
-        if (firstCell) {
-          firstCell.focus();
-        }
-      }
-    }, 100);
-  }
-}
-
-// Initialize navigation system
-const gridNav = new GridNavigation();
-
-// Enhanced goTo function to work with navigation system
-function goTo(step) {
-  // Hide all pages
-  document.querySelectorAll('.page').forEach(page => {
-    page.classList.add('hidden');
-  });
-  
-  // Show target page
-  const targetPage = document.querySelector(`[data-step="${step}"]`);
-  if (targetPage) {
-    targetPage.classList.remove('hidden');
-    gridNav.currentPage = step;
-  }
-}
-
-// Enhanced phone formatting
-function formatPhone(input) {
-  let digits = input.value.replace(/\D/g, '');
-  digits = digits.substring(0, 10);
-
-  let formatted = '';
-  if (digits.length > 0) {
-    formatted = '(' + digits.substring(0, 3);
-  }
-  if (digits.length >= 4) {
-    formatted += ') ' + digits.substring(3, 6);
-  }
-  if (digits.length >= 7) {
-    formatted += '-' + digits.substring(6, 10);
-  }
-
-  input.value = formatted;
-}
-
-// Enhanced postal code formatting
-function enforcePostalFormat(input) {
-  let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  let formatted = '';
-  if (value.length > 0) formatted += value[0].replace(/[^A-Z]/g, '');
-  if (value.length > 1) formatted += value[1].replace(/[^0-9]/g, '');
-  if (value.length > 2) formatted += value[2].replace(/[^A-Z]/g, '');
-  if (value.length > 3) formatted += ' ' + value[3].replace(/[^0-9]/g, '');
-  if (value.length > 4) formatted += value[4].replace(/[^A-Z]/g, '');
-  if (value.length > 5) formatted += value[5].replace(/[^0-9]/g, '');
-  input.value = formatted;
-}
-
-// Show/hide the "Other" input box for Contact Relationship
-function toggleOtherRelation(select){
-  const otherBox = document.getElementById('otherRelation');
-  if(select.value === 'Other'){
-    otherBox.classList.remove('hidden');
-    otherBox.focus();
-  } else {
-    otherBox.classList.add('hidden');
-    otherBox.value = '';
-  }
-}
-
-function toggleOtherField(inputId, radio) {
-  const input = document.getElementById(inputId);
-  if (radio.value === "Other" && radio.checked) {
-    input.classList.remove("hidden");
-    input.focus();
-  } else {
-    input.classList.add("hidden");
-    input.value = "";
-  }
-}
-
-function toggleLimitedProfile(isYes) {
-  const box = document.getElementById('limitedProfileBox');
-  if (isYes) {
-    box.classList.remove('hidden');
-    document.getElementById('limitedProfileDetails').focus();
-  } else {
-    box.classList.add('hidden');
-    document.getElementById('limitedProfileDetails').value = '';
-  }
-}
-
-// Initialize Tom Select for languages
-document.addEventListener('DOMContentLoaded', () => {
-  const select = document.getElementById('homeLang');
+  // --- Offline Language List (compact horizontal) ---
   const languages = [
-    "English","Tigrinya","Amharic","Arabic","French","Spanish","Somali","Swahili","Hindi",
-    "Mandarin Chinese","Cantonese","Portuguese","Tagalog","Italian","German","Russian",
-    "Punjabi","Urdu","Bengali","Korean","Japanese","Vietnamese","Cree","Ojibwe","Inuktitut",
-    "Persian (Farsi)","Kurdish","Pashto","Ukrainian","Polish","Turkish","Greek","Tamil",
-    "Malayalam","Telugu","Gujarati","Thai","Indonesian","Malay","Burmese","Sinhalese",
-    "Nepali","Dari","Hebrew","Armenian","Albanian","Serbian","Croatian","Bosnian",
-    "Bulgarian","Romanian","Dutch","Swedish","Finnish","Norwegian","Danish","Czech",
-    "Slovak","Hungarian","Latvian","Lithuanian","Estonian","Haitian Creole","Afrikaans",
-    "Zulu","Xhosa","Shona","Twi","Ewe","Yoruba","Igbo","Hausa","Oromo","Tigré","Nuer",
-    "Dinka","Acholi","Somali Bantu","Khmer","Lao","Mongolian","Kazakh","Uzbek","Tajik",
-    "Azerbaijani","Georgian","Macedonian","Cebuano (Bisaya)","Catalan","Basque","Galician",
-    "Samoan","Tongan","Fijian","Fula","Maori","Luganda","Bantu","Bilen","Kinyarwanda",
-    "Kinyabwishya","Kinyamulenge","Kikongo ya leta","Lingala","Mano","Kpelle","Kikuyu",
-    "Kamba","Other"
+  "English","Tigrinya","Amharic","Arabic","French","Spanish","Somali","Swahili","Hindi",
+  "Mandarin Chinese","Cantonese","Portuguese","Tagalog","Italian","German","Russian",
+  "Punjabi","Urdu","Bengali","Korean","Japanese","Vietnamese","Cree","Ojibwe","Inuktitut",
+  "Persian (Farsi)","Kurdish","Pashto","Ukrainian","Polish","Turkish","Greek","Tamil",
+  "Malayalam","Telugu","Gujarati","Thai","Indonesian","Malay","Burmese","Sinhalese",
+  "Nepali","Dari","Hebrew","Armenian","Albanian","Serbian","Croatian","Bosnian",
+  "Bulgarian","Romanian","Dutch","Swedish","Finnish","Norwegian","Danish","Czech",
+  "Slovak","Hungarian","Latvian","Lithuanian","Estonian","Haitian Creole","Afrikaans",
+  "Zulu","Xhosa","Shona","Twi","Ewe","Yoruba","Igbo","Hausa","Oromo","Tigré","Nuer",
+  "Dinka","Acholi","Somali Bantu","Khmer","Lao","Mongolian","Kazakh","Uzbek","Tajik",
+  "Azerbaijani","Georgian","Macedonian","Cebuano (Bisaya)","Catalan","Basque","Galician",
+  "Samoan","Tongan","Fijian","Fula","Maori","Luganda","Bantu","Bilen","Kinyarwanda",
+  "Kinyabwishya","Kinyamulenge","Kikongo ya leta","Lingala","Mano","Kpelle","Kikuyu",
+  "Kamba","Other"
   ];
 
-  languages.forEach(lang => {
+  // --- Initialize Tom Select with multi-select, custom entry, and anchored search ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('homeLang');
+
+ languages.forEach(lang => {
     const opt = document.createElement('option');
     opt.value = lang;
     opt.textContent = lang;
     select.appendChild(opt);
   });
 
+  // Initialize Tom Select and keep a reference
   const ts = new TomSelect(select, {
     placeholder: "You may select or type more than one language",
     maxOptions: 500,
     create: true,
     persist: true,
     plugins: ['remove_button'],
-    onFocus: function() {
-      this.open();
+    score: function(search) {
+      const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      return function(item) {
+        return regex.test(item.text) ? 1 : 0;
+      };
+    },
+    // old-style callbacks (still useful)
+    onItemAdd: function(value, $item) {
+      safeClearAndClose(this);
+    },
+    onOptionAdd: function(value, data) {
+      safeClearAndClose(this);
     }
   });
+
+  // Robust helper that clears whatever input TomSelect has created,
+  // forces a refresh, closes dropdown, and returns focus to the control.
+  function safeClearAndClose(instance) {
+    // run on next tick so internal handlers finish first
+    setTimeout(() => {
+      try {
+        // 1) preferred API
+        if (typeof instance.setTextboxValue === 'function') {
+          try { instance.setTextboxValue(''); } catch(e) {}
+        }
+
+        // 2) direct internal references used across builds
+        if (instance.control_input) instance.control_input.value = '';
+        if (instance.input) instance.input.value = '';
+
+        // 3) find any visible textbox inside the TomSelect wrapper and clear it
+        try {
+          const wrapper = instance.wrapper || instance.control || instance.input && instance.input.parentNode;
+          if (wrapper) {
+            const textInput = wrapper.querySelector && (wrapper.querySelector('input[type="text"], input:not([type])'));
+            if (textInput) {
+              textInput.value = '';
+              // also update attribute in case some builds read it from attribute
+              textInput.setAttribute('value', '');
+            }
+          }
+        } catch(e) {}
+
+        // 4) refresh options, close dropdown, and focus
+        try { instance.refreshOptions(false); } catch(e) {}
+        try { instance.close(); } catch(e) {}
+        try {
+          // focus whichever input we found (priority: control_input, input, wrapper input)
+          if (instance.control_input) instance.control_input.focus();
+          else if (instance.input) instance.input.focus();
+          else {
+            const wrapper = instance.wrapper || instance.control || document.querySelector('.ts-control');
+            const textInput = wrapper && wrapper.querySelector && wrapper.querySelector('input[type="text"], input:not([type])');
+            if (textInput) textInput.focus();
+          }
+        } catch(e) {}
+      } catch (err) {
+        // silent fail — nothing critical, but do not throw
+        console.warn('safeClearAndClose error', err);
+      }
+    }, 0);
+  }
+
+  // Extra safety: listen for native DOM 'change' events on the original <select>
+  // and clear the tomselect input as soon as selection changes (covers some edge-cases)
+  select.addEventListener('change', () => safeClearAndClose(ts));
 });
 </script>
 
-<style>
-/* Enhanced focus styles for grid navigation */
-.focusable-cell:focus {
-  outline: 3px solid #2563eb;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
-  z-index: 10;
-  position: relative;
-}
 
-/* Ensure parent containers don't clip dropdowns */
-.page {
-  overflow: visible !important;
-}
+</script>
 
-/* Style consistency */
-.select2-container .select2-selection--single {
-  height: 42px;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  padding: 6px 10px;
-  background-color: #fff;
-}
+   <!-- PAGE 5 Students (dynamic add) -->
+      <section class="page hidden" data-step="5">
+        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
+        <div id="studentsContainer" class="space-y-4">
+          <!-- template inserted by JS -->
+        </div>
+        <div class="flex items-center gap-3 mt-3">
+          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
+          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
+        </div>
 
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-  height: 42px;
-  right: 10px;
-}
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
+</div>
 
-/* Better focus for radio/checkbox groups */
-fieldset:focus-within {
-  border: 1px solid #2563eb;
-  padding: 8px;
-  border-radius: 4px;
-}
+      </section>
 
-/* Navigation button focus */
-.nav-buttons button:focus {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-</style>
+
+<!-- PAGE 6 Schooling profile & notes -->
+<section class="page hidden" data-step="6">
+  <h2 class="font-medium mb-3">Page 6</h2>
+  <div class="grid grid-cols-12 gap-3">
+    <div class="col-span-4">
+      <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
+      <div class="mt-1 flex items-center gap-6">
+        <label class="inline-flex items-center">
+          <input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)">No
+        </label>
+        <label class="inline-flex items-center">
+          <input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)">Yes
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conditional box if "Yes" is chosen -->
+  <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
+    <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
+    <p class="text-xs italic text-gray-600">
+      Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin
+    </p>
+    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2" placeholder="Provide details for each student"></textarea>
+  </div>
+
+  <!-- Note field -->
+  <div class="col-span-12 mt-4">
+    <label class="block text-sm font-medium">NOTE:</label>
+    <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Additional notes if relevant"></textarea>
+  </div>
+
+  <!-- Navigation -->
+<div class="nav-buttons">
+  <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
+  <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
+</div>
+
+</section>
+
+
+<script>
+  function toggleLimitedProfile(isYes) {
+    const box = document.getElementById('limitedProfileBox');
+    if (isYes) {
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+      document.getElementById('limitedProfileDetails').value = '';
+    }
+  }
+</script>
+  </div> <!-- closes wizardRoot -->
+</div> <!-- closes outer colored border -->
+
+
+
+
+
+
+
+
 
 
   

@@ -210,6 +210,8 @@
 
 
 
+
+
 <!-- PAGE 1 -->
 <section class="page" data-step="1">
   <h2 class="font-medium mb-3">Page 1</h2>
@@ -220,15 +222,6 @@
       <label class="block text-sm">DATE</label>
       <input id="date" type="date" class="w-full border rounded p-2 mt-1" data-preserve-keys="true" />
     </div>
-
-    <!-- TAKEN BY -->
-    <div class="col-span-3">
-      <label class="block text-sm">TAKEN BY</label>
-      <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1" placeholder="Name" />
-    </div>
-
-
-
 
     <!-- TAKEN BY -->
     <div class="col-span-3">
@@ -378,6 +371,409 @@
   }
 </script>
 
+<!-- PAGE 2 -->
+<section class="page hidden" data-step="2">
+  <h2 class="font-medium mb-3">Page 2</h2>
+
+  <div class="grid grid-cols-12 gap-3 mb-3">
+    <!-- STUDENT'S STATUS -->
+    <div class="col-span-6">
+      <label class="block text-sm">STUDENT'S STATUS</label>
+      <div class="mt-1 flex flex-wrap gap-3 items-center">
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="PR" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">PR</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="RC" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">RC</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="SP" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">SP</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">WP</label>
+        <label class="inline-flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)">Other</label>
+        <!-- Hidden until "Other" -->
+        <input id="studentStatusOther" type="text" class="hidden border rounded p-2 ml-2" placeholder="Specify" />
+      </div>
+    </div>
+
+    <!-- IMMIGRATION DOCUMENT -->
+    <div class="col-span-6">
+      <label class="block text-sm">IMMIGRATION DOCUMENT (OF NATURAL PARENT / GUARDIAN)</label>
+      <div class="mt-1 flex flex-wrap gap-3 items-center">
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="PR" class="mr-2" onchange="toggleOtherField('immDocOther', this)">PR</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="RC" class="mr-2" onchange="toggleOtherField('immDocOther', this)">RC</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="SP" class="mr-2" onchange="toggleOtherField('immDocOther', this)">SP</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-2" onchange="toggleOtherField('immDocOther', this)">WP</label>
+        <label class="inline-flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-2" onchange="toggleOtherField('immDocOther', this)">Other</label>
+        <!-- Hidden until "Other" -->
+        <input id="immDocOther" type="text" class="hidden border rounded p-2 ml-2" placeholder="Specify" />
+      </div>
+    </div>
+
+    <!-- EXPIRY DATE -->
+    <div class="col-span-4 mt-2">
+      <label class="block text-sm">EXPIRY DATE (RC / SP / WP)</label>
+      <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
+    </div>
+
+    <!-- PREVIOUS ATTENDANCE -->
+    <div class="col-span-12 mt-2">
+      <label class="block text-sm">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
+      <div class="mt-1 flex items-center gap-6">
+        <label class="inline-flex items-center"><input type="radio" name="prevAttend" value="No" onchange="toggleAttendance(false)" class="mr-2">No</label>
+        <label class="inline-flex items-center"><input type="radio" name="prevAttend" value="Yes" onchange="toggleAttendance(true)" class="mr-2">Yes</label>
+      </div>
+      <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="If Yes: Where / Grade / For how long" disabled />
+    </div>
+
+    <!-- DATE STUDENT(S) LANDED -->
+    <div class="col-span-12 mt-2">
+      <label class="block text-sm">DATE STUDENT(S) LANDED IN CANADA</label>
+      <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
+    </div>
+  </div>
+
+  <!-- Navigation buttons -->
+ <div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
+</div>
+
+</section>
+
+<script>
+  function toggleOtherField(inputId, radio) {
+    const input = document.getElementById(inputId);
+    if (radio.value === "Other" && radio.checked) {
+      input.classList.remove("hidden");
+    } else {
+      input.classList.add("hidden");
+      input.value = "";
+    }
+  }
+</script>
+
+      
+      <!-- PAGE 3 Parents -->
+      <section class="page hidden" data-step="3">
+        <h2 class="font-medium mb-3">Page 3</h2>
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-3">
+            <label class="block text-sm">FATHER'S SURNAME</label>
+            <input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-sm">FATHER'S GIVEN NAME</label>
+            <input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-sm">MOTHER'S SURNAME</label>
+            <input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-sm">MOTHER'S GIVEN NAME</label>
+            <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
+          </div>
+        </div>
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(2)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
+</div>
+
+
+
+      </section>
+
+<!-- PAGE 4 Address & family -->
+<section class="page hidden" data-step="4">
+  <h2 class="font-medium mb-3">Page 4</h2>
+
+  <div class="grid grid-cols-12 gap-3">
+    <!-- Apartment -->
+    <div class="col-span-2">
+      <label class="block text-sm">APARTMENT #</label>
+      <input id="apt" type="text" class="w-full border rounded p-2 mt-1" />
+    </div>
+
+    <!-- Family Address -->
+    <div class="col-span-8">
+      <label class="block text-sm">FAMILY ADDRESS</label>
+      <input id="address" type="text" class="w-full border rounded p-2 mt-1" />
+    </div>
+
+    <!-- Postal Code -->
+    <div class="col-span-2">
+      <label class="block text-sm">POSTAL CODE</label>
+      <input 
+        id="postal" 
+        type="text" 
+        class="w-full border rounded p-2 mt-1" 
+        maxlength="7"
+        oninput="enforcePostalFormat(this)" 
+      />
+    </div>
+
+    <!-- Family Phone -->
+    <div class="col-span-2 mt-2">
+      <label class="block text-sm">FAMILY PHONE #</label>
+      <input 
+        id="familyPhone" 
+        type="text" 
+        maxlength="14" 
+        class="w-full border rounded p-2 mt-1" 
+        placeholder="(123) 456-7890"
+        oninput="formatPhone(this)" 
+      />
+    </div>
+
+    <!-- Home Language Dropdown (multi + custom) -->
+    <div class="col-span-6 mt-2 ml-4">
+      <label class="block text-sm">HOME LANGUAGE(S)</label>
+      <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
+
+    </div>
+
+    <!-- Catholic Section -->
+    <div class="col-span-12 mt-2">
+      <label class="block text-sm">CATHOLIC</label>
+      <div class="mt-1 flex items-center gap-6">
+        <label class="inline-flex items-center">
+          <input type="radio" name="catholic" value="No" class="mr-2">No
+        </label>
+        <label class="inline-flex items-center">
+          <input type="radio" name="catholic" value="Yes" class="mr-2">Yes
+        </label>
+      </div>
+      <input id="religionOther" type="text" class="mt-2 w-full border rounded p-2" placeholder="If not Catholic, specify religion (optional)" />
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons mt-4">
+    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
+    <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
+  </div>
+</section>
+
+<!-- Tom Select (searchable dropdown) -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+  // --- Postal Code Format ---
+  function enforcePostalFormat(input) {
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    let formatted = '';
+    if (value.length > 0) formatted += value[0].replace(/[^A-Z]/g, '');
+    if (value.length > 1) formatted += value[1].replace(/[^0-9]/g, '');
+    if (value.length > 2) formatted += value[2].replace(/[^A-Z]/g, '');
+    if (value.length > 3) formatted += ' ' + value[3].replace(/[^0-9]/g, '');
+    if (value.length > 4) formatted += value[4].replace(/[^A-Z]/g, '');
+    if (value.length > 5) formatted += value[5].replace(/[^0-9]/g, '');
+    input.value = formatted;
+  }
+
+  // --- Phone Format ---
+  function formatPhone(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 3 && value.length <= 6) {
+      input.value = '(' + value.slice(0,3) + ') ' + value.slice(3);
+    } else if (value.length > 6) {
+      input.value = '(' + value.slice(0,3) + ') ' + value.slice(3,6) + '-' + value.slice(6,10);
+    } else {
+      input.value = value;
+    }
+  }
+
+  // --- Offline Language List (compact horizontal) ---
+  const languages = [
+  "English","Tigrinya","Amharic","Arabic","French","Spanish","Somali","Swahili","Hindi",
+  "Mandarin Chinese","Cantonese","Portuguese","Tagalog","Italian","German","Russian",
+  "Punjabi","Urdu","Bengali","Korean","Japanese","Vietnamese","Cree","Ojibwe","Inuktitut",
+  "Persian (Farsi)","Kurdish","Pashto","Ukrainian","Polish","Turkish","Greek","Tamil",
+  "Malayalam","Telugu","Gujarati","Thai","Indonesian","Malay","Burmese","Sinhalese",
+  "Nepali","Dari","Hebrew","Armenian","Albanian","Serbian","Croatian","Bosnian",
+  "Bulgarian","Romanian","Dutch","Swedish","Finnish","Norwegian","Danish","Czech",
+  "Slovak","Hungarian","Latvian","Lithuanian","Estonian","Haitian Creole","Afrikaans",
+  "Zulu","Xhosa","Shona","Twi","Ewe","Yoruba","Igbo","Hausa","Oromo","Tigré","Nuer",
+  "Dinka","Acholi","Somali Bantu","Khmer","Lao","Mongolian","Kazakh","Uzbek","Tajik",
+  "Azerbaijani","Georgian","Macedonian","Cebuano (Bisaya)","Catalan","Basque","Galician",
+  "Samoan","Tongan","Fijian","Fula","Maori","Luganda","Bantu","Bilen","Kinyarwanda",
+  "Kinyabwishya","Kinyamulenge","Kikongo ya leta","Lingala","Mano","Kpelle","Kikuyu",
+  "Kamba","Other"
+  ];
+
+  // --- Initialize Tom Select with multi-select, custom entry, and anchored search ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('homeLang');
+
+ languages.forEach(lang => {
+    const opt = document.createElement('option');
+    opt.value = lang;
+    opt.textContent = lang;
+    select.appendChild(opt);
+  });
+
+  // Initialize Tom Select and keep a reference
+  const ts = new TomSelect(select, {
+    placeholder: "You may select or type more than one language",
+    maxOptions: 500,
+    create: true,
+    persist: true,
+    plugins: ['remove_button'],
+    score: function(search) {
+      const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      return function(item) {
+        return regex.test(item.text) ? 1 : 0;
+      };
+    },
+    // old-style callbacks (still useful)
+    onItemAdd: function(value, $item) {
+      safeClearAndClose(this);
+    },
+    onOptionAdd: function(value, data) {
+      safeClearAndClose(this);
+    }
+  });
+
+  // Robust helper that clears whatever input TomSelect has created,
+  // forces a refresh, closes dropdown, and returns focus to the control.
+  function safeClearAndClose(instance) {
+    // run on next tick so internal handlers finish first
+    setTimeout(() => {
+      try {
+        // 1) preferred API
+        if (typeof instance.setTextboxValue === 'function') {
+          try { instance.setTextboxValue(''); } catch(e) {}
+        }
+
+        // 2) direct internal references used across builds
+        if (instance.control_input) instance.control_input.value = '';
+        if (instance.input) instance.input.value = '';
+
+        // 3) find any visible textbox inside the TomSelect wrapper and clear it
+        try {
+          const wrapper = instance.wrapper || instance.control || instance.input && instance.input.parentNode;
+          if (wrapper) {
+            const textInput = wrapper.querySelector && (wrapper.querySelector('input[type="text"], input:not([type])'));
+            if (textInput) {
+              textInput.value = '';
+              // also update attribute in case some builds read it from attribute
+              textInput.setAttribute('value', '');
+            }
+          }
+        } catch(e) {}
+
+        // 4) refresh options, close dropdown, and focus
+        try { instance.refreshOptions(false); } catch(e) {}
+        try { instance.close(); } catch(e) {}
+        try {
+          // focus whichever input we found (priority: control_input, input, wrapper input)
+          if (instance.control_input) instance.control_input.focus();
+          else if (instance.input) instance.input.focus();
+          else {
+            const wrapper = instance.wrapper || instance.control || document.querySelector('.ts-control');
+            const textInput = wrapper && wrapper.querySelector && wrapper.querySelector('input[type="text"], input:not([type])');
+            if (textInput) textInput.focus();
+          }
+        } catch(e) {}
+      } catch (err) {
+        // silent fail — nothing critical, but do not throw
+        console.warn('safeClearAndClose error', err);
+      }
+    }, 0);
+  }
+
+  // Extra safety: listen for native DOM 'change' events on the original <select>
+  // and clear the tomselect input as soon as selection changes (covers some edge-cases)
+  select.addEventListener('change', () => safeClearAndClose(ts));
+});
+</script>
+
+
+</script>
+
+   <!-- PAGE 5 Students (dynamic add) -->
+      <section class="page hidden" data-step="5">
+        <h2 class="font-medium mb-3">Page 5 — Student Details (Add as many as needed)</h2>
+        <div id="studentsContainer" class="space-y-4">
+          <!-- template inserted by JS -->
+        </div>
+        <div class="flex items-center gap-3 mt-3">
+          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
+          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
+        </div>
+
+<div class="nav-buttons">
+  <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
+  <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
+</div>
+
+      </section>
+
+
+<!-- PAGE 6 Schooling profile & notes -->
+<section class="page hidden" data-step="6">
+  <h2 class="font-medium mb-3">Page 6</h2>
+  <div class="grid grid-cols-12 gap-3">
+    <div class="col-span-4">
+      <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
+      <div class="mt-1 flex items-center gap-6">
+        <label class="inline-flex items-center">
+          <input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)">No
+        </label>
+        <label class="inline-flex items-center">
+          <input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)">Yes
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conditional box if "Yes" is chosen -->
+  <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
+    <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
+    <p class="text-xs italic text-gray-600">
+      Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin
+    </p>
+    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2" placeholder="Provide details for each student"></textarea>
+  </div>
+
+  <!-- Note field -->
+  <div class="col-span-12 mt-4">
+    <label class="block text-sm font-medium">NOTE:</label>
+    <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Additional notes if relevant"></textarea>
+  </div>
+
+  <!-- Navigation -->
+<div class="nav-buttons">
+  <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
+  <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
+</div>
+
+</section>
+
+
+<script>
+  function toggleLimitedProfile(isYes) {
+    const box = document.getElementById('limitedProfileBox');
+    if (isYes) {
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+      document.getElementById('limitedProfileDetails').value = '';
+    }
+  }
+</script>
+  </div> <!-- closes wizardRoot -->
+</div> <!-- closes outer colored border -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 <!-- PAGE 2 -->
 <section class="page hidden" data-step="2">
   <h2 class="font-medium mb-3">Page 2</h2>

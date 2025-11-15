@@ -1543,19 +1543,18 @@ document.getElementById('shareBtn').onclick = async () => {
 
   
 <script>
-// Page 1 Keyboard Navigation
+// Page 1 Keyboard Navigation (without Next button)
 document.addEventListener('DOMContentLoaded', function() {
     const page1 = document.querySelector('[data-step="1"]');
     if (!page1) return;
 
-    // Get all focusable elements in order
+    // Get all focusable elements except the Next button
     const focusableElements = [
         document.getElementById('date'),
         document.getElementById('takenBy'),
         document.getElementById('contactName'),
         document.getElementById('contactPhone'),
-        document.getElementById('contactRel'),
-        document.querySelector('.nav-buttons button')
+        document.getElementById('contactRel')
     ].filter(el => el); // Remove any null elements
 
     let currentIndex = 0;
@@ -1579,7 +1578,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => focusableElements[0]?.focus(), 100);
 });
 </script>
-
 
 
 

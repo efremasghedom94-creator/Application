@@ -1543,7 +1543,7 @@ document.getElementById('shareBtn').onclick = async () => {
 
   
 <script>
-// Page 1 Keyboard Navigation (with proper dropdown handling)
+// Page 1 Keyboard Navigation (with date field part navigation)
 document.addEventListener('DOMContentLoaded', function() {
     const page1 = document.querySelector('[data-step="1"]');
     if (!page1) return;
@@ -1558,31 +1558,70 @@ document.addEventListener('DOMContentLoaded', function() {
     ].filter(el => el);
 
     let currentIndex = 0;
+    let isInDateField = false;
+    let datePartIndex = 0; // 0=MM, 1=DD, 2=YYYY
 
     // Add keyboard event listener
     page1.addEventListener('keydown', function(e) {
         const contactRel = document.getElementById('contactRel');
         const isDropdownOpen = document.querySelector('.select2-container--open') !== null;
+        const currentElement = focusableElements[currentIndex];
 
-        // If dropdown is open, only allow up/down and enter
+        // If dropdown is open, handle dropdown navigation
         if (isDropdownOpen) {
             if (['ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                e.preventDefault(); // Block left/right navigation
+                e.preventDefault();
                 return;
             }
             if (e.key === 'Enter') {
-                // Selection made, close dropdown and move to next field
                 setTimeout(() => {
                     currentIndex = (currentIndex + 1) % focusableElements.length;
                     focusableElements[currentIndex].focus();
                 }, 100);
             }
-            return; // Let Select2 handle up/down keys
+            return;
         }
 
-        // Normal field navigation (dropdown closed)
+        // Special handling for date field navigation
+        if (currentElement.id === 'date' && ['ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            e.preventDefault();
+            
+            if (e.key === 'ArrowRight') {
+                if (datePartIndex < 2) {
+                    datePartIndex++;
+                    // Move cursor to next part (simulated by selecting the field)
+                    currentElement.focus();
+                    currentElement.select();
+                } else {
+                    // Move to next field
+                    datePartIndex = 0;
+                    currentIndex = (currentIndex + 1) % focusableElements.length;
+                    focusableElements[currentIndex].focus();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (datePartIndex > 0) {
+                    datePartIndex--;
+                    // Move cursor to previous part
+                    currentElement.focus();
+                    currentElement.select();
+                } else {
+                    // Move to previous field
+                    datePartIndex = 0;
+                    currentIndex = currentIndex === 0 ? focusableElements.length - 1 : currentIndex - 1;
+                    focusableElements[currentIndex].focus();
+                }
+            }
+            return;
+        }
+
+        // Normal field navigation (for other fields)
         if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
             e.preventDefault();
+            
+            // Reset date part navigation when leaving date field
+            if (currentElement.id === 'date') {
+                datePartIndex = 0;
+            }
             
             if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
                 currentIndex = (currentIndex + 1) % focusableElements.length;
@@ -1594,7 +1633,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // If we focused contact relationship, set up Enter to open dropdown
             if (focusableElements[currentIndex].id === 'contactRel') {
-                // Remove any existing Enter listener to avoid duplicates
                 contactRel.removeEventListener('keydown', handleContactRelEnter);
                 contactRel.addEventListener('keydown', handleContactRelEnter);
             }
@@ -1610,10 +1648,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Focus first element
-    setTimeout(() => focusableElements[0]?.focus(), 100);
+    setTimeout(() => {
+        focusableElements[0]?.focus();
+        // If it's the date field, select it to show the "part" navigation
+        if (focusableElements[0].id === 'date') {
+            focusableElements[0].select();
+        }
+    }, 100);
 });
 </script>
-
 
 
 

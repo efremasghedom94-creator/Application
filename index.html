@@ -1558,36 +1558,26 @@ document.addEventListener('DOMContentLoaded', function() {
     ].filter(el => el);
 
     let currentIndex = 0;
-    let isInDropdown = false;
 
     // Add keyboard event listener
     page1.addEventListener('keydown', function(e) {
         const contactRel = document.getElementById('contactRel');
         const isDropdownOpen = document.querySelector('.select2-container--open') !== null;
 
-        // If dropdown is open, handle dropdown navigation
+        // If dropdown is open, only allow up/down and enter
         if (isDropdownOpen) {
-            isInDropdown = true;
-            
-            // Allow up/down for dropdown, block left/right for field navigation
             if (['ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                e.preventDefault();
+                e.preventDefault(); // Block left/right navigation
                 return;
             }
-            
-            // Enter selects and closes dropdown
             if (e.key === 'Enter') {
+                // Selection made, close dropdown and move to next field
                 setTimeout(() => {
-                    isInDropdown = false;
-                    // Move to next field after selection
                     currentIndex = (currentIndex + 1) % focusableElements.length;
                     focusableElements[currentIndex].focus();
                 }, 100);
-                return;
             }
-            
-            // Let Select2 handle up/down keys inside dropdown
-            return;
+            return; // Let Select2 handle up/down keys
         }
 
         // Normal field navigation (dropdown closed)
@@ -1602,7 +1592,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             focusableElements[currentIndex].focus();
             
-            // If we focused contact relationship, open dropdown on Enter
+            // If we focused contact relationship, set up Enter to open dropdown
             if (focusableElements[currentIndex].id === 'contactRel') {
                 // Remove any existing Enter listener to avoid duplicates
                 contactRel.removeEventListener('keydown', handleContactRelEnter);

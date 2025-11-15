@@ -1542,513 +1542,106 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
   
-
-
 <script>
-// Enhanced Keyboard Navigation System
-class GridNavigation {
-  constructor() {
-    this.currentPage = 1;
-    this.grids = {};
-    this.focusableSelectors = [
-      'input:not([type="hidden"]):not([disabled])',
-      'select',
-      'textarea',
-      'button:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])'
-    ];
-    this.init();
-  }
-
-  init() {
-    this.setupEventListeners();
-    this.initializeAllGrids();
-    this.addAccessibilityAttributes();
-    
-    // Focus first element on load
-    setTimeout(() => this.focusFirstElement(), 100);
-  }
-
-  setupEventListeners() {
-    document.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
-    
-    // Prevent Enter from submitting forms accidentally
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.target.matches('select, .ts-control input, button')) {
-        e.preventDefault();
-      }
-    });
-
-    // Rebuild grids when dynamic content changes
-    const observer = new MutationObserver(() => {
-      this.initializeAllGrids();
-    });
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
-    });
-  }
-
-  addAccessibilityAttributes() {
-    // Add ARIA labels and roles for better screen reader support
-    document.querySelectorAll('.page').forEach((page, index) => {
-      const step = page.getAttribute('data-step');
-      page.setAttribute('aria-label', `Form page ${step}`);
-      page.setAttribute('role', 'form');
-    });
-
-    // Add keyboard shortcuts hint (optional)
-    this.addKeyboardShortcutsHelp();
-  }
-
-  addKeyboardShortcutsHelp() {
-    const helpText = `
-      Keyboard Shortcuts Available:
-      • Arrow Keys: Navigate between fields
-      • Tab/Shift+Tab: Standard navigation
-      • Shift + Arrow Left/Right: Change pages
-      • Space + Shift: Next page
-      • Enter: Activate buttons (when focused)
-      • Escape: Close dropdowns if open
-    `;
-    
-    // You can optionally display this help somewhere in your UI
-    console.log('Keyboard shortcuts enabled:', helpText);
-  }
-
-  initializeAllGrids() {
-    for (let page = 1; page <= 6; page++) {
-      this.buildGridForPage(page);
+// Keyboard Navigation System
+class KeyboardNav {
+    constructor() {
+        this.currentPage = 1;
+        this.init();
     }
-  }
 
-  buildGridForPage(pageNumber) {
-    const page = document.querySelector(`[data-step="${pageNumber}"]`);
-    if (!page) return;
+    init() {
+        document.addEventListener('keydown', (e) => this.handleKeys(e));
+        // Focus first field on load
+        setTimeout(() => this.focusFirstField(), 100);
+    }
 
-    const focusableElements = Array.from(
-      page.querySelectorAll(this.focusableSelectors.join(','))
-    ).filter(el => {
-      // Filter out hidden elements
-      const style = window.getComputedStyle(el);
-      return style.display !== 'none' && 
-             style.visibility !== 'hidden' &&
-             !el.closest('[style*="display: none"]') &&
-             !el.closest('.hidden');
-    });
+    handleKeys(e) {
+        // Page navigation
+        if (e.shiftKey) {
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                this.nextPage();
+                return;
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                this.prevPage();
+                return;
+            }
+        }
 
-    const grid = {};
-    
-    // Group elements by their approximate visual row
-    focusableElements.forEach((element, index) => {
-      const rect = element.getBoundingClientRect();
-      const row = Math.floor(rect.top / 40); // Approximate row based on position
-      
-      if (!grid[row]) grid[row] = {};
-      grid[row][index] = element;
-      
-      // Add navigation attributes
-      element.setAttribute('data-nav-row', row);
-      element.setAttribute('data-nav-col', index);
-      element.setAttribute('data-page', pageNumber);
-    });
+        // Quick generate from any page
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            if (typeof generateFinal === 'function') generateFinal();
+            return;
+        }
 
-    this.grids[pageNumber] = grid;
-  }
+        // Escape from final form
+        if (e.key === 'Escape' && document.getElementById('finalWrap') && 
+            !document.getElementById('finalWrap').classList.contains('hidden')) {
+            document.getElementById('editBtn')?.click();
+        }
+    }
 
-  getCurrentGrid() {
-    return this.grids[this.currentPage];
-  }
+    nextPage() {
+        const next = this.currentPage < 6 ? this.currentPage + 1 : 1;
+        this.goToPage(next);
+    }
 
-  getCurrentPosition() {
-    const activeElement = document.activeElement;
-    if (!this.isFocusable(activeElement)) return null;
+    prevPage() {
+        const prev = this.currentPage > 1 ? this.currentPage - 1 : 6;
+        this.goToPage(prev);
+    }
 
-    const row = parseInt(activeElement.getAttribute('data-nav-row'));
-    const col = parseInt(activeElement.getAttribute('data-nav-col'));
-    const page = parseInt(activeElement.getAttribute('data-page'));
-    
-    return { row, col, page, element: activeElement };
-  }
+    goToPage(page) {
+        this.currentPage = page;
+        if (typeof goTo === 'function') goTo(page);
+        setTimeout(() => this.focusFirstField(), 150);
+    }
 
-  isFocusable(element) {
-    if (!element || !element.matches) return false;
-    
-    return this.focusableSelectors.some(selector => 
-      element.matches(selector)
-    ) && !element.disabled && 
-       element.offsetParent !== null && // visible
-       !element.closest('.hidden');
-  }
-
-  findNextCell(direction) {
-    const grid = this.getCurrentGrid();
-    if (!grid || Object.keys(grid).length === 0) return null;
-
-    const current = this.getCurrentPosition();
-    if (!current) return this.getFirstFocusableElement();
-
-    let { row, col } = current;
-    const rows = Object.keys(grid).map(Number).sort((a, b) => a - b);
-
-    switch (direction) {
-      case 'right':
-      case 'next':
-        return this.findNextInRow(grid, row, col, 1);
+    focusFirstField() {
+        const page = document.querySelector(`[data-step="${this.currentPage}"]`);
+        if (!page) return;
         
-      case 'left':
-      case 'previous':
-        return this.findNextInRow(grid, row, col, -1);
-        
-      case 'down':
-        return this.findNextInColumn(grid, row, col, 1);
-        
-      case 'up':
-        return this.findNextInColumn(grid, row, col, -1);
+        const firstField = page.querySelector('input, select, textarea');
+        if (firstField) firstField.focus();
     }
-  }
-
-  findNextInRow(grid, currentRow, currentCol, direction) {
-    const rows = Object.keys(grid).map(Number).sort((a, b) => a - b);
-    let row = currentRow;
-    let col = currentCol;
-
-    // First try current row
-    const currentRowCells = Object.keys(grid[row] || {}).map(Number).sort((a, b) => a - b);
-    let nextColIndex = currentRowCells.indexOf(col) + direction;
-    
-    if (nextColIndex >= 0 && nextColIndex < currentRowCells.length) {
-      return grid[row][currentRowCells[nextColIndex]];
-    }
-
-    // Move to next/previous row
-    const rowIndex = rows.indexOf(row);
-    let nextRowIndex = rowIndex + direction;
-    
-    // Wrap around
-    if (nextRowIndex >= rows.length) nextRowIndex = 0;
-    if (nextRowIndex < 0) nextRowIndex = rows.length - 1;
-    
-    row = rows[nextRowIndex];
-    const nextRowCells = Object.keys(grid[row] || {}).map(Number).sort((a, b) => a - b);
-    
-    if (direction > 0) {
-      return nextRowCells.length > 0 ? grid[row][nextRowCells[0]] : null;
-    } else {
-      return nextRowCells.length > 0 ? grid[row][nextRowCells[nextRowCells.length - 1]] : null;
-    }
-  }
-
-  findNextInColumn(grid, currentRow, currentCol, direction) {
-    const rows = Object.keys(grid).map(Number).sort((a, b) => a - b);
-    const rowIndex = rows.indexOf(currentRow);
-    let nextRowIndex = rowIndex + direction;
-
-    // Wrap around
-    if (nextRowIndex >= rows.length) nextRowIndex = 0;
-    if (nextRowIndex < 0) nextRowIndex = rows.length - 1;
-
-    const nextRow = rows[nextRowIndex];
-    const nextRowCells = Object.keys(grid[nextRow] || {}).map(Number).sort((a, b) => a - b);
-    
-    if (nextRowCells.length === 0) return null;
-
-    // Find closest column in the new row
-    let closestCol = nextRowCells[0];
-    let minDistance = Math.abs(closestCol - currentCol);
-    
-    nextRowCells.forEach(col => {
-      const distance = Math.abs(col - currentCol);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestCol = col;
-      }
-    });
-
-    return grid[nextRow][closestCol];
-  }
-
-  moveFocus(direction) {
-    const nextCell = this.findNextCell(direction);
-    if (nextCell && this.isFocusable(nextCell)) {
-      nextCell.focus();
-      this.highlightCurrentField(nextCell);
-    }
-  }
-
-  highlightCurrentField(element) {
-    // Remove previous highlights
-    document.querySelectorAll('.keyboard-highlight').forEach(el => {
-      el.classList.remove('keyboard-highlight');
-    });
-    
-    // Add highlight to current field
-    element.classList.add('keyboard-highlight');
-    
-    // Scroll into view if needed
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  getFirstFocusableElement() {
-    const grid = this.getCurrentGrid();
-    if (!grid) return null;
-    
-    const rows = Object.keys(grid).map(Number).sort((a, b) => a - b);
-    if (rows.length === 0) return null;
-    
-    const firstRow = rows[0];
-    const firstRowCells = Object.keys(grid[firstRow] || {}).map(Number).sort((a, b) => a - b);
-    
-    return firstRowCells.length > 0 ? grid[firstRow][firstRowCells[0]] : null;
-  }
-
-  handleKeyNavigation(e) {
-    // Don't interfere with input fields when user is typing
-    if (e.target.matches('input[type="text"], input[type="date"], textarea') && 
-        !['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Tab', 'Escape'].includes(e.key)) {
-      return;
-    }
-
-    // Handle dropdown escape key
-    if (e.key === 'Escape') {
-      const active = document.activeElement;
-      if (active.matches('select') && active.parentNode.querySelector('.select2')) {
-        active.blur();
-      }
-      return;
-    }
-
-    // Page navigation with Shift+Arrow
-    if (e.shiftKey) {
-      if (e.key === 'ArrowRight' || e.key === ' ') {
-        e.preventDefault();
-        this.navigateToNextPage();
-        return;
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        this.navigateToPreviousPage();
-        return;
-      }
-    }
-
-    // Cell navigation with Arrow keys (when not in text input)
-    if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key) && 
-        !e.target.matches('input[type="text"], textarea')) {
-      e.preventDefault();
-      
-      const directionMap = {
-        'ArrowRight': 'right',
-        'ArrowLeft': 'left',
-        'ArrowDown': 'down',
-        'ArrowUp': 'up'
-      };
-      
-      this.moveFocus(directionMap[e.key]);
-    }
-
-    // Enter key to activate buttons and navigate
-    if (e.key === 'Enter' && e.target.matches('button, .nav-control')) {
-      // Let the default behavior handle button clicks
-      return;
-    }
-  }
-
-  navigateToNextPage() {
-    const nextPage = this.currentPage + 1;
-    if (nextPage <= 6) {
-      this.goToPage(nextPage);
-    } else {
-      // If on last page, go to first page
-      this.goToPage(1);
-    }
-  }
-
-  navigateToPreviousPage() {
-    const prevPage = this.currentPage - 1;
-    if (prevPage >= 1) {
-      this.goToPage(prevPage);
-    } else {
-      // If on first page, go to last page
-      this.goToPage(6);
-    }
-  }
-
-  goToPage(pageNumber) {
-    this.currentPage = pageNumber;
-    
-    // Use existing navigation function
-    if (typeof goTo === 'function') {
-      goTo(pageNumber);
-    }
-    
-    // Focus first element on new page
-    setTimeout(() => {
-      const firstElement = this.getFirstFocusableElement();
-      if (firstElement) {
-        firstElement.focus();
-        this.highlightCurrentField(firstElement);
-      }
-      this.initializeAllGrids(); // Rebuild grid for new page
-    }, 150);
-  }
-
-  focusFirstElement() {
-    const firstElement = this.getFirstFocusableElement();
-    if (firstElement) {
-      firstElement.focus();
-      this.highlightCurrentField(firstElement);
-    }
-  }
 }
 
-// Enhanced student management with keyboard support
-function setupEnhancedStudents() {
-  const originalAddStudent = window.addStudent;
-  const originalRemoveStudent = window.removeStudent;
-
-  window.addStudent = function(prefill) {
-    originalAddStudent(prefill);
-    setTimeout(() => {
-      if (window.gridNav) {
-        window.gridNav.initializeAllGrids();
-        // Focus the first field of the new student
-        const newStudentId = window.studentCount;
-        const firstField = document.getElementById(`s_${newStudentId}_surname`);
-        if (firstField) {
-          firstField.focus();
-          window.gridNav.highlightCurrentField(firstField);
-        }
-      }
-    }, 100);
-  };
-
-  window.removeStudent = function() {
-    originalRemoveStudent();
-    setTimeout(() => {
-      if (window.gridNav) {
-        window.gridNav.initializeAllGrids();
-        // Focus the last remaining student or navigation
-        const lastStudentId = window.studentCount;
-        if (lastStudentId > 0) {
-          const firstField = document.getElementById(`s_${lastStudentId}_surname`);
-          if (firstField) firstField.focus();
-        } else {
-          window.gridNav.focusFirstElement();
-        }
-      }
-    }, 100);
-  };
-}
-
-// Initialize everything when DOM is loaded
+// Initialize when ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize keyboard navigation
-  window.gridNav = new GridNavigation();
-  
-  // Enhance student management
-  setupEnhancedStudents();
-  
-  // Enhance existing navigation to work with keyboard system
-  const originalGoTo = window.goTo;
-  window.goTo = function(step) {
-    originalGoTo(step);
-    if (window.gridNav) {
-      setTimeout(() => {
-        window.gridNav.currentPage = step;
-        window.gridNav.initializeAllGrids();
-        window.gridNav.focusFirstElement();
-      }, 100);
-    }
-  };
-
-  // Add keyboard support for final form actions
-  document.addEventListener('keydown', (e) => {
-    // Ctrl+Enter to generate form from any page
-    if (e.ctrlKey && e.key === 'Enter') {
-      e.preventDefault();
-      if (typeof generateFinal === 'function') {
-        generateFinal();
-      }
-    }
+    window.keyboardNav = new KeyboardNav();
     
-    // Escape key to go back from final form
-    if (e.key === 'Escape' && document.getElementById('finalWrap') && 
-        !document.getElementById('finalWrap').classList.contains('hidden')) {
-      document.getElementById('editBtn')?.click();
-    }
-  });
-
-  console.log('Keyboard navigation system loaded. Use arrow keys to navigate, Shift+Arrow to change pages.');
+    // Enhance existing navigation
+    const originalGoTo = window.goTo;
+    window.goTo = function(step) {
+        originalGoTo(step);
+        if (window.keyboardNav) {
+            window.keyboardNav.currentPage = step;
+            setTimeout(() => window.keyboardNav.focusFirstField(), 100);
+        }
+    };
 });
 
-// Add CSS for keyboard navigation highlights
-const keyboardStyles = `
-.keyboard-highlight {
-  outline: 3px solid #3b82f6 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
-  z-index: 10 !important;
-  position: relative !important;
-  border-color: #3b82f6 !important;
-}
-
-.keyboard-highlight-select2 .select2-selection {
-  outline: 3px solid #3b82f6 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
-}
-
-.focusable-cell:focus {
-  outline: 2px solid #2563eb !important;
-  outline-offset: 1px !important;
-}
-
-/* Better focus for navigation buttons */
-.nav-buttons button:focus {
-  outline: 2px solid white !important;
-  outline-offset: 2px !important;
-  background-color: #059669 !important;
-}
-
-/* Tom Select focus enhancements */
-.ts-control.focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-}
-
-/* Select2 focus enhancements */
-.select2-container--default .select2-selection--single:focus {
-  border-color: #3b82f6 !important;
+// Add focus styles
+const focusStyles = `
+.focusable:focus {
+    outline: 3px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+    z-index: 10;
 }
 `;
+const style = document.createElement('style');
+style.textContent = focusStyles;
+document.head.appendChild(style);
 
-// Inject styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = keyboardStyles;
-document.head.appendChild(styleSheet);
+// Make all form elements focusable
+document.querySelectorAll('input, select, textarea, button').forEach(el => {
+    el.classList.add('focusable');
+});
 </script>
-
-<style>
-/* Additional responsive improvements for keyboard navigation */
-@media (max-width: 768px) {
-  .keyboard-highlight {
-    outline-width: 2px !important;
-    outline-offset: 1px !important;
-  }
-}
-
-/* Ensure all interactive elements are properly styled */
-input, select, textarea, button {
-  transition: all 0.2s ease-in-out;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-}
-</style>
 
 
 

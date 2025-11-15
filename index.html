@@ -218,10 +218,72 @@
 
   <div class="grid grid-cols-12 gap-3">
     <!-- DATE -->
-    <div class="col-span-2">
-      <label class="block text-sm">DATE</label>
-      <input id="date" type="date" class="w-full border rounded p-2 mt-1" data-preserve-keys="true" />
-    </div>
+  <!-- DATE FIELD -->
+<div class="col-span-2">
+  <label class="block text-sm">DATE</label>
+  <input 
+    id="date"
+    type="date"
+    class="w-full border rounded p-2 mt-1"
+    min="1900-01-01"
+    max="2100-12-31"
+  />
+  <p id="date-error" class="text-red-600 text-sm mt-1 hidden"></p>
+</div>
+
+<script>
+  const dateInput = document.getElementById("date");
+  const errorMsg = document.getElementById("date-error");
+
+  dateInput.addEventListener("input", function () {
+    let value = this.value;
+
+    // Split year-month-day
+    let parts = value.split("-");
+    let year = parts[0];
+
+    // -----------------------------------------
+    // 1. Restrict year to 4 digits
+    // -----------------------------------------
+    if (year && year.length > 4) {
+      parts[0] = year.slice(0, 4);
+      this.value = parts.join("-");
+      year = parts[0];
+    }
+
+    // -----------------------------------------
+    // 2. Validate year range
+    // -----------------------------------------
+    if (year && year.length === 4) {
+      const yearNum = parseInt(year);
+
+      if (yearNum < 1900 || yearNum > 2100) {
+        this.classList.add("border-red-600");
+        errorMsg.textContent = "Year must be between 1900 and 2100.";
+        errorMsg.classList.remove("hidden");
+        return;
+      }
+    }
+
+    // -----------------------------------------
+    // 3. Validate incomplete year (less than 4 digits)
+    // -----------------------------------------
+    if (year && year.length > 0 && year.length < 4) {
+      this.classList.add("border-red-600");
+      errorMsg.textContent = "Year must be exactly 4 digits (YYYY).";
+      errorMsg.classList.remove("hidden");
+      return;
+    }
+
+    // -----------------------------------------
+    // 4. Clear errors when valid
+    // -----------------------------------------
+    this.classList.remove("border-red-600");
+    errorMsg.classList.add("hidden");
+    errorMsg.textContent = "";
+  });
+</script>
+
 
     <!-- TAKEN BY -->
     <div class="col-span-3">

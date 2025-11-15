@@ -216,11 +216,26 @@
   <h2 class="font-medium mb-3">Page 1</h2>
 
   <div class="grid grid-cols-12 gap-3">
-    <!-- DATE -->
-    <div class="col-span-2">
-      <label class="block text-sm">DATE</label>
-      <input id="date" type="date" class="w-full border rounded p-2 mt-1" data-preserve-keys="true" />
-    </div>
+<!-- DATE -->
+<div class="col-span-2">
+  <label class="block text-sm">DATE</label>
+  <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
+</div>
+
+<script>
+  document.getElementById("date").addEventListener("input", function () {
+    const value = this.value;
+    const year = value.split("-")[0];
+
+    // If year is not 4 digits, clear it or prevent submission
+    if (year.length !== 4) {
+      this.setCustomValidity("Year must be exactly 4 digits (YYYY).");
+    } else {
+      this.setCustomValidity("");
+    }
+  });
+</script>
+
 
     <!-- TAKEN BY -->
     <div class="col-span-3">
@@ -1538,6 +1553,9 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
+
+
+  
 
 
 

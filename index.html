@@ -218,11 +218,22 @@
 
   <div class="grid grid-cols-12 gap-3">
     <!-- DATE -->
-<!-- DATE FIELD -->
+<!-- KEYBOARD-FRIENDLY DATE FIELD -->
 <div class="col-span-2">
   <label class="block text-sm">DATE</label>
+
+  <!-- Keyboard-friendly masked input -->
   <input 
-    id="date"
+    id="dateMasked"
+    type="text"
+    class="w-full border rounded p-2 mt-1 mb-1"
+    placeholder="MM/DD/YYYY"
+    maxlength="10"
+  />
+
+  <!-- Native calendar input (hidden visually but still usable) -->
+  <input 
+    id="dateNative"
     type="date"
     class="w-full border rounded p-2 mt-1"
     min="2000-01-01"
@@ -231,52 +242,83 @@
 </div>
 
 <script>
-  const dateInput = document.getElementById("date");
+  const masked = document.getElementById("dateMasked");
+  const native = document.getElementById("dateNative");
 
-  dateInput.addEventListener("input", function () {
-    let value = this.value;
+  // -------------------------------
+  // FORMAT + VALIDATE MASKED INPUT
+  // -------------------------------
+  masked.addEventListener("input", function () {
+    let v = this.value.replace(/\D/g, "").slice(0, 8); // only numbers
 
-    // Split year-month-day
-    let parts = value.split("-");
-    let year = parts[0];
+    if (v.length >= 3) v = v.slice(0, 2) + "/" + v.slice(2);
+    if (v.length >= 6) v = v.slice(0, 5) + "/" + v.slice(5);
 
-    // -----------------------------------------
-    // 1. Restrict year to 4 digits
-    // -----------------------------------------
-    if (year && year.length > 4) {
-      parts[0] = year.slice(0, 4);
-      this.value = parts.join("-");
-      year = parts[0];
+    this.value = v;
+
+    syncToNative();
+  });
+
+  // -------------------------------
+  // ARROW KEY NAVIGATION (MM→DD→YYYY)
+  // -------------------------------
+  masked.addEventListener("keydown", function (e) {
+    const pos = this.selectionStart;
+
+    // RIGHT ARROW → skip over "/"
+    if (e.key === "ArrowRight" && this.value[pos] === "/") {
+      this.setSelectionRange(pos + 1, pos + 1);
+      e.preventDefault();
     }
 
-    // -----------------------------------------
-    // 2. Validate year range (2000–2050)
-    // No message — only red border when invalid
-    // -----------------------------------------
-    if (year && year.length === 4) {
-      const yearNum = parseInt(year);
-
-      if (yearNum < 2000 || yearNum > 2050) {
-        this.classList.add("border-red-600");
-        return;
-      }
+    // LEFT ARROW → skip back over "/"
+    if (e.key === "ArrowLeft" && this.value[pos - 1] === "/") {
+      this.setSelectionRange(pos - 2, pos - 2);
+      e.preventDefault();
     }
+  });
 
-    // -----------------------------------------
-    // 3. Incomplete year (less than 4 digits)
-    // No message — only red border
-    // -----------------------------------------
-    if (year && year.length > 0 && year.length < 4) {
-      this.classList.add("border-red-600");
+  // -------------------------------
+  // SYNC MASKED → NATIVE DATE INPUT
+  // -------------------------------
+  function syncToNative() {
+    if (masked.value.length !== 10) {
+      masked.classList.add("border-red-600");
+      native.value = "";
       return;
     }
 
-    // -----------------------------------------
-    // 4. Clear border when valid
-    // -----------------------------------------
-    this.classList.remove("border-red-600");
+    const [mm, dd, yyyy] = masked.value.split("/").map(Number);
+
+    if (
+      yyyy < 2000 || yyyy > 2050 || 
+      mm < 1 || mm > 12 || 
+      dd < 1 || dd > 31
+    ) {
+      masked.classList.add("border-red-600");
+      native.value = "";
+      return;
+    }
+
+    masked.classList.remove("border-red-600");
+
+    // Convert to YYYY-MM-DD for native date input
+    native.value = `${yyyy}-${String(mm).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
+  }
+
+  // -------------------------------
+  // SYNC NATIVE (calendar pick) → MASKED
+  // -------------------------------
+  native.addEventListener("input", function () {
+    if (!this.value) return;
+
+    const [yyyy, mm, dd] = this.value.split("-");
+
+    masked.value = `${mm}/${dd}/${yyyy}`;
+    masked.classList.remove("border-red-600");
   });
 </script>
+
 
 
 

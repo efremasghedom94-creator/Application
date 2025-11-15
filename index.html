@@ -1543,7 +1543,7 @@ document.getElementById('shareBtn').onclick = async () => {
 
   
 <script>
-// Page 1 Keyboard Navigation (without Next button)
+// Page 1 Keyboard Navigation (with dropdown handling)
 document.addEventListener('DOMContentLoaded', function() {
     const page1 = document.querySelector('[data-step="1"]');
     if (!page1) return;
@@ -1555,12 +1555,37 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('contactName'),
         document.getElementById('contactPhone'),
         document.getElementById('contactRel')
-    ].filter(el => el); // Remove any null elements
+    ].filter(el => el);
 
     let currentIndex = 0;
+    let inDropdownMode = false;
 
     // Add keyboard event listener
     page1.addEventListener('keydown', function(e) {
+        const contactRel = document.getElementById('contactRel');
+        
+        // Check if we're in the contact relationship dropdown with options open
+        const isDropdownOpen = contactRel && 
+                              document.activeElement === contactRel &&
+                              document.querySelector('.select2-container--open');
+        
+        if (isDropdownOpen) {
+            inDropdownMode = true;
+            // Let Select2 handle up/down keys inside dropdown
+            if (e.key === 'Enter') {
+                // Selection made, exit dropdown mode
+                setTimeout(() => {
+                    inDropdownMode = false;
+                    // Move to next field after selection
+                    currentIndex = (currentIndex + 1) % focusableElements.length;
+                    focusableElements[currentIndex].focus();
+                }, 100);
+            }
+            return; // Let Select2 handle the keys
+        }
+        
+        inDropdownMode = false;
+
         if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
             e.preventDefault();
             
@@ -1571,6 +1596,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             focusableElements[currentIndex].focus();
+            
+            // If we focused the contact relationship dropdown, open it
+            if (focusableElements[currentIndex].id === 'contactRel') {
+                setTimeout(() => {
+                    // Trigger Select2 to open
+                    $(contactRel).select2('open');
+                }, 50);
+            }
         }
     });
 

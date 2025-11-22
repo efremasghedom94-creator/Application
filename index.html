@@ -1968,125 +1968,62 @@ document.getElementById('shareBtn').onclick = async () => {
 <script>
 // --- Global State & Helpers ---
 
-// Get all focusable elements within the current active page
+// Get all interactive elements that are visible on the current page
 function getFocusableElements(container) {
   if (!container) return [];
-  // Select all interactive elements that a user can typically focus on
-  const selector = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
-  return Array.from(container.querySelectorAll(selector))
-    // Filter out hidden elements and their wrappers (e.g., Tom-select's internal inputs)
-    .filter(el => {
-      // Check for hidden or display:none on the element or its direct parents
-      if (el.offsetWidth === 0 && el.offsetHeight === 0 && el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.tagName !== 'SELECT') return false;
-      // Exclude hidden Tom-Select/Select2 original <select> element (if used)
-      if (el.tagName === 'SELECT' && (el.classList.contains('select2-hidden-accessible') || el.style.display === 'none')) return false;
 
-      // Special handling for the hidden Tom-Select input, look for its control wrapper
-      if (el.classList.contains('ts-control')) {
-          const tomSelectWrapper = el.closest('.ts-wrapper');
-          if (tomSelectWrapper && tomSelectWrapper.style.display === 'none') return false;
+  // 1. Selector for standard focusable elements
+  const selector = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
+  const elements = Array.from(container.querySelectorAll(selector));
+
+  // 2. Add elements created by libraries (Select2, TomSelect)
+  const libraryElements = [];
+  
+  // Find visible Select2/TomSelect input fields
+  container.querySelectorAll('.select2-container, .ts-wrapper').forEach(wrapper => {
+      // Find the active, visible text input within the wrapper
+      const input = wrapper.querySelector('input[type="text"]:not([disabled]):not(.select2-search__field)');
+      if (input) {
+          libraryElements.push(input);
+      } else {
+          // Fallback for Select2 single-select (the rendered text)
+          const rendered = wrapper.querySelector('.select2-selection__rendered');
+          if (rendered && rendered.offsetParent) {
+              libraryElements.push(rendered);
+          }
+      }
+  });
+
+
+  // 3. Combine and filter for visibility and uniqueness
+  const focusable = [...elements, ...libraryElements]
+    .filter(el => {
+      // Basic visibility check
+      if (el.offsetWidth === 0 && el.offsetHeight === 0) {
+          // Exception: Select2/TomSelect search fields often have 1px width/height and should be included if visible
+          if (!el.classList.contains('select2-search__field') && !el.closest('.ts-control')) {
+              return false;
+          }
+      }
+
+      // Filter out original hidden <select> elements used by libraries
+      if (el.tagName === 'SELECT' && (el.classList.contains('select2-hidden-accessible') || el.style.display === 'none')) {
+          return false;
       }
       
-      // Check for hidden containers (like the conditional 'Other' input)
+      // Filter out conditionally hidden inputs (like 'Specify' fields)
       let current = el;
       while (current && current !== container) {
-        if (current.classList.contains('hidden') && current.id !== 'studentsContainer') return false; // StudentsContainer is hidden but its children are active
-        current = current.parentElement;
+          if (current.classList.contains('hidden')) return false;
+          current = current.parentElement;
       }
+
       return true;
     })
-    .map(el => {
-        // If it's a TomSelect control, focus the internal input for typing
-        if (el.classList.contains('ts-control')) {
-            const input = el.querySelector('input[type="text"]:not([disabled])');
-            return input || el;
-        }
-        // If it's a Select2 control, focus the search input
-        if (el.classList.contains('select2-selection__rendered')) {
-            const input = el.closest('.select2-container').querySelector('.select2-search__field');
-            return input || el;
-        }
-        return el;
-    })
-    // Ensure unique elements and remove duplicates introduced by Tom-Select/Select2 search inputs
+    // Ensure uniqueness
     .filter((v, i, a) => a.indexOf(v) === i);
-}
-
-// Custom logic for finding the next/previous focusable element (horizontally or vertically)
-function getNextFocus(currentEl, direction, focusableElements) {
-    if (!focusableElements || focusableElements.length === 0) return null;
-    const currentIndex = focusableElements.indexOf(currentEl);
-    if (currentIndex === -1) return focusableElements[0]; // If not found, focus the first one
-
-    // Helper to get element bounds
-    const getBounds = (el) => {
-        try {
-            return el.getBoundingClientRect();
-        } catch (e) {
-            return { top: 0, left: 0, bottom: 0, right: 0, width: 0, height: 0 };
-        }
-    };
-
-    const currentBounds = getBounds(currentEl);
-    let bestMatch = null;
-    let minDistance = Infinity;
-
-    if (direction === 'LEFT' || direction === 'RIGHT') {
-        // Horizontal navigation (Left/Right) - loop around
-        let nextIndex = (direction === 'RIGHT') ?
-            (currentIndex + 1) % focusableElements.length :
-            (currentIndex - 1 + focusableElements.length) % focusableElements.length;
-
-        // Skip to the next element until a valid one is found or we loop back
-        let loopCount = 0;
-        while (focusableElements[nextIndex] && !focusableElements[nextIndex].offsetParent && loopCount < focusableElements.length) {
-            nextIndex = (direction === 'RIGHT') ?
-                (nextIndex + 1) % focusableElements.length :
-                (nextIndex - 1 + focusableElements.length) % focusableElements.length;
-            loopCount++;
-        }
-        
-        return focusableElements[nextIndex];
-
-    } else if (direction === 'UP' || direction === 'DOWN') {
-        // Vertical navigation (Up/Down) - find the nearest field in the target direction
-        const verticalCheck = (direction === 'DOWN') ? (bounds) => bounds.top > currentBounds.top + 5 : (bounds) => bounds.top < currentBounds.top - 5;
-        
-        // Find candidates in the target direction
-        const candidates = focusableElements.filter(el => {
-            if (el === currentEl) return false;
-            const bounds = getBounds(el);
-            // Must be visible and in the correct vertical direction
-            return (bounds.width > 0 || bounds.height > 0) && verticalCheck(bounds);
-        });
-
-        // Find the best match (closest in both Y and X)
-        for (const el of candidates) {
-            const bounds = getBounds(el);
-            // Calculate distance (prioritizing Y axis)
-            const dx = Math.abs(bounds.left - currentBounds.left);
-            const dy = Math.abs(bounds.top - currentBounds.top);
-            // Heuristic for nearest: give Y distance more weight
-            const distance = dy * 2 + dx;
-
-            if (distance < minDistance) {
-                minDistance = distance;
-                bestMatch = el;
-            }
-        }
-        
-        // Fallback: If no good match, use simple next/prev element in the list
-        if (bestMatch === null) {
-             const nextIndex = (direction === 'DOWN') ?
-                (currentIndex + 1) % focusableElements.length :
-                (currentIndex - 1 + focusableElements.length) % focusableElements.length;
-             return focusableElements[nextIndex];
-        }
-
-        return bestMatch;
-    }
-
-    return null;
+    
+    return focusable;
 }
 
 // Custom handler for Radio Group navigation
@@ -2095,13 +2032,15 @@ function handleRadioGroupNavigation(event, direction) {
     // Check if the current element is a radio button
     if (currentRadio.type !== 'radio' || !currentRadio.name) return false;
 
+    // Use only radio buttons in the current group that are NOT hidden
     const radiosInGroup = document.querySelectorAll(`input[name="${currentRadio.name}"]`);
-    const radioArray = Array.from(radiosInGroup).filter(r => !r.closest('.hidden')); // Filter out hidden radio buttons
+    const radioArray = Array.from(radiosInGroup).filter(r => !r.closest('.hidden')); 
     const currentIndex = radioArray.indexOf(currentRadio);
 
-    if (currentIndex === -1) return false; // Should not happen
+    if (currentIndex === -1) return false;
 
     let nextIndex;
+    // Left/Right or Up/Down should move within the radio group
     if (direction === 'LEFT' || direction === 'UP') {
         nextIndex = (currentIndex - 1 + radioArray.length) % radioArray.length;
     } else if (direction === 'RIGHT' || direction === 'DOWN') {
@@ -2117,10 +2056,10 @@ function handleRadioGroupNavigation(event, direction) {
 function handleRadioGroupSelection(event) {
     const currentRadio = event.target;
     if (currentRadio.type === 'radio' && currentRadio.name) {
-        event.preventDefault(); // Prevent default form submission or other Enter behavior
+        event.preventDefault(); 
         currentRadio.checked = true;
         
-        // Manually trigger the onchange event to run toggleOtherField etc.
+        // Manually trigger the onchange event
         const changeEvent = new Event('change', { bubbles: true });
         currentRadio.dispatchEvent(changeEvent);
 
@@ -2129,40 +2068,43 @@ function handleRadioGroupSelection(event) {
     return false;
 }
 
-// Custom handler for TomSelect/Select2/Native <select> on ENTER
+// Custom handler for Dropdown open/selection on ENTER
 function handleDropdownEnter(event) {
     const el = event.target;
 
-    // 1. Native <select> (like Contact Relationship)
+    // 1. Native <select>
     if (el.tagName === 'SELECT') {
-        // Native select is typically handled by the browser, but we ensure it opens
         event.preventDefault(); 
-        if (typeof el.size === 'number' && el.size > 1) { /* Multi-select or size set, just focusing */ }
-        else { el.click(); } // Try to simulate click to open dropdown
+        el.focus();
+        // A simple click often opens the native dropdown
+        el.click(); 
         return true;
     }
     
-    // 2. Select2 (Contact Relationship) - uses JQuery
-    if (el.classList.contains('select2-search__field') || el.classList.contains('select2-selection__rendered')) {
-        const select2Control = el.closest('.select2-container').querySelector('.select2-selection--single');
-        if (select2Control) {
-            $(select2Control).trigger('click'); // Use JQuery to open Select2
-            event.preventDefault();
-            return true;
+    // 2. Select2 (Contact Relationship) - Target the rendered area/search field
+    if (el.classList.contains('select2-search__field') || el.classList.contains('select2-selection__rendered') || el.closest('.select2-container')) {
+        const select2Container = el.closest('.select2-container');
+        if (select2Container) {
+            // Find the visible control element
+            const select2Control = select2Container.querySelector('.select2-selection--single');
+            if (select2Control) {
+                // Use JQuery to trigger the open event
+                if (typeof $ !== 'undefined' && typeof $.fn.trigger === 'function') {
+                    $(select2Control).trigger('click'); 
+                } else {
+                    select2Control.click();
+                }
+                event.preventDefault();
+                return true;
+            }
         }
     }
     
-    // 3. TomSelect (Home Language(s)) - uses internal input
-    if (el.classList.contains('ts-input') || el.closest('.ts-control')) {
+    // 3. TomSelect (Home Language(s))
+    if (el.closest('.ts-control')) {
         const tomSelectInstance = TomSelect.forElement(document.getElementById('homeLang'));
-        if (tomSelectInstance) {
-            // Check if dropdown is already open
-            if (tomSelectInstance.isOpen) {
-                // If open and an option is highlighted, select it (default behavior)
-            } else {
-                // If closed, open it
-                tomSelectInstance.open();
-            }
+        if (tomSelectInstance && !tomSelectInstance.isOpen) {
+            tomSelectInstance.open();
             event.preventDefault();
             return true;
         }
@@ -2181,6 +2123,12 @@ document.addEventListener('keydown', function(event) {
 
     const isShift = event.shiftKey;
     const key = event.key;
+    const focusableElements = getFocusableElements(currentStep);
+    const currentIndex = focusableElements.indexOf(activeEl);
+
+    // Elements that should maintain default text entry behavior
+    const isTextInput = activeEl.tagName === 'INPUT' && (activeEl.type === 'text' || activeEl.type === 'number' || activeEl.type === 'date');
+    const isTextArea = activeEl.tagName === 'TEXTAREA';
 
     // --- Part 1: Page Navigation (SHIFT + Arrow Left/Right) ---
     if (isShift && (key === 'ArrowLeft' || key === 'ArrowRight')) {
@@ -2188,15 +2136,12 @@ document.addEventListener('keydown', function(event) {
         const currentStepNum = parseInt(currentStep.dataset.step, 10);
         let nextStepNum = currentStepNum;
 
-        if (key === 'ArrowRight') {
-            nextStepNum = currentStepNum + 1;
-        } else if (key === 'ArrowLeft') {
-            nextStepNum = currentStepNum - 1;
-        }
+        if (key === 'ArrowRight') nextStepNum = currentStepNum + 1;
+        else if (key === 'ArrowLeft') nextStepNum = currentStepNum - 1;
         
         // Find the goTo function (assuming it's globally available)
         if (typeof goTo === 'function') {
-            const maxStep = 6; // Based on your code, max step is 6
+            const maxStep = 6; 
             const targetStep = Math.min(Math.max(1, nextStepNum), maxStep);
             if (targetStep !== currentStepNum) {
                  goTo(targetStep);
@@ -2205,72 +2150,81 @@ document.addEventListener('keydown', function(event) {
         return;
     }
     
-    // Check if the element is an input field where the default behavior should be preserved
-    // This is especially important for text inputs, textareas, and certain custom elements
-    const isTextInput = activeEl.tagName === 'INPUT' && (activeEl.type === 'text' || activeEl.type === 'number' || activeEl.type === 'date');
-    const isTextArea = activeEl.tagName === 'TEXTAREA';
-    const isTomSelectInput = activeEl.closest('.ts-control') && activeEl.tagName === 'INPUT';
-    const isSelect2Input = activeEl.classList.contains('select2-search__field');
-
     // --- Part 2: Form Field Navigation (Arrow Keys) ---
     if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown') {
         
-        // Allow default behavior inside text inputs/textareas for cursor movement
+        // 1. Allow default cursor movement in large text fields
         if (isTextInput || isTextArea) {
             return;
         }
 
-        // Handle Radio Group movement first (should also work with Arrow Up/Down)
-        if (handleRadioGroupNavigation(event, key.replace('Arrow', '').toUpperCase())) {
+        // 2. Handle Radio Group movement (overrides standard navigation)
+        const direction = key.replace('Arrow', '').toUpperCase();
+        if (handleRadioGroupNavigation(event, direction)) {
             event.preventDefault();
             return;
         }
 
-        // Prevent default browser scrolling/history behavior
-        event.preventDefault();
-
-        // Check if a TomSelect or Select2 dropdown is open
-        const isTomSelectOpen = TomSelect.forElement(document.getElementById('homeLang'))?.isOpen;
+        // 3. Dropdown/TomSelect navigation when *open* is handled by the browser/library
         const isSelect2Open = document.querySelector('.select2-container--open');
+        const tomSelectInstance = TomSelect.forElement(document.getElementById('homeLang'));
+        const isTomSelectOpen = tomSelectInstance?.isOpen;
 
-        // If a dropdown is open, let the dropdown library handle the navigation inside the list
-        if (isTomSelectOpen || isSelect2Open) {
-            // For TomSelect/Select2, the library handles Arrow Up/Down for list navigation
+        if (isSelect2Open || isTomSelectOpen) {
+            // Let the library handle Up/Down for list navigation
             return;
         }
-        
-        // Find the next focusable element based on custom logic
-        const direction = key.replace('Arrow', '').toUpperCase();
-        const focusableElements = getFocusableElements(currentStep);
-        const nextEl = getNextFocus(activeEl, direction, focusableElements);
 
-        if (nextEl) {
-            nextEl.focus();
+        // 4. Standard Field Navigation (Horizontal Loop / Vertical Next)
+        event.preventDefault(); // Prevent page scrolling
+
+        if (focusableElements.length === 0 || currentIndex === -1) {
+            focusableElements[0]?.focus();
+            return;
         }
+
+        let nextIndex = currentIndex;
+        
+        // Horizontal navigation: Simple index next/previous (loops)
+        if (key === 'ArrowRight') {
+            nextIndex = (currentIndex + 1) % focusableElements.length;
+        } else if (key === 'ArrowLeft') {
+            nextIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+        } 
+        
+        // Vertical navigation: Simple index next/previous (loops)
+        else if (key === 'ArrowDown' || key === 'ArrowUp') {
+            // For Up/Down, we use the same looping mechanism, as a simple list traversal
+            // is the most reliable way to guarantee movement.
+            if (key === 'ArrowDown') {
+                nextIndex = (currentIndex + 1) % focusableElements.length;
+            } else {
+                nextIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+            }
+        }
+
+
+        if (nextIndex !== currentIndex && focusableElements[nextIndex]) {
+            focusableElements[nextIndex].focus();
+        }
+        
     }
 
     // --- Part 3: Selection/Activation (ENTER) ---
     if (key === 'Enter') {
-        // Prevent default form submission on ENTER
         event.preventDefault(); 
         
         // 1. Handle Radio Group selection
-        if (handleRadioGroupSelection(event)) {
-            return;
-        }
+        if (handleRadioGroupSelection(event)) return;
         
-        // 2. Handle Dropdown open/selection (for both native and TomSelect/Select2)
-        if (handleDropdownEnter(event)) {
-             return;
-        }
+        // 2. Handle Dropdown open/selection
+        if (handleDropdownEnter(event)) return;
 
-        // 3. Simple Button/Link Activation
-        if (activeEl.tagName === 'BUTTON' || activeEl.tagName === 'A' || activeEl.getAttribute('role') === 'button') {
+        // 3. Button/Link Activation
+        if (activeEl.tagName === 'BUTTON' || activeEl.tagName === 'A') {
             activeEl.click();
             return;
         }
-
-        // 4. Default for other focusable elements (like custom checkboxes, though not present here)
     }
 });
 </script>

@@ -1960,182 +1960,139 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
+<style>
+  /* 1. More visible focus border */
+  input:focus, select:focus, textarea:focus, .ts-control:focus, .select2-selection:focus {
+    outline: 2px solid #4db8ff !important;
+  }
+</style>
+
 <script>
-// ======================================================
-// 0. Prevent keyboard from opening native date picker
-// ======================================================
-document.addEventListener("keydown", function (e) {
-  if (document.activeElement.type === "date") {
-    if (e.key !== "Tab") e.preventDefault();  // Only allow tab
+document.addEventListener("DOMContentLoaded", () => {
+
+  // -----------------------------
+  // Helper: all focusable elements
+  // -----------------------------
+  function getFocusableElements() {
+    return Array.from(document.querySelectorAll(`
+      input:not([type=hidden]),
+      select,
+      textarea,
+      .ts-control,
+      .select2-selection,
+      input[type=radio]
+    `)).filter(el => !el.disabled && !el.closest('.hidden'));
   }
-}, true);
 
-// ======================================================
-// 1. Date MM/DD/YYYY Navigation (on real <input type="date">)
-// ======================================================
-document.querySelectorAll('input[type="date"]').forEach(dateInput => {
-  dateInput.addEventListener("focus", () => {
-    dateInput.setSelectionRange(0, 2);   // Always select MM first
-  });
+  // -----------------------------
+  // Focus move horizontal/vertical
+  // -----------------------------
+  function focusMove(dir) {
+    const fields = getFocusableElements();
+    const active = document.activeElement;
+    let index = fields.indexOf(active);
+    if (index === -1) return;
 
-  dateInput.addEventListener("keydown", (e) => {
-    let pos = dateInput.selectionStart;
+    let newIndex = index + dir;
 
-    if (e.key === "ArrowRight") {
+    // loop around
+    if (newIndex < 0) newIndex = fields.length - 1;
+    if (newIndex >= fields.length) newIndex = 0;
+
+    fields[newIndex].focus();
+  }
+
+  // -----------------------------
+  // Keyboard handling
+  // -----------------------------
+  document.addEventListener("keydown", (e) => {
+    const el = document.activeElement;
+
+    // ---- Arrow navigation ----
+    if (["ArrowLeft","ArrowRight"].includes(e.key) && !e.shiftKey) {
       e.preventDefault();
-      if (pos < 3) dateInput.setSelectionRange(3, 5);  // go MM → DD
-      else dateInput.setSelectionRange(6, 10);         // go DD → YYYY
-    }
-
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      if (pos > 5) dateInput.setSelectionRange(3, 5);  // YYYY → DD
-      else dateInput.setSelectionRange(0, 2);          // DD → MM
-    }
-  });
-});
-
-// ======================================================
-// 2. Focusable elements collector
-// ======================================================
-function getFocusableElements() {
-  return Array.from(document.querySelectorAll(`
-    input:not([type=hidden]),
-    select,
-    textarea,
-    .ts-control,
-    .select2-selection
-  `)).filter(el => !el.disabled && !el.closest('.hidden'));
-}
-
-// ======================================================
-// 3. Horizontal navigation LEFT ↔ RIGHT (Outside dropdowns)
-// ======================================================
-function focusMove(dir) {
-  const fields = getFocusableElements();
-  const active = document.activeElement;
-  let index = fields.indexOf(active);
-  if (index === -1) return;
-
-  let newIndex = index + dir;
-  if (newIndex < 0) newIndex = fields.length - 1;
-  if (newIndex >= fields.length) newIndex = 0;
-
-  fields[newIndex].focus();
-}
-
-// ======================================================
-// 4. GLOBAL key handling
-// ======================================================
-document.addEventListener("keydown", function(e) {
-
-  const el = document.activeElement;
-
-  // Skip horizontal navigation when inside a dropdown
-  if (el.classList.contains("select2-dropdown") ||
-      el.classList.contains("select2-results__option") ||
-      el.getAttribute("aria-expanded") === "true") {
-    return;
-  }
-
-  // Skip navigation while inside TomSelect
-  if (el.closest(".ts-dropdown")) return;
-
-  // Skip navigation inside select list (expanded)
-  if (el.tagName === "SELECT" && el.size > 1) return;
-
-  // LEFT / RIGHT = Move to other fields
-  if (e.key === "ArrowLeft" && !e.shiftKey) {
-    e.preventDefault();
-    focusMove(-1);
-    return;
-  }
-
-  if (e.key === "ArrowRight" && !e.shiftKey) {
-    e.preventDefault();
-    focusMove(1);
-    return;
-  }
-
-  // ====================================================
-  // ENTER to open dropdown (but do NOT break arrow keys)
-  // ====================================================
-  if (e.key === "Enter") {
-    // Native select
-    if (el.tagName === "SELECT") {
-      e.preventDefault();
-      el.size = el.options.length; // expand
+      focusMove(e.key === "ArrowRight" ? 1 : -1);
       return;
     }
 
-    // Contact Relationship (Select2)
-    if (el.classList.contains("select2-selection")) {
+    // ---- Up/Down navigation ----
+    if (["ArrowUp","ArrowDown"].includes(e.key)) {
       e.preventDefault();
-      $(el).trigger("mousedown");
+      focusMove(e.key === "ArrowDown" ? 1 : -1);
       return;
     }
 
-    // TomSelect
-    if (el.classList.contains("ts-control")) {
-      e.preventDefault();
-      el.tomselect.open();
-      return;
-    }
-  }
-});
-
-// ======================================================
-// 5. Allow UP/DOWN inside dropdown without escaping
-// ======================================================
-document.addEventListener("keydown", function(e) {
-  const el = document.activeElement;
-
-  // SELECT2 trap
-  if (el.closest(".select2-container")) {
-    // Allow ArrowUp, ArrowDown to move items inside dropdown
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      return; // DO NOT move focus away
-    }
-  }
-
-  // Native <select> expanded mode
-  if (el.tagName === "SELECT" && el.size > 1) {
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      return; // trap inside list
-    }
-  }
-
-  // TomSelect trap
-  if (el.closest(".ts-dropdown")) {
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") return;
-  }
-});
-
-// ======================================================
-// 6. Collapse select on blur or selection
-// ======================================================
-document.addEventListener("change", (e) => {
-  if (e.target.tagName === "SELECT" && e.target.size > 1) {
-    e.target.size = 0;
-  }
-});
-document.addEventListener("blur", (e) => {
-  if (e.target.tagName === "SELECT" && e.target.size) {
-    e.target.size = 0;
-  }
-}, true);
-
-// ======================================================
-// 7. ENTER selects PR / RP / SP radio buttons
-// ======================================================
-document.querySelectorAll('input[type="radio"]').forEach(radio => {
-  radio.addEventListener("keydown", (e) => {
+    // ---- ENTER for dropdowns ----
     if (e.key === "Enter") {
-      radio.checked = true;
+      // Native select
+      if (el.tagName === "SELECT") {
+        e.preventDefault();
+        el.size = el.options.length; // open dropdown
+        return;
+      }
+
+      // Tom Select
+      if (el.classList.contains("ts-control")) {
+        e.preventDefault();
+        el.tomselect.open();
+        return;
+      }
+
+      // Select2
+      if (el.classList.contains("select2-selection")) {
+        e.preventDefault();
+        $(el).trigger("mousedown");
+        return;
+      }
+
+      // Radio button ENTER selection
+      if (el.type === "radio") {
+        e.preventDefault();
+        el.checked = true;
+        return;
+      }
     }
   });
+
+  // Collapse native select on change or blur
+  document.addEventListener("change", (e) => {
+    if (e.target.tagName === "SELECT" && e.target.size) e.target.size = 0;
+  });
+  document.addEventListener("blur", (e) => {
+    if (e.target.tagName === "SELECT" && e.target.size) e.target.size = 0;
+  }, true);
+
+  // -----------------------------
+  // Date input MM/DD/YYYY navigation
+  // -----------------------------
+  document.querySelectorAll('input[type="date"]').forEach(dateInput => {
+
+    dateInput.addEventListener("focus", () => {
+      // select MM automatically
+      dateInput.setSelectionRange(0, 2);
+    });
+
+    dateInput.addEventListener("keydown", (e) => {
+      const pos = dateInput.selectionStart;
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (pos < 3) dateInput.setSelectionRange(3, 5);        // MM → DD
+        else if (pos < 6) dateInput.setSelectionRange(6, 10);  // DD → YYYY
+      }
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (pos > 5) dateInput.setSelectionRange(3, 5);        // YYYY → DD
+        else if (pos > 2) dateInput.setSelectionRange(0, 2);   // DD → MM
+      }
+    });
+
+  });
+
 });
 </script>
+
 
 
 

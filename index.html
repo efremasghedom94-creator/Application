@@ -1027,7 +1027,6 @@
     select.appendChild(opt);
   });
 
-  // Initialize Tom Select and keep a reference
   const ts = new TomSelect(select, {
     placeholder: "You may select or type more than one language",
     maxOptions: 500,
@@ -1035,19 +1034,31 @@
     persist: true,
     plugins: ['remove_button'],
     score: function(search) {
-      const regex = new RegExp('^' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-      return function(item) {
-        return regex.test(item.text) ? 1 : 0;
-      };
+        ...
     },
-    // old-style callbacks (still useful)
     onItemAdd: function(value, $item) {
-      safeClearAndClose(this);
+        safeClearAndClose(this);
     },
     onOptionAdd: function(value, data) {
-      safeClearAndClose(this);
+        safeClearAndClose(this);
     }
-  });
+});
+
+// --- FIX: Allow ArrowLeft / ArrowRight to leave TomSelect when closed ---
+ts.on('initialize', () => {
+  const inputEl = ts.control_input; // TomSelect's text input
+  
+  inputEl.addEventListener('keydown', (e) => {
+    const closed = !ts.isOpen; // TomSelect dropdown is closed
+
+    if (closed && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.stopImmediatePropagation();   // stop TomSelect internal handler
+      e.stopPropagation();
+      // no preventDefault — allow your global navigation
+    }
+  }, true); // capture mode so we intercept before TomSelect
+});
+
 
   // Robust helper that clears whatever input TomSelect has created,
   // forces a refresh, closes dropdown, and returns focus to the control.

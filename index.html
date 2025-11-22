@@ -1985,34 +1985,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function getFocusableElements(container) {
         if (!container) return [];
 
-        // Select inputs, selects, textareas, and generic focusable items
         const selector = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]';
         let elements = Array.from(container.querySelectorAll(selector));
 
-        // Add Select2 focusable spans
         const select2Triggers = Array.from(container.querySelectorAll('.select2-selection'));
-        
-        // Add TomSelect inputs
         const tomSelectInputs = Array.from(container.querySelectorAll('.ts-control input'));
 
         const allCandidates = [...elements, ...select2Triggers, ...tomSelectInputs];
 
         return allCandidates.filter(el => {
-            // EXCLUSION: Do not focus the NEXT/BACK buttons via Arrow Keys
             if (el.closest('.nav-buttons')) return false;
-
-            // Visibility Check
             if (el.offsetParent === null) return false;
-            
-            // Exclude hidden underlying selects from libraries
             if (el.tagName === 'SELECT' && (el.classList.contains('select2-hidden-accessible') || el.style.display === 'none')) return false;
-
-            // Exclude elements in hidden containers
             if (el.closest('.hidden')) return false;
-
             return true;
         }).sort((a, b) => {
-            // Sort by DOM order for logical flow
             return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
         });
     }
@@ -2026,19 +2013,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const key = event.key;
         const isShift = event.shiftKey;
 
-        // --- A. PAGE NAVIGATION (Shift + Left/Right) ---
+        // ---------------------------------------------
+        // A. PAGE SWITCHING (Shift + Left/Right)
+        // ---------------------------------------------
         if (isShift && (key === 'ArrowLeft' || key === 'ArrowRight')) {
             event.preventDefault();
             const currentStepNum = parseInt(currentStep.dataset.step, 10);
             let nextStepNum = key === 'ArrowRight' ? currentStepNum + 1 : currentStepNum - 1;
-            
-            // Logic to trigger your goTo() function safely
+
             if (typeof goTo === 'function') {
-                // Determine max pages dynamically or hardcode if known (e.g. 6)
                 const maxPages = 6; 
                 if (nextStepNum >= 1 && nextStepNum <= maxPages) {
                     goTo(nextStepNum);
-                    // Focus first field of new page
                     setTimeout(() => {
                         const newPage = document.querySelector(`.page[data-step="${nextStepNum}"]`);
                         const focusables = getFocusableElements(newPage);
@@ -2049,101 +2035,107 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // --- B. FIELD NAVIGATION (Arrows) ---
+        // ---------------------------------------------
+        // B. FIELD NAVIGATION (Arrow Keys)
+        // ---------------------------------------------
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
-            
-          const isSelect2Open = document.querySelector('.select2-container--open');
 
-// TomSelect is open only when dropdown exists & is not hidden
-const isTomSelectOpen = !!document.querySelector('.ts-dropdown:not([style*="display: none"])');
+            const isSelect2Open = document.querySelector('.select2-container--open');
+            const isTomSelectOpen = !!document.querySelector('.ts-dropdown:not([style*="display: none"])');
 
-if (isSelect2Open || isTomSelectOpen) {
-    return; // Let dropdown handle arrows
-}
+            // If dropdown is open → let it control arrows
+            if (isSelect2Open || isTomSelectOpen) return;
 
+            // Text-like fields
+            const isTextLike = activeEl.tagName === 'INPUT' &&
+                  ['text', 'password', 'email', 'tel', 'number', 'search', 'url'].includes(activeEl.type);
 
-            // 2. Text Input Boundaries (Allow Typing)
-            const isTextLike = activeEl.tagName === 'INPUT' && ['text', 'password', 'email', 'tel', 'number', 'search', 'url'].includes(activeEl.type);
             const isTextArea = activeEl.tagName === 'TEXTAREA';
 
             if (isTextLike || isTextArea) {
-                // If moving Left/Right, only navigate if cursor is at start/end
                 try {
                     if (key === 'ArrowLeft' && activeEl.selectionStart > 0) return;
                     if (key === 'ArrowRight' && activeEl.selectionStart < activeEl.value.length) return;
-                } catch (e) {
-                    // Some inputs (like number) might throw on selectionStart access; allow navigation if so.
-                }
+                } catch (e) {}
             }
 
-            // 3. Date Inputs (Allow Internal Navigation)
+            // Date fields: allow L/R to change date internally
             if (activeEl.tagName === 'INPUT' && activeEl.type === 'date') {
-                // Allow Left/Right to change Day/Month/Year
-                if (key === 'ArrowLeft' || key === 'ArrowRight') return; 
-                // Allow Up/Down to navigate OUT of the cell (Next/Prev field)
+                if (key === 'ArrowLeft' || key === 'ArrowRight') return;
             }
 
-            // 4. Calculate Next Field (Looping)
-            event.preventDefault(); // Stop scrolling
-            
+            // Move to next field
+            event.preventDefault();
             const focusables = getFocusableElements(currentStep);
             if (focusables.length === 0) return;
 
             const idx = focusables.indexOf(activeEl);
             let nextIdx = idx;
 
-            // Down or Right = Forward
             if (key === 'ArrowRight' || key === 'ArrowDown') {
                 nextIdx = (idx + 1) % focusables.length;
-            } 
-            // Up or Left = Backward
-            else {
+            } else {
                 nextIdx = (idx - 1 + focusables.length) % focusables.length;
             }
 
-            // 5. Apply Focus
-            if (focusables[nextIdx]) {
-                focusables[nextIdx].focus();
-            }
+            if (focusables[nextIdx]) focusables[nextIdx].focus();
         }
 
-        // --- C. SELECTION / INTERACTION (Enter) ---
+        // ---------------------------------------------
+        // C. ENTER KEY HANDLING
+        // ---------------------------------------------
         if (key === 'Enter') {
-            event.preventDefault(); // Stop form submit
+            event.preventDefault();
 
-            // 1. Radio Buttons (Select)
             if (activeEl.type === 'radio') {
                 activeEl.checked = true;
                 activeEl.dispatchEvent(new Event('change', { bubbles: true }));
                 return;
             }
 
-            // 2. Select2 (Open)
             if (activeEl.classList.contains('select2-selection')) {
                 $(activeEl).trigger('click');
                 return;
             }
 
-            // 3. TomSelect (Open)
             if (activeEl.closest('.ts-control')) {
                 activeEl.click();
                 return;
             }
             
-            // 4. Native Select (Open)
             if (activeEl.tagName === 'SELECT') {
-                activeEl.click(); // Works in most browsers to open dropdown
+                activeEl.click();
                 return;
             }
 
-            // 5. Buttons (Click - e.g. Add Student)
             if (activeEl.tagName === 'BUTTON') {
                 activeEl.click();
             }
         }
     });
+
+    // --------------------------------------------------------------------
+    // *** FIX: ALLOW ARROW LEFT/RIGHT TO EXIT TOMSELECT WHEN CLOSED ***
+    // --------------------------------------------------------------------
+    document.addEventListener("tomselect:init", (e) => {
+        const ts = e.detail.instance;
+
+        if (ts && ts.control_input) {
+            ts.control_input.addEventListener('keydown', function(ev) {
+                const closed = !ts.isOpen;
+
+                // If TomSelect is CLOSED → we allow Left/Right to escape
+                if (closed && (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight')) {
+                    ev.stopImmediatePropagation();  // prevent TomSelect from intercepting
+                    // DO NOT preventDefault → allow main script to handle navigation
+                }
+            });
+        }
+    });
+
 });
 </script>
+
 
 
 

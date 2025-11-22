@@ -1961,7 +1961,6 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 <style>
-  /* Visible focus for accessibility */
   input:focus, select:focus, textarea:focus, .ts-control:focus, .select2-selection:focus {
     outline: 2px solid #4db8ff !important;
   }
@@ -1988,58 +1987,60 @@ document.addEventListener("DOMContentLoaded", () => {
     if (index === -1) return;
 
     let newIndex = index + dir;
-
     if (newIndex < 0) newIndex = fields.length - 1;
     if (newIndex >= fields.length) newIndex = 0;
 
     fields[newIndex].focus();
   }
 
+  function isDropdownOpen(el) {
+    // Native select dropdown
+    if (el.tagName === "SELECT" && el.size > 1) return true;
+    // TomSelect
+    if (el.classList.contains("ts-control") && el.tomselect && el.tomselect.isOpen) return true;
+    // Select2
+    if (el.classList.contains("select2-selection") && $(el).data('select2')?.isOpen()) return true;
+    return false;
+  }
+
   document.addEventListener("keydown", (e) => {
     const el = document.activeElement;
 
-    // Prevent arrow focus movement when inside dropdown list
-    const dropdownOpen = el.tagName === "SELECT" && el.size > 1;
-    const isTomSelectOpen = el.classList.contains("ts-control") && el.tomselect && el.tomselect.isOpen;
-    const isSelect2Open = el.classList.contains("select2-selection") && $(el).data('select2')?.isOpen();
+    // If dropdown is open, allow arrow keys to navigate inside it only
+    if (isDropdownOpen(el)) return;
 
-    if (!dropdownOpen && !isTomSelectOpen && !isSelect2Open) {
-      if (["ArrowLeft","ArrowRight"].includes(e.key) && !e.shiftKey) {
-        e.preventDefault();
-        focusMove(e.key === "ArrowRight" ? 1 : -1);
-        return;
-      }
-
-      if (["ArrowUp","ArrowDown"].includes(e.key)) {
-        e.preventDefault();
-        focusMove(e.key === "ArrowDown" ? 1 : -1);
-        return;
-      }
+    // Arrow navigation between fields
+    if (["ArrowLeft","ArrowRight"].includes(e.key) && !e.shiftKey) {
+      e.preventDefault();
+      focusMove(e.key === "ArrowRight" ? 1 : -1);
+      return;
+    }
+    if (["ArrowUp","ArrowDown"].includes(e.key)) {
+      e.preventDefault();
+      focusMove(e.key === "ArrowDown" ? 1 : -1);
+      return;
     }
 
-    // ENTER key handling
+    // ENTER key behavior
     if (e.key === "Enter") {
       // Native select
       if (el.tagName === "SELECT") {
         e.preventDefault();
-        el.size = el.options.length;
+        el.size = el.options.length; // expand list
         return;
       }
-
       // Tom Select
       if (el.classList.contains("ts-control")) {
         e.preventDefault();
         el.tomselect.open();
         return;
       }
-
       // Select2
       if (el.classList.contains("select2-selection")) {
         e.preventDefault();
         $(el).trigger("mousedown");
         return;
       }
-
       // Radio buttons
       if (el.type === "radio") {
         e.preventDefault();
@@ -2047,7 +2048,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
     }
-
   });
 
   // Collapse native select on change or blur
@@ -2059,7 +2059,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }, true);
 
   // Date MM/DD/YYYY keyboard navigation
-  document.querySelectorAll('input[type="date"]').forEach(dateInput => {
+  document.querySelectorAll('input[data-type="split-date"]').forEach(dateInput => {
     dateInput.addEventListener("focus", () => {
       dateInput.setSelectionRange(0, 2); // start on MM
     });
@@ -2081,6 +2081,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
+
 
 
 

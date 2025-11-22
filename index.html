@@ -1961,46 +1961,132 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
   
+<style>
+/* ⭐ Accessible light-blue focus border */
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #66b3ff !important;
+  border-color: #66b3ff !important;
+}
+</style>
+
 <script>
-// -----------------------------
-// 1. Collect all focusable fields
-// -----------------------------
+// ------------------------------------------------------------
+// UTILITIES
+// ------------------------------------------------------------
 function getFocusableElements() {
   return Array.from(document.querySelectorAll(`
     input:not([type=hidden]),
     select,
     textarea,
-    .ts-control,         /* TomSelect */
-    .select2-selection    /* Select2 */
+    .ts-control,
+    .select2-selection
   `)).filter(el => !el.disabled && !el.closest('.hidden'));
 }
 
-// -----------------------------
-// 2. Move focus left/right inside same page (LOOP)
-// -----------------------------
+// Horizontal focus movement (left/right)
 function focusMove(dir) {
   const fields = getFocusableElements();
   const active = document.activeElement;
-
   let index = fields.indexOf(active);
-
   if (index === -1) return;
 
   let newIndex = index + dir;
 
-  // loop
   if (newIndex < 0) newIndex = fields.length - 1;
   if (newIndex >= fields.length) newIndex = 0;
 
   fields[newIndex].focus();
 }
 
-// -----------------------------
-// 3. Override KEYBOARD behavior
-// -----------------------------
+// Vertical movement (up/down)
+function focusMoveVertical(dir) {
+  const fields = getFocusableElements();
+  const active = document.activeElement;
+  let index = fields.indexOf(active);
+  if (index === -1) return;
+
+  let newIndex = index + dir;
+
+  if (newIndex >= 0 && newIndex < fields.length) {
+    fields[newIndex].focus();
+  }
+}
+
+// ------------------------------------------------------------
+// DATE FIELD LOGIC (MM → DD → YYYY + auto-select month)
+// ------------------------------------------------------------
+const mm = document.getElementById("mm");
+const dd = document.getElementById("dd");
+const yyyy = document.getElementById("yyyy");
+
+if (mm) {
+  mm.addEventListener("focus", () => {
+    mm.select(); // highlight month so user can type right away
+  });
+
+  mm.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") dd.focus();
+    if (e.key === "ArrowDown") focusMoveVertical(1);
+    if (e.key === "ArrowUp") focusMoveVertical(-1);
+  });
+}
+
+if (dd) {
+  dd.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") mm.focus();
+    if (e.key === "ArrowRight") yyyy.focus();
+    if (e.key === "ArrowDown") focusMoveVertical(1);
+    if (e.key === "ArrowUp") focusMoveVertical(-1);
+  });
+}
+
+if (yyyy) {
+  yyyy.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") dd.focus();
+    if (e.key === "ArrowDown") focusMoveVertical(1);
+    if (e.key === "ArrowUp") focusMoveVertical(-1);
+  });
+}
+
+// ------------------------------------------------------------
+// CONTACT RELATIONSHIP FIX:
+// LEFT arrow must go back to previous field
+// ------------------------------------------------------------
+const relationship = document.getElementById("relationship");
+if (relationship) {
+  relationship.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      focusMove(-1); // go to previous field
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      focusMove(1);
+    }
+    if (e.key === "ArrowDown") focusMoveVertical(1);
+    if (e.key === "ArrowUp") focusMoveVertical(-1);
+  });
+}
+
+// ------------------------------------------------------------
+// PAGE 2: PR / RP / SP radio buttons → ENTER selects the option
+// ------------------------------------------------------------
+const statusRadios = document.querySelectorAll("input[name='status']");
+statusRadios.forEach((radio) => {
+  radio.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      radio.checked = true;
+      e.preventDefault();
+    }
+  });
+});
+
+// ------------------------------------------------------------
+// MAIN KEYBOARD HANDLING
+// ------------------------------------------------------------
 document.addEventListener("keydown", function(e) {
 
-  // SHIFT + ARROWS = next/back page
+  // SHIFT + Arrow → page navigation
   if (e.shiftKey) {
     if (e.key === "ArrowRight") {
       e.preventDefault();
@@ -2014,7 +2100,7 @@ document.addEventListener("keydown", function(e) {
     }
   }
 
-  // LEFT / RIGHT = move fields only
+  // Horizontal movement
   if (e.key === "ArrowLeft" && !e.shiftKey) {
     e.preventDefault();
     focusMove(-1);
@@ -2027,20 +2113,33 @@ document.addEventListener("keydown", function(e) {
     return;
   }
 
-  // -----------------------------
-  // ENTER to open dropdown (Select2 + TomSelect + native <select>)
-  // -----------------------------
+  // Vertical movement
+  if (e.key === "ArrowUp" && !e.shiftKey) {
+    e.preventDefault();
+    focusMoveVertical(-1);
+    return;
+  }
+
+  if (e.key === "ArrowDown" && !e.shiftKey) {
+    e.preventDefault();
+    focusMoveVertical(1);
+    return;
+  }
+
+  // ------------------------------------------------------------
+  // ENTER → open dropdowns (Select2, TomSelect, <select>)
+  // ------------------------------------------------------------
   if (e.key === "Enter") {
     const el = document.activeElement;
 
-    // Native select:
+    // Native select
     if (el.tagName === "SELECT") {
       e.preventDefault();
-      el.size = el.options.length; // expand list
+      el.size = el.options.length;
       return;
     }
 
-    // Tom Select
+    // TomSelect
     if (el.classList.contains("ts-control")) {
       e.preventDefault();
       el.tomselect.open();
@@ -2057,24 +2156,26 @@ document.addEventListener("keydown", function(e) {
 
 });
 
-// -----------------------------
-// 4. Collapse <select> on selection
-// -----------------------------
+// ------------------------------------------------------------
+// Collapse <select> when choosing an option
+// ------------------------------------------------------------
 document.addEventListener("change", (e) => {
   if (e.target.tagName === "SELECT" && e.target.size) {
     e.target.size = 0;
   }
 });
 
-// -----------------------------
-// 5. Close select on blur
-// -----------------------------
+// ------------------------------------------------------------
+// Close <select> on blur
+// ------------------------------------------------------------
 document.addEventListener("blur", (e) => {
   if (e.target.tagName === "SELECT" && e.target.size) {
     e.target.size = 0;
   }
 }, true);
+
 </script>
+
 
 
 

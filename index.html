@@ -1968,7 +1968,7 @@ document.getElementById('shareBtn').onclick = async () => {
 <script>
 /**
  * KEYBOARD NAVIGATION SCRIPT
- * Pasted for: Keyboard friendly navigation (Arrows, Enter, Shift+Arrows)
+ * Updated: Allows Left/Right navigation at text boundaries and flows through radio groups.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2010,7 +2010,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Main Keydown Listener ---
     document.addEventListener('keydown', function(event) {
-        // Find the currently active page (not hidden)
         const currentStep = document.querySelector('.page:not(.hidden)');
         if (!currentStep) return;
 
@@ -2028,13 +2027,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Determine target page
             let nextStepNum = key === 'ArrowRight' ? currentStepNum + 1 : currentStepNum - 1;
             
-            // Bounds check (Assuming steps 1 to 6 based on your code)
+            // Bounds check (Assuming steps 1 to 6)
             if (nextStepNum < 1) nextStepNum = 1;
             if (nextStepNum > 6) nextStepNum = 6;
 
             if (nextStepNum !== currentStepNum && typeof goTo === 'function') {
                 goTo(nextStepNum);
-                // Focus the first element on the new page after a slight delay
                 setTimeout(() => {
                     const newPage = document.querySelector(`.page[data-step="${nextStepNum}"]`);
                     const focusables = getFocusableElements(newPage);
@@ -2049,44 +2047,35 @@ document.addEventListener('DOMContentLoaded', () => {
         // -------------------------------------------------------------
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
             
-            // GUARD: Check if user is typing in a Text Box
-            const isTyping = (activeEl.tagName === 'INPUT' && ['text', 'date', 'number', 'email'].includes(activeEl.type)) || 
-                             activeEl.tagName === 'TEXTAREA';
-            
-            // If typing, allow Left/Right to move cursor inside text
-            if (isTyping && (key === 'ArrowLeft' || key === 'ArrowRight')) return;
+            // --- GUARD: TEXT INPUT BOUNDARIES ---
+            // If the user is typing, we only navigate if the cursor is at the start/end
+            const isTextType = activeEl.tagName === 'INPUT' && ['text', 'password', 'search', 'email', 'tel', 'url', 'number'].includes(activeEl.type);
+            const isTextArea = activeEl.tagName === 'TEXTAREA';
 
-            // GUARD: Check if a Dropdown is OPEN (Select2 or TomSelect)
-            // If open, we let the library handle Up/Down to navigate options
+            if (isTextType || isTextArea) {
+                // If pressing Left, and cursor is NOT at start, let browser move cursor
+                if (key === 'ArrowLeft' && activeEl.selectionStart !== null && activeEl.selectionStart > 0) return;
+                
+                // If pressing Right, and cursor is NOT at end, let browser move cursor
+                if (key === 'ArrowRight' && activeEl.selectionStart !== null && activeEl.selectionStart < activeEl.value.length) return;
+            }
+
+            // --- GUARD: DATE INPUTS ---
+            // Native date pickers need Left/Right to select Day/Month/Year.
+            // We only allow Up/Down to leave the date field.
+            if (activeEl.tagName === 'INPUT' && activeEl.type === 'date') {
+                if (key === 'ArrowLeft' || key === 'ArrowRight') return;
+            }
+
+            // --- GUARD: DROPDOWNS OPEN ---
+            // If a dropdown is open, let the library handle navigation
             const isSelect2Open = document.querySelector('.select2-container--open');
             const tsWrapper = activeEl.closest('.ts-wrapper');
             const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('input-active') && activeEl.closest('.ts-control');
 
             if (isSelect2Open || isTomSelectOpen) return;
 
-            // GUARD: Radio Groups (Let's handle them nicely)
-            if (activeEl.type === 'radio') {
-                // If standard behavior is desired (arrows change selection), return.
-                // But to enforce "Enter selects", we manipulate focus logic manually:
-                const radios = Array.from(document.querySelectorAll(`input[name="${activeEl.name}"]`)).filter(r => !r.closest('.hidden'));
-                const radioIdx = radios.indexOf(activeEl);
-                let nextRadioIdx = radioIdx;
-
-                if (key === 'ArrowRight' || key === 'ArrowDown') {
-                    nextRadioIdx = (radioIdx + 1) % radios.length;
-                } else {
-                    nextRadioIdx = (radioIdx - 1 + radios.length) % radios.length;
-                }
-                
-                event.preventDefault();
-                radios[nextRadioIdx].focus();
-                // Uncomment line below if you want arrows to Auto-Select. 
-                // Leave commented if you want "Enter" to select.
-                // radios[nextRadioIdx].click(); 
-                return;
-            }
-
-            // NAVIGATION LOGIC (Looping)
+            // --- NAVIGATION LOGIC ---
             event.preventDefault(); // Stop page scrolling
             
             const focusables = getFocusableElements(currentStep);
@@ -2096,11 +2085,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let nextIdx = idx;
 
+            // Simple Linear Loop Logic
             if (key === 'ArrowRight' || key === 'ArrowDown') {
-                // Move Forward (Looping)
                 nextIdx = (idx + 1) % focusables.length;
             } else {
-                // Move Backward (Looping)
                 nextIdx = (idx - 1 + focusables.length) % focusables.length;
             }
 
@@ -2119,31 +2107,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Case A: Radio Buttons
             if (activeEl.type === 'radio') {
                 activeEl.checked = true;
-                // Manually trigger change event for your toggle functions
                 activeEl.dispatchEvent(new Event('change', { bubbles: true }));
                 return;
             }
 
-            // Case B: Select2 (Opens dropdown)
+            // Case B: Select2
             if (activeEl.classList.contains('select2-selection')) {
-                // Determine which select this belongs to
-                const container = activeEl.closest('.select2-container');
-                // Select2 usually requires jQuery to trigger open via the original select or the container
                 $(activeEl).trigger('click');
                 return;
             }
 
-            // Case C: TomSelect (Opens dropdown)
+            // Case C: TomSelect
             if (activeEl.closest('.ts-control')) {
-                const originalSelect = activeEl.closest('.ts-wrapper').nextElementSibling; // usually sits next to wrapper
-                // Or try to find instance via wrapper
-                const wrapper = activeEl.closest('.ts-wrapper');
-                // TomSelect instances are stored on the original element, but we can try to trigger click on control
                 activeEl.click();
                 return;
             }
 
-            // Case D: Buttons (Next/Back)
+            // Case D: Buttons
             if (activeEl.tagName === 'BUTTON') {
                 activeEl.click();
             }

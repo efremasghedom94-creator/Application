@@ -1960,127 +1960,180 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
-<style>
-  input:focus, select:focus, textarea:focus, .ts-control:focus, .select2-selection:focus {
-    outline: 2px solid #4db8ff !important;
-  }
-</style>
 
-<script>
+
+
+  <script>
+/* ===========================================================
+   KEYBOARD NAVIGATION ENGINE
+   =========================================================== */
+
 document.addEventListener("DOMContentLoaded", () => {
+  const focusables = [
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    "button:not([disabled])",
+    ".ts-control",         // TomSelect wrapper
+    ".select2-selection"   // Select2 wrapper
+  ].join(",");
 
-  function getFocusableElements() {
-    return Array.from(document.querySelectorAll(`
-      input:not([type=hidden]),
-      select,
-      textarea,
-      .ts-control,
-      .select2-selection,
-      input[type=radio]
-    `)).filter(el => !el.disabled && !el.closest('.hidden'));
+  function getAllFields() {
+    return Array.from(document.querySelectorAll(focusables));
   }
 
-  function focusMove(dir) {
-    const fields = getFocusableElements();
-    const active = document.activeElement;
-    let index = fields.indexOf(active);
-    if (index === -1) return;
-
-    let newIndex = index + dir;
-    if (newIndex < 0) newIndex = fields.length - 1;
-    if (newIndex >= fields.length) newIndex = 0;
-
-    fields[newIndex].focus();
+  function getCurrentField() {
+    return document.activeElement;
   }
 
-  function isDropdownOpen(el) {
-    // Native select dropdown
-    if (el.tagName === "SELECT" && el.size > 1) return true;
-    // TomSelect
-    if (el.classList.contains("ts-control") && el.tomselect && el.tomselect.isOpen) return true;
-    // Select2
-    if (el.classList.contains("select2-selection") && $(el).data('select2')?.isOpen()) return true;
-    return false;
+  function sameRow(a, b) {
+    const ax = a.getBoundingClientRect();
+    const bx = b.getBoundingClientRect();
+    return Math.abs(ax.top - bx.top) < 25;
   }
 
-  document.addEventListener("keydown", (e) => {
-    const el = document.activeElement;
+  function nearestAbove(current) {
+    const fields = getAllFields();
+    const c = current.getBoundingClientRect();
+    let best = null;
+    let bestDist = Infinity;
 
-    // If dropdown is open, allow arrow keys to navigate inside it only
-    if (isDropdownOpen(el)) return;
-
-    // Arrow navigation between fields
-    if (["ArrowLeft","ArrowRight"].includes(e.key) && !e.shiftKey) {
-      e.preventDefault();
-      focusMove(e.key === "ArrowRight" ? 1 : -1);
-      return;
-    }
-    if (["ArrowUp","ArrowDown"].includes(e.key)) {
-      e.preventDefault();
-      focusMove(e.key === "ArrowDown" ? 1 : -1);
-      return;
-    }
-
-    // ENTER key behavior
-    if (e.key === "Enter") {
-      // Native select
-      if (el.tagName === "SELECT") {
-        e.preventDefault();
-        el.size = el.options.length; // expand list
-        return;
+    fields.forEach(f => {
+      const r = f.getBoundingClientRect();
+      if (r.top < c.top) {
+        const dist = Math.abs(c.left - r.left) + (c.top - r.top);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = f;
+        }
       }
-      // Tom Select
-      if (el.classList.contains("ts-control")) {
-        e.preventDefault();
-        el.tomselect.open();
-        return;
-      }
-      // Select2
-      if (el.classList.contains("select2-selection")) {
-        e.preventDefault();
-        $(el).trigger("mousedown");
-        return;
-      }
-      // Radio buttons
-      if (el.type === "radio") {
-        e.preventDefault();
-        el.checked = true;
-        return;
-      }
-    }
-  });
-
-  // Collapse native select on change or blur
-  document.addEventListener("change", (e) => {
-    if (e.target.tagName === "SELECT" && e.target.size) e.target.size = 0;
-  });
-  document.addEventListener("blur", (e) => {
-    if (e.target.tagName === "SELECT" && e.target.size) e.target.size = 0;
-  }, true);
-
-  // Date MM/DD/YYYY keyboard navigation
-  document.querySelectorAll('input[data-type="split-date"]').forEach(dateInput => {
-    dateInput.addEventListener("focus", () => {
-      dateInput.setSelectionRange(0, 2); // start on MM
     });
 
-    dateInput.addEventListener("keydown", (e) => {
-      const pos = dateInput.selectionStart;
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        if (pos < 3) dateInput.setSelectionRange(3, 5); // MM → DD
-        else if (pos < 6) dateInput.setSelectionRange(6, 10); // DD → YYYY
+    return best;
+  }
+
+  function nearestBelow(current) {
+    const fields = getAllFields();
+    const c = current.getBoundingClientRect();
+    let best = null;
+    let bestDist = Infinity;
+
+    fields.forEach(f => {
+      const r = f.getBoundingClientRect();
+      if (r.top > c.top) {
+        const dist = Math.abs(c.left - r.left) + (r.top - c.top);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = f;
+        }
       }
+    });
+
+    return best;
+  }
+
+  /* ===========================================================
+     Main keyboard handler
+     =========================================================== */
+  document.addEventListener("keydown", e => {
+    const cur = getCurrentField();
+    if (!cur) return;
+
+    const fields = getAllFields();
+    const i = fields.indexOf(cur);
+
+    /* ---------------- Arrow Left / Right ---------------- */
+    if (!e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+      e.preventDefault();
+
+      let nextIndex;
       if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        if (pos > 5) dateInput.setSelectionRange(3, 5); // YYYY → DD
-        else if (pos > 2) dateInput.setSelectionRange(0, 2); // DD → MM
+        // find previous on same row (loop)
+        for (let k = i - 1; k >= -fields.length; k--) {
+          const idx = (k + fields.length) % fields.length;
+          if (sameRow(fields[idx], cur)) {
+            fields[idx].focus();
+            return;
+          }
+        }
       }
-    });
-  });
 
+      if (e.key === "ArrowRight") {
+        // find next on same row (loop)
+        for (let k = i + 1; k < i + fields.length; k++) {
+          const idx = k % fields.length;
+          if (sameRow(fields[idx], cur)) {
+            fields[idx].focus();
+            return;
+          }
+        }
+      }
+    }
+
+    /* ---------------- Arrow Up / Down ---------------- */
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const above = nearestAbove(cur);
+      if (above) above.focus();
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const below = nearestBelow(cur);
+      if (below) below.focus();
+    }
+
+    /* ---------------- SHIFT + ← / → triggers page navigation ---------------- */
+    if (e.shiftKey && e.key === "ArrowLeft") {
+      e.preventDefault();
+      const page = Number(document.querySelector(".page:not(.hidden)")?.dataset.step);
+      if (page > 1) goTo(page - 1);
+    }
+
+    if (e.shiftKey && e.key === "ArrowRight") {
+      e.preventDefault();
+      const page = Number(document.querySelector(".page:not(.hidden)")?.dataset.step);
+      goTo(page + 1);
+    }
+
+    /* ---------------- ENTER KEY BEHAVIOR ---------------- */
+    if (e.key === "Enter") {
+      const tag = cur.tagName.toLowerCase();
+
+      // Radio → toggle selection
+      if (tag === "input" && cur.type === "radio") {
+        e.preventDefault();
+        cur.checked = true;
+        cur.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      // Select2 → open/close
+      if (cur.classList.contains("select2-selection")) {
+        e.preventDefault();
+        cur.click();
+      }
+
+      // TomSelect → open dropdown
+      if (cur.classList.contains("ts-control")) {
+        e.preventDefault();
+        cur.tomselect.open();
+      }
+
+      // Native select
+      if (tag === "select") {
+        e.preventDefault();
+        cur.size = cur.options.length; // expand like dropdown
+        cur.addEventListener(
+          "blur",
+          () => (cur.size = 0),
+          { once: true }
+        );
+      }
+    }
+  });
 });
 </script>
+
 
 
 

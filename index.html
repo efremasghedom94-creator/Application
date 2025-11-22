@@ -2052,30 +2052,52 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- B. FIELD NAVIGATION (Arrows) ---
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
             
-// 1. Check if Dropdown is OPEN (Let Library Handle it)
+// -------------------------------------------------------------
+            // REPLACEMENT FOR SECTIONS 1 & 2
+            // -------------------------------------------------------------
+
+            // 1. Check if Dropdown is OPEN (Let Library Handle it)
             const isSelect2Open = document.querySelector('.select2-container--open');
             const tsWrapper = activeEl.closest('.ts-wrapper');
-            // FIX: Check for 'dropdown-active' ensures we only trap keys when menu is VISIBLE
+            // FIX: Check for 'dropdown-active' to ensure we only trap keys if the MENU is visible
             const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('dropdown-active');
 
             if (isSelect2Open || isTomSelectOpen) {
+                // Return early to let the library handle Up/Down navigation in the list
                 return;
             }
 
-            // 2. Text Input Boundaries (Allow Typing)
+            // 2. Text Input Boundaries (Allow Typing & TomSelect Navigation)
             const isTextLike = activeEl.tagName === 'INPUT' && ['text', 'password', 'email', 'tel', 'number', 'search', 'url'].includes(activeEl.type);
             const isTextArea = activeEl.tagName === 'TEXTAREA';
+            const isTomSelect = activeEl.closest('.ts-control'); // Specific check for Home Language
 
             if (isTextLike || isTextArea) {
-                // If moving Left/Right, only navigate if cursor is at start/end
                 try {
-                    if (key === 'ArrowLeft' && activeEl.selectionStart > 0) return;
-                    if (key === 'ArrowRight' && activeEl.selectionStart < activeEl.value.length) return;
+                    const cursor = activeEl.selectionStart;
+                    const length = activeEl.value.length;
+
+                    // A. Left Arrow
+                    if (key === 'ArrowLeft') {
+                        // If cursor is NOT at start, let browser move cursor. 
+                        // If cursor IS at start (0), allow script to navigate to previous cell.
+                        if (cursor > 0) return;
+                        // Special TomSelect Fix: If input is empty, ensure we force-exit even if it tries to select a "pill"
+                        if (isTomSelect && length === 0) { /* Fall through to navigation */ }
+                    }
+
+                    // B. Right Arrow
+                    if (key === 'ArrowRight') {
+                        // If cursor is NOT at end, let browser move cursor.
+                        // If cursor IS at end, allow script to navigate to next cell.
+                        if (cursor < length) return;
+                        // Special TomSelect Fix: If input is empty, ensure we force-exit
+                        if (isTomSelect && length === 0) { /* Fall through to navigation */ }
+                    }
                 } catch (e) {
-                    // Some inputs (like number) might throw on selectionStart access; allow navigation if so.
+                    // Ignore errors on inputs that don't support selectionStart
                 }
             }
-
             // 3. Date Inputs (Allow Internal Navigation)
             if (activeEl.tagName === 'INPUT' && activeEl.type === 'date') {
                 // Allow Left/Right to change Day/Month/Year

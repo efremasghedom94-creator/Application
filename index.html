@@ -1962,67 +1962,124 @@ document.getElementById('shareBtn').onclick = async () => {
 
   
 <script>
-// Page 1 Keyboard Navigation
-document.addEventListener('DOMContentLoaded', function() {
-    const page1 = document.querySelector('[data-step="1"]');
-    if (!page1) return;
+// -----------------------------
+// 1. Collect all focusable fields
+// -----------------------------
+function getFocusableElements() {
+  return Array.from(document.querySelectorAll(`
+    input:not([type=hidden]),
+    select,
+    textarea,
+    .ts-control,         /* TomSelect */
+    .select2-selection    /* Select2 */
+  `)).filter(el => !el.disabled && !el.closest('.hidden'));
+}
 
-    const focusableElements = [
-        document.getElementById('date'),
-        document.getElementById('takenBy'),
-        document.getElementById('contactName'),
-        document.getElementById('contactPhone'),
-        document.getElementById('contactRel')
-    ].filter(el => el);
+// -----------------------------
+// 2. Move focus left/right inside same page (LOOP)
+// -----------------------------
+function focusMove(dir) {
+  const fields = getFocusableElements();
+  const active = document.activeElement;
 
-    let currentIndex = 0;
+  let index = fields.indexOf(active);
 
-    page1.addEventListener('keydown', function(e) {
-        const contactRel = document.getElementById('contactRel');
-        const isDropdownOpen = document.querySelector('.select2-container--open') !== null;
+  if (index === -1) return;
 
-        if (isDropdownOpen) {
-            if (['ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                e.preventDefault();
-                return;
-            }
-            if (e.key === 'Enter') {
-                setTimeout(() => {
-                    currentIndex = (currentIndex + 1) % focusableElements.length;
-                    focusableElements[currentIndex].focus();
-                }, 100);
-            }
-            return;
-        }
+  let newIndex = index + dir;
 
-        if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
-            e.preventDefault();
-            
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                currentIndex = (currentIndex + 1) % focusableElements.length;
-            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                currentIndex = currentIndex === 0 ? focusableElements.length - 1 : currentIndex - 1;
-            }
-            
-            focusableElements[currentIndex].focus();
-            
-            if (focusableElements[currentIndex].id === 'contactRel') {
-                contactRel.removeEventListener('keydown', handleContactRelEnter);
-                contactRel.addEventListener('keydown', handleContactRelEnter);
-            }
-        }
-    });
+  // loop
+  if (newIndex < 0) newIndex = fields.length - 1;
+  if (newIndex >= fields.length) newIndex = 0;
 
-    function handleContactRelEnter(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            $(this).select2('open');
-        }
+  fields[newIndex].focus();
+}
+
+// -----------------------------
+// 3. Override KEYBOARD behavior
+// -----------------------------
+document.addEventListener("keydown", function(e) {
+
+  // SHIFT + ARROWS = next/back page
+  if (e.shiftKey) {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      goTo(currentStep + 1);
+      return;
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      goTo(currentStep - 1);
+      return;
+    }
+  }
+
+  // LEFT / RIGHT = move fields only
+  if (e.key === "ArrowLeft" && !e.shiftKey) {
+    e.preventDefault();
+    focusMove(-1);
+    return;
+  }
+
+  if (e.key === "ArrowRight" && !e.shiftKey) {
+    e.preventDefault();
+    focusMove(1);
+    return;
+  }
+
+  // -----------------------------
+  // ENTER to open dropdown (Select2 + TomSelect + native <select>)
+  // -----------------------------
+  if (e.key === "Enter") {
+    const el = document.activeElement;
+
+    // Native select:
+    if (el.tagName === "SELECT") {
+      e.preventDefault();
+      el.size = el.options.length; // expand list
+      return;
     }
 
-    setTimeout(() => focusableElements[0]?.focus(), 100);
+    // Tom Select
+    if (el.classList.contains("ts-control")) {
+      e.preventDefault();
+      el.tomselect.open();
+      return;
+    }
+
+    // Select2
+    if (el.classList.contains("select2-selection")) {
+      e.preventDefault();
+      $(el).trigger("mousedown");
+      return;
+    }
+  }
+
 });
+
+// -----------------------------
+// 4. Collapse <select> on selection
+// -----------------------------
+document.addEventListener("change", (e) => {
+  if (e.target.tagName === "SELECT" && e.target.size) {
+    e.target.size = 0;
+  }
+});
+
+// -----------------------------
+// 5. Close select on blur
+// -----------------------------
+document.addEventListener("blur", (e) => {
+  if (e.target.tagName === "SELECT" && e.target.size) {
+    e.target.size = 0;
+  }
+}, true);
 </script>
+
+
+
+
+  
 
 
 

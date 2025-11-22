@@ -1962,504 +1962,146 @@ document.getElementById('shareBtn').onclick = async () => {
 
   
 <style>
-  /* Accessible light-blue focus */
-  input:focus, select:focus, textarea:focus, .ts-control:focus, .select2-selection:focus {
-    outline: 3px solid #66b3ff !important;
-    box-shadow: 0 0 0 3px rgba(102,179,255,0.15);
-  }
-
-  /* Small styling for created date inputs */
-  .keyboard-date { display:inline-flex; gap:6px; align-items:center; }
-  .keyboard-date input { width:56px; padding:6px 8px; border-radius:6px; border:1px solid #d1d5db; }
-  .keyboard-date .sep { padding:0 2px; color:#444; font-weight:600; }
+/* Accessible focus highlight */
+input:focus, select:focus {
+  outline: 2px solid #66b3ff !important;
+  border-color: #66b3ff !important;
+}
 </style>
 
 <script>
-(function(){
-  // -------------------------
-  // Small helpers
-  // -------------------------
-  function qsAll(sel){ return Array.from(document.querySelectorAll(sel)); }
-  function isHidden(el){ return el && (el.offsetParent === null || el.closest('.hidden')); }
+// ------------------------------------------------------------
+// COLLECT FOCUSABLE FIELDS
+// ------------------------------------------------------------
+function getFocusableElements() {
+  return Array.from(document.querySelectorAll(`
+    input:not([type=hidden]),
+    select,
+    textarea,
+    .ts-control,
+    .select2-selection
+  `)).filter(el => !el.disabled && !el.closest('.hidden'));
+}
 
-  // Replace native type=date inputs with three text inputs (MM / DD / YYYY).
-  // Keeps original input as hidden to keep form submission compatibility.
-  function replaceDateInputs() {
-    const dateInputs = qsAll('input[type="date"]');
-    dateInputs.forEach(orig => {
-      // avoid double-replacement
-      if (orig.dataset.kbReplaced) return;
+// ------------------------------------------------------------
+// HORIZONTAL NAVIGATION (LEFT / RIGHT)
+// ------------------------------------------------------------
+function focusMove(dir) {
+  const fields = getFocusableElements();
+  const active = document.activeElement;
+  const index = fields.indexOf(active);
+  if (index === -1) return;
 
-      orig.dataset.kbReplaced = "1";
-      const wrapper = document.createElement('span');
-      wrapper.className = 'keyboard-date';
-      const idBase = orig.id || ('kbdate_' + Math.random().toString(36).slice(2,8));
+  let newIndex = index + dir;
+  if (newIndex < 0) newIndex = fields.length - 1;
+  if (newIndex >= fields.length) newIndex = 0;
 
-      // Create visible fields
-      const mm = document.createElement('input');
-      mm.type = 'text'; mm.maxLength = 2; mm.placeholder = 'MM'; mm.id = idBase + '_mm';
-      const dd = document.createElement('input');
-      dd.type = 'text'; dd.maxLength = 2; dd.placeholder = 'DD'; dd.id = idBase + '_dd';
-      const yyyy = document.createElement('input');
-      yyyy.type = 'text'; yyyy.maxLength = 4; yyyy.placeholder = 'YYYY'; yyyy.id = idBase + '_yyyy';
+  fields[newIndex].focus();
+}
 
-      // Simple delimiter display
-      const sep1 = document.createElement('span'); sep1.className = 'sep'; sep1.textContent = '/';
-      const sep2 = document.createElement('span'); sep2.className = 'sep'; sep2.textContent = '/';
+// ------------------------------------------------------------
+// VERTICAL NAVIGATION (UP / DOWN)
+// ------------------------------------------------------------
+function focusMoveVertical(dir) {
+  const fields = getFocusableElements();
+  const active = document.activeElement;
+  let index = fields.indexOf(active);
+  if (index === -1) return;
 
-      // Build
-      wrapper.appendChild(mm);
-      wrapper.appendChild(sep1);
-      wrapper.appendChild(dd);
-      wrapper.appendChild(sep2);
-      wrapper.appendChild(yyyy);
-
-      // Insert before original, hide original but keep for form.
-      orig.style.display = 'none';
-      orig.parentNode.insertBefore(wrapper, orig);
-
-      // Initialize from orig.value if exists (YYYY-MM-DD)
-      if (orig.value) {
-        const v = orig.value.split('-');
-        if (v.length === 3) {
-          yyyy.value = v[0] || '';
-          mm.value = v[1] || '';
-          dd.value = v[2] || '';
-        }
-      }
-
-      // Helper to sync to original (in YYYY-MM-DD)
-      function syncToOriginal(){
-        const m = mm.value.padStart(2,'0').replace(/[^0-9]/g,'').slice(0,2);
-        const d = dd.value.padStart(2,'0').replace(/[^0-9]/g,'').slice(0,2);
-        const y = yyyy.value.replace(/[^0-9]/g,'').slice(0,4);
-        if (y || m || d) {
-          orig.value = (y.padStart(4,'0') || '0000') + '-' + (m || '00') + '-' + (d || '00');
-        } else orig.value = '';
-      }
-
-      // Autoselect month on focus; do NOT open calendar.
-      mm.addEventListener('focus', () => {
-        // highlight contents for quick overwrite
-        mm.select();
-      });
-
-      // Allow arrow navigation between mm/dd/yyyy
-      mm.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') { e.preventDefault(); dd.focus(); }
-        if (e.key === 'ArrowLeft')  { e.preventDefault(); focusMove(-1); } // left -> previous field
-        if (e.key === 'ArrowDown')  { e.preventDefault(); focusMoveVertical(1); }
-        if (e.key === 'ArrowUp')    { e.preventDefault(); focusMoveVertical(-1); }
-        if (e.key === 'Enter')      e.preventDefault(); // do nothing special on Enter here
-      });
-      dd.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') { e.preventDefault(); yyyy.focus(); }
-        if (e.key === 'ArrowLeft')  { e.preventDefault(); mm.focus(); }
-        if (e.key === 'ArrowDown')  { e.preventDefault(); focusMoveVertical(1); }
-        if (e.key === 'ArrowUp')    { e.preventDefault(); focusMoveVertical(-1); }
-      });
-      yyyy.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft')  { e.preventDefault(); dd.focus(); }
-        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); } // right -> next field beyond date
-        if (e.key === 'ArrowDown')  { e.preventDefault(); focusMoveVertical(1); }
-        if (e.key === 'ArrowUp')    { e.preventDefault(); focusMoveVertical(-1); }
-      });
-
-      // On input, restrict digits and sync back
-      [mm, dd, yyyy].forEach(inp => {
-        inp.addEventListener('input', () => {
-          inp.value = inp.value.replace(/[^0-9]/g,'');
-          syncToOriginal();
-        });
-        // on blur, ensure padding for mm/dd
-        inp.addEventListener('blur', () => { syncToOriginal(); });
-      });
-
-      // Make these focusable by adding tabindex if needed
-      [mm, dd, yyyy].forEach(i => { if (!i.hasAttribute('tabindex')) i.setAttribute('tabindex','0'); });
-
-      // mark wrapper for later recognition
-      wrapper.dataset.kbDate = orig.id || idBase;
-    });
+  let newIndex = index + dir;
+  if (newIndex >= 0 && newIndex < fields.length) {
+    fields[newIndex].focus();
   }
+}
 
-  // Build focusable element list (includes tomselect & select2 wrappers)
-  function getFocusableElements() {
-    // include visible inputs, textareas, selects, select2 and tomselect containers, and our keyboard-date inputs
-    const items = [];
+// ------------------------------------------------------------
+// DATE (MM → DD → YYYY) WITHOUT DATE PICKER
+// ------------------------------------------------------------
+const mm = document.getElementById("mm");
+const dd = document.getElementById("dd");
+const yyyy = document.getElementById("yyyy");
 
-    // standard inputs/selects/textarea (ignore hidden ones and ones inside hidden parents)
-    qsAll('input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled])').forEach(el => {
-      if (!isHidden(el)) items.push(el);
-    });
+if (mm) {
+  mm.addEventListener("focus", () => mm.select());
+  mm.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); dd.focus(); }
+    if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
+    if (e.key === "ArrowUp")   { e.preventDefault(); focusMoveVertical(-1); }
+  });
+}
 
-    // include tom-select wrapper controls (if present)
-    qsAll('.ts-control').forEach(el => { if (!isHidden(el)) items.push(el); });
+if (dd) {
+  dd.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); mm.focus(); }
+    if (e.key === "ArrowRight") { e.preventDefault(); yyyy.focus(); }
+    if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
+    if (e.key === "ArrowUp")   { e.preventDefault(); focusMoveVertical(-1); }
+  });
+}
 
-    // include Select2 selection wrappers
-    qsAll('.select2-selection').forEach(el => { if (!isHidden(el)) items.push(el); });
+if (yyyy) {
+  yyyy.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); dd.focus(); }
+    if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
+    if (e.key === "ArrowUp")   { e.preventDefault(); focusMoveVertical(-1); }
+  });
+}
 
-    // include the three date fields we created (they're inputs already included above)
-    // now dedupe while preserving order as in DOM
-    const seen = new Set();
-    const ordered = Array.from(document.querySelectorAll('body *')).reduce((acc, el)=> {
-      if (items.includes(el) && !seen.has(el)) {
-        acc.push(el); seen.add(el);
-      }
-      return acc;
-    }, []);
-    return ordered;
-  }
-
-  // Horizontal movement (loop)
-  function focusMove(dir) {
-    const fields = getFocusableElements();
-    const active = document.activeElement;
-    let idx = fields.indexOf(active);
-
-    // If active is a descendant (e.g., inside .ts-control wrapper input) try to map wrapper
-    if (idx === -1) {
-      // fallback: if active has a closest .ts-control or .select2-selection, treat that as active
-      const wrap = active.closest && (active.closest('.ts-control') || active.closest('.select2-selection') || active.closest('.keyboard-date'));
-      if (wrap) idx = fields.indexOf(wrap);
-      if (idx === -1) return;
-    }
-
-    let newIndex = idx + dir;
-    if (newIndex < 0) newIndex = fields.length - 1;
-    if (newIndex >= fields.length) newIndex = 0;
-
-    const target = fields[newIndex];
-    focusElementSmart(target);
-  }
-
-  // Vertical move: choose nearest element whose top is greater/less than current
-  function focusMoveVertical(dir) {
-    const fields = getFocusableElements();
-    const active = document.activeElement;
-    let activeRect = active.getBoundingClientRect ? active.getBoundingClientRect() : { top: 0, left: 0 };
-
-    // if active isn't in list try to map to wrapper
-    let activeEl = active;
-    if (!fields.includes(active)) {
-      const wrap = active.closest && (active.closest('.ts-control') || active.closest('.select2-selection') || active.closest('.keyboard-date'));
-      if (wrap) activeEl = wrap;
-    }
-
-    try { activeRect = activeEl.getBoundingClientRect(); } catch(err){}
-
-    // consider only fields not hidden
-    const candidates = fields.filter(f => f !== activeEl && !isHidden(f)).map(f => {
-      const r = f.getBoundingClientRect();
-      return { el: f, top: Math.round(r.top), left: Math.round(r.left), rect: r };
-    });
-
-    if (dir > 0) {
-      // choose those below (top > activeTop) and pick the one with smallest top difference, then closest left
-      const below = candidates.filter(c => c.top > Math.round(activeRect.top + 4));
-      if (below.length === 0) {
-        // if none below, wrap to first visible in document flow
-        if (candidates.length) return focusElementSmart(candidates[0].el);
-        return;
-      }
-      below.sort((a,b) => {
-        const dt = a.top - b.top;
-        if (Math.abs(dt) !== 0) return dt;
-        return Math.abs(a.left - activeRect.left) - Math.abs(b.left - activeRect.left);
-      });
-      focusElementSmart(below[0].el);
-    } else {
-      // choose those above (top < activeTop) and pick the one with largest top (closest above)
-      const above = candidates.filter(c => c.top < Math.round(activeRect.top - 4));
-      if (above.length === 0) {
-        // wrap to last
-        if (candidates.length) return focusElementSmart(candidates[candidates.length-1].el);
-        return;
-      }
-      above.sort((a,b) => {
-        const dt = b.top - a.top;
-        if (Math.abs(dt) !== 0) return dt;
-        return Math.abs(a.left - activeRect.left) - Math.abs(b.left - activeRect.left);
-      });
-      focusElementSmart(above[0].el);
-    }
-  }
-
-  // Smart focusing: if target is wrapper (select2 or ts-control) try to focus a focusable child
-  function focusElementSmart(target) {
-    if (!target) return;
-    try {
-      // If target is a select element use focus directly
-      if (target.tagName === 'SELECT' || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        target.focus();
-        if (target.select) try { target.select(); } catch(e){}
-        return;
-      }
-
-      // select2 wrapper -> find its focusable element (usually sibling original select or internal)
-      if (target.classList && target.classList.contains('select2-selection')) {
-        // try to focus the inner control (Select2 usually makes the wrapper focusable)
-        target.focus();
-        return;
-      }
-
-      // tomselect control: focus the input inside
-      if (target.classList && target.classList.contains('ts-control')) {
-        const inner = target.querySelector('input[type="text"], input:not([type])');
-        if (inner) { inner.focus(); return; }
-        target.focus();
-        return;
-      }
-
-      // keyboard-date wrapper: focus its first input (mm)
-      if (target.dataset && target.dataset.kbDate) {
-        const inner = target.querySelector('input');
-        if (inner) { inner.focus(); return; }
-      }
-
-      // fallback
-      if (typeof target.focus === 'function') target.focus();
-    } catch(err){
-      try { target.focus(); } catch(e){}
-    }
-  }
-
-
-  // -------------------------
-  // Radios: Enter selects
-  // -------------------------
-  function attachRadioEnterBehavior() {
-    // include all radios (studentStatus, immDoc, etc)
-    qsAll('input[type="radio"]').forEach(radio => {
-      if (radio.dataset.kbRadio) return;
-      radio.dataset.kbRadio = '1';
-      radio.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          radio.checked = true;
-          radio.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        // allow arrow keys to move between radio inputs horizontally (preserve natural behavior)
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          // move to next radio within same name (circular)
-          const group = Array.from(document.querySelectorAll(`input[type="radio"][name="${radio.name}"]`));
-          const idx = group.indexOf(radio);
-          const next = group[(idx + 1) % group.length];
-          focusElementSmart(next);
-        }
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          const group = Array.from(document.querySelectorAll(`input[type="radio"][name="${radio.name}"]`));
-          const idx = group.indexOf(radio);
-          const prev = group[(idx - 1 + group.length) % group.length];
-          focusElementSmart(prev);
-        }
-      });
-    });
-  }
-
-  // -------------------------
-  // ENTER behavior for selects / tomselect / select2
-  // -------------------------
-  function attachSelectEnterBehavior() {
-    // For native <select> we will expand on Enter (size = options.length), and collapse when selection happens or blur
-    qsAll('select').forEach(s => {
-      if (s.dataset.kbSelect) return;
-      s.dataset.kbSelect = '1';
-      s.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          // expand but don't open a calendar obviously
-          try { s.size = Math.min(20, s.options.length || 0); } catch(err){}
-          // For selects with multiple true, don't change size
-        }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); focusMove(-1); }
-        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
-        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
-        if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); }
-      });
-      s.addEventListener('change', () => { try { s.size = 0; } catch(e){} });
-      s.addEventListener('blur', () => { try { s.size = 0; } catch(e){} });
-    });
-
-    // Select2 and TomSelect wrappers: try to make Enter open the dropdown
-    qsAll('.select2-selection').forEach(sel => {
-      if (sel.dataset.kbSelect2) return;
-      sel.dataset.kbSelect2 = '1';
-      sel.setAttribute('tabindex','0');
-      sel.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          try { $(sel).trigger('mousedown'); } catch(err){}
-        }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); focusMove(-1); }
-        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
-        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
-        if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); }
-      });
-    });
-
-    qsAll('.ts-control').forEach(tc => {
-      if (tc.dataset.kbTs) return;
-      tc.dataset.kbTs = '1';
-      tc.setAttribute('tabindex','0');
-      tc.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          try {
-            // try to open via known references
-            if (tc.tomselect && typeof tc.tomselect.open === 'function') tc.tomselect.open();
-            else {
-              // fallback: try to find internal input and send keydown to open
-              const input = tc.querySelector('input[type="text"], input:not([type])');
-              if (input) input.focus();
-            }
-          } catch(err){}
-        }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); focusMove(-1); }
-        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
-        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
-        if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); }
-      });
-    });
-  }
-
-  // -------------------------
-  // Specific contactRel fix:
-  // ensure left arrow returns to previous field
-  // handle both the <select id="contactRel"> and its select2 wrapper (.select2-selection)
-  // -------------------------
-  function attachContactRelFix() {
-    const origSelect = document.getElementById('contactRel');
-    if (!origSelect) return;
-
-    // if select2 created wrapper, it will be .select2-selection next to it in DOM; detect wrapper
-    const s2wrap = origSelect.parentNode.querySelector('.select2-selection') || document.querySelector('.select2-selection'); // fallback
-
-    // Ensure both the native select and the wrapper respond to ArrowLeft by focusing previous
-    [origSelect, s2wrap].forEach(el => {
-      if (!el) return;
-      el.setAttribute && el.setAttribute('tabindex','0');
-      if (el.dataset.contactRelKb) return;
-      el.dataset.contactRelKb = '1';
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          focusMove(-1);
-        }
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          focusMove(1);
-        }
-        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
-        if (e.key === 'ArrowUp')   { e.preventDefault(); focusMoveVertical(-1); }
-      });
-    });
-  }
-
-  // -------------------------
-  // Global keyboard capture for arrow navigation and SHIFT+arrows page navigation
-  // -------------------------
-  function globalKeyHandler(e) {
-    // If focus is inside an open UI element that handles keys (like a select option list), let it handle keys.
-    // Heuristic: if activeElement is a listbox or has role="listbox" we skip global handling.
-    const ae = document.activeElement;
-    const role = ae && ae.getAttribute && ae.getAttribute('role');
-    const tag = ae && ae.tagName;
-    if (role === 'listbox' || role === 'option' || tag === 'OPTION') return;
-
-    // SHIFT + arrows -> page movement via goTo()
-    if (e.shiftKey) {
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        try { if (typeof goTo === 'function') goTo((typeof currentStep !== 'undefined' ? currentStep : 1) + 1); } catch(err){}
-        return;
-      }
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        try { if (typeof goTo === 'function') goTo((typeof currentStep !== 'undefined' ? currentStep : 1) - 1); } catch(err){}
-        return;
-      }
-    }
-
-    // Horizontal navigation (skip when user is actively in a multi-line textarea - let default)
-    if (e.key === 'ArrowLeft' && !e.shiftKey) {
-      // if active element is a text input and caret > 0, allow normal caret movement
-      if (tag === 'INPUT' && (ae.type === 'text' || ae.type === 'search' || ae.type === 'tel') ) {
-        try {
-          const caret = ae.selectionStart;
-          if (typeof caret === 'number' && caret > 0) return; // allow native caret movement
-        } catch(err){}
-      }
+// ------------------------------------------------------------
+// CONTACT RELATIONSHIP FIX (LEFT SHOULD GO BACK)
+// ------------------------------------------------------------
+const relationship = document.getElementById("relationship");
+if (relationship) {
+  relationship.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") {
       e.preventDefault();
-      focusMove(-1);
-      return;
+      focusMove(-1); // previous field
     }
-    if (e.key === 'ArrowRight' && !e.shiftKey) {
-      if (tag === 'INPUT' && (ae.type === 'text' || ae.type === 'search' || ae.type === 'tel') ) {
-        try {
-          const caret = ae.selectionEnd;
-          if (typeof caret === 'number' && caret < (ae.value || '').length) return;
-        } catch(err){}
-      }
+    if (e.key === "ArrowRight") {
       e.preventDefault();
-      focusMove(1);
-      return;
+      focusMove(1); // next field
     }
-
-    // Vertical
-    if (e.key === 'ArrowDown' && !e.shiftKey) {
-      // if active is select with options open, let it handle
-      e.preventDefault();
-      focusMoveVertical(1);
-      return;
-    }
-    if (e.key === 'ArrowUp' && !e.shiftKey) {
+    if (e.key === "ArrowUp") {
       e.preventDefault();
       focusMoveVertical(-1);
-      return;
     }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      focusMoveVertical(1);
+    }
+  });
+}
 
-    // ENTER for selects/tomselect/select2: handled by attachSelectEnterBehavior handlers; nothing global required
+// ------------------------------------------------------------
+// PAGE 2: PR / RP / SP radio buttons — ENTER selects
+// ------------------------------------------------------------
+document.querySelectorAll("input[name='status']").forEach((radio) => {
+  radio.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      radio.checked = true; // select the radio
+    }
+  });
+});
+
+// ------------------------------------------------------------
+// GLOBAL KEY HANDLER
+// ------------------------------------------------------------
+document.addEventListener("keydown", function(e) {
+
+  // LEFT / RIGHT movement
+  if (!e.shiftKey) {
+    if (e.key === "ArrowLeft") { e.preventDefault(); focusMove(-1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); focusMove(1); }
   }
 
-  // -------------------------
-  // Initialization routine
-  // -------------------------
-  function initKeyboardFriendly() {
-    try {
-      replaceDateInputs();
-      attachRadioEnterBehavior();
-      attachSelectEnterBehavior();
-      attachContactRelFix();
+  // UP / DOWN movement
+  if (e.key === "ArrowUp") { e.preventDefault(); focusMoveVertical(-1); }
+  if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
 
-      // add global key listener
-      document.removeEventListener('keydown', globalKeyHandler);
-      document.addEventListener('keydown', globalKeyHandler, { capture: true });
-
-      // re-run some attachers after dynamic UI libraries initialize (Select2 / TomSelect)
-      // If you initialize Select2/TomSelect after this script, call window.initKeyboardFriendly && window.initKeyboardFriendly()
-      setTimeout(()=>{
-        attachSelectEnterBehavior();
-        attachContactRelFix();
-        attachRadioEnterBehavior();
-      }, 600);
-
-      // Expose a function for re-init if dynamic content is added later
-      window.initKeyboardFriendly = function(){ initKeyboardFriendly(); };
-    } catch(err){
-      console.warn('initKeyboardFriendly error', err);
-    }
-  }
-
-  // Run on DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initKeyboardFriendly);
-  } else initKeyboardFriendly();
-
-})();
+});
 </script>
+
 
 
 

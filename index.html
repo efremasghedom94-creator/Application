@@ -790,19 +790,6 @@
   </div> <!-- closes wizardRoot -->
 </div> <!-- closes outer colored border -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-      
 <!-- PAGE 2 -->
 <section class="page hidden" data-step="2">
   <h2 class="font-medium mb-3">Page 2</h2>
@@ -2065,13 +2052,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- B. FIELD NAVIGATION (Arrows) ---
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
             
-            // 1. Check if Dropdown is OPEN (Let Library Handle it)
+// 1. Check if Dropdown is OPEN (Let Library Handle it)
             const isSelect2Open = document.querySelector('.select2-container--open');
             const tsWrapper = activeEl.closest('.ts-wrapper');
-            const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('input-active') && activeEl.closest('.ts-control');
+            // FIX: Check for 'dropdown-active' ensures we only trap keys when menu is VISIBLE
+            const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('dropdown-active');
 
             if (isSelect2Open || isTomSelectOpen) {
-                // Do NOT prevent default. Let Select2/TomSelect handle Up/Down in list.
                 return;
             }
 

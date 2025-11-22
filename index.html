@@ -2052,15 +2052,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- B. FIELD NAVIGATION (Arrows) ---
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
             
-            // 1. Check if Dropdown is OPEN (Let Library Handle it)
-            const isSelect2Open = document.querySelector('.select2-container--open');
-            const tsWrapper = activeEl.closest('.ts-wrapper');
-            const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('input-active') && activeEl.closest('.ts-control');
+          const isSelect2Open = document.querySelector('.select2-container--open');
 
-            if (isSelect2Open || isTomSelectOpen) {
-                // Do NOT prevent default. Let Select2/TomSelect handle Up/Down in list.
-                return;
-            }
+// TomSelect is open only when dropdown exists & is not hidden
+const isTomSelectOpen = !!document.querySelector('.ts-dropdown:not([style*="display: none"])');
+
+if (isSelect2Open || isTomSelectOpen) {
+    return; // Let dropdown handle arrows
+}
+
 
             // 2. Text Input Boundaries (Allow Typing)
             const isTextLike = activeEl.tagName === 'INPUT' && ['text', 'password', 'email', 'tel', 'number', 'search', 'url'].includes(activeEl.type);

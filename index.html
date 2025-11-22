@@ -1960,147 +1960,419 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
-  
-<style>
-/* Accessible focus highlight */
-input:focus, select:focus {
-  outline: 2px solid #66b3ff !important;
-  border-color: #66b3ff !important;
-}
+  <style>
+  /* Accessible focus highlight */
+  input:focus, select:focus, textarea:focus, .ts-control:focus, .select2-selection:focus {
+    outline: 3px solid #66b3ff !important;
+    box-shadow: 0 0 0 3px rgba(102,179,255,0.12);
+  }
+  .keyboard-date { display:inline-flex; gap:6px; align-items:center; }
+  .keyboard-date input { width:56px; padding:6px 8px; border-radius:6px; border:1px solid #d1d5db; }
+  .keyboard-date .sep { padding:0 2px; color:#444; font-weight:600; }
 </style>
 
 <script>
-// ------------------------------------------------------------
-// COLLECT FOCUSABLE FIELDS
-// ------------------------------------------------------------
-function getFocusableElements() {
-  return Array.from(document.querySelectorAll(`
-    input:not([type=hidden]),
-    select,
-    textarea,
-    .ts-control,
-    .select2-selection
-  `)).filter(el => !el.disabled && !el.closest('.hidden'));
-}
+(function(){
+  // -------------------------
+  // Helpers
+  // -------------------------
+  function qsAll(sel){ return Array.from(document.querySelectorAll(sel)); }
+  function isHidden(el){ return !el || el.offsetParent === null || !!el.closest('.hidden'); }
 
-// ------------------------------------------------------------
-// HORIZONTAL NAVIGATION (LEFT / RIGHT)
-// ------------------------------------------------------------
-function focusMove(dir) {
-  const fields = getFocusableElements();
-  const active = document.activeElement;
-  const index = fields.indexOf(active);
-  if (index === -1) return;
+  // Detect whether any dropdown/listbox is currently open (Select2 / TomSelect / native expanded select / any role=listbox)
+  function isAnyDropdownOpen() {
+    try {
+      // Select2: container gets .select2-container--open or .select2-dropdown exists
+      if (document.querySelector('.select2-container--open')) return true;
+      if (document.querySelector('.select2-dropdown')) return true;
 
-  let newIndex = index + dir;
-  if (newIndex < 0) newIndex = fields.length - 1;
-  if (newIndex >= fields.length) newIndex = 0;
+      // TomSelect / Tom Select: .ts-dropdown present and visible
+      const tsDrops = qsAll('.ts-dropdown');
+      for (const d of tsDrops) {
+        if (d.offsetParent !== null) return true; // visible
+      }
 
-  fields[newIndex].focus();
-}
+      // Native <select> expanded: check any select with size > 0 or with size attribute set to >1 and visible
+      const selects = qsAll('select');
+      for (const s of selects) {
+        if (!isHidden(s)) {
+          // some browsers use s.size when expanded via keyboard
+          if (s.size && Number(s.size) > 0) return true;
+          // also check if user has a sibling dropdown element representing the open native options (rare)
+        }
+      }
 
-// ------------------------------------------------------------
-// VERTICAL NAVIGATION (UP / DOWN)
-// ------------------------------------------------------------
-function focusMoveVertical(dir) {
-  const fields = getFocusableElements();
-  const active = document.activeElement;
-  let index = fields.indexOf(active);
-  if (index === -1) return;
-
-  let newIndex = index + dir;
-  if (newIndex >= 0 && newIndex < fields.length) {
-    fields[newIndex].focus();
-  }
-}
-
-// ------------------------------------------------------------
-// DATE (MM → DD → YYYY) WITHOUT DATE PICKER
-// ------------------------------------------------------------
-const mm = document.getElementById("mm");
-const dd = document.getElementById("dd");
-const yyyy = document.getElementById("yyyy");
-
-if (mm) {
-  mm.addEventListener("focus", () => mm.select());
-  mm.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") { e.preventDefault(); dd.focus(); }
-    if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
-    if (e.key === "ArrowUp")   { e.preventDefault(); focusMoveVertical(-1); }
-  });
-}
-
-if (dd) {
-  dd.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") { e.preventDefault(); mm.focus(); }
-    if (e.key === "ArrowRight") { e.preventDefault(); yyyy.focus(); }
-    if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
-    if (e.key === "ArrowUp")   { e.preventDefault(); focusMoveVertical(-1); }
-  });
-}
-
-if (yyyy) {
-  yyyy.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") { e.preventDefault(); dd.focus(); }
-    if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
-    if (e.key === "ArrowUp")   { e.preventDefault(); focusMoveVertical(-1); }
-  });
-}
-
-// ------------------------------------------------------------
-// CONTACT RELATIONSHIP FIX (LEFT SHOULD GO BACK)
-// ------------------------------------------------------------
-const relationship = document.getElementById("relationship");
-if (relationship) {
-  relationship.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      focusMove(-1); // previous field
-    }
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      focusMove(1); // next field
-    }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      focusMoveVertical(-1);
-    }
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      focusMoveVertical(1);
-    }
-  });
-}
-
-// ------------------------------------------------------------
-// PAGE 2: PR / RP / SP radio buttons — ENTER selects
-// ------------------------------------------------------------
-document.querySelectorAll("input[name='status']").forEach((radio) => {
-  radio.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      radio.checked = true; // select the radio
-    }
-  });
-});
-
-// ------------------------------------------------------------
-// GLOBAL KEY HANDLER
-// ------------------------------------------------------------
-document.addEventListener("keydown", function(e) {
-
-  // LEFT / RIGHT movement
-  if (!e.shiftKey) {
-    if (e.key === "ArrowLeft") { e.preventDefault(); focusMove(-1); }
-    if (e.key === "ArrowRight") { e.preventDefault(); focusMove(1); }
+      // Generic listbox (aria)
+      const listboxes = qsAll('[role="listbox"]');
+      for (const lb of listboxes) {
+        if (lb.offsetParent !== null) return true;
+      }
+    } catch(e){ /* ignore */ }
+    return false;
   }
 
-  // UP / DOWN movement
-  if (e.key === "ArrowUp") { e.preventDefault(); focusMoveVertical(-1); }
-  if (e.key === "ArrowDown") { e.preventDefault(); focusMoveVertical(1); }
+  // -------------------------
+  // Focusable list & navigation
+  // -------------------------
+  function getFocusableElements() {
+    // Collect visible controls in DOM order
+    const raw = Array.from(document.querySelectorAll(
+      'input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled]), .ts-control, .select2-selection, [data-kb-date]'
+    ));
+    // Filter hidden & dedupe preserving document order
+    const seen = new Set();
+    const ordered = [];
+    for (const el of raw) {
+      // if element is actually a keyboard-date wrapper marker, prefer the wrapper
+      if (isHidden(el)) continue;
+      if (!seen.has(el)) { seen.add(el); ordered.push(el); }
+    }
+    return ordered;
+  }
 
-});
+  function focusElementSmart(target) {
+    if (!target) return;
+    try {
+      if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA') {
+        target.focus();
+        if (typeof target.select === 'function') try { target.select(); } catch(e){}
+        return;
+      }
+      // select2 wrapper
+      if (target.classList && target.classList.contains('select2-selection')) {
+        target.focus();
+        return;
+      }
+      // tomselect wrapper
+      if (target.classList && target.classList.contains('ts-control')) {
+        const inner = target.querySelector('input[type="text"], input:not([type])');
+        if (inner) { inner.focus(); return; }
+        target.focus();
+        return;
+      }
+      // keyboard-date wrapper (we mark these with data-kb-date)
+      if (target.dataset && target.dataset.kbDate) {
+        const inner = target.querySelector('input');
+        if (inner) { inner.focus(); return; }
+      }
+      if (typeof target.focus === 'function') target.focus();
+    } catch(e){ try { target.focus(); } catch(err){} }
+  }
+
+  function focusMove(dir) {
+    const fields = getFocusableElements();
+    const active = document.activeElement;
+    let idx = fields.indexOf(active);
+
+    // Try to match wrappers if active is inside one (e.g., input inside ts-control)
+    if (idx === -1) {
+      const wrap = active.closest && (active.closest('.ts-control') || active.closest('.select2-selection') || active.closest('[data-kb-date]'));
+      if (wrap) idx = fields.indexOf(wrap);
+      if (idx === -1) return;
+    }
+
+    let newIndex = idx + dir;
+    if (newIndex < 0) newIndex = fields.length - 1;
+    if (newIndex >= fields.length) newIndex = 0;
+    focusElementSmart(fields[newIndex]);
+  }
+
+  function focusMoveVertical(dir) {
+    const fields = getFocusableElements();
+    const active = document.activeElement;
+    let activeEl = active;
+    if (!fields.includes(activeEl)) {
+      const wrap = active.closest && (active.closest('.ts-control') || active.closest('.select2-selection') || active.closest('[data-kb-date]'));
+      if (wrap) activeEl = wrap;
+    }
+    let rect;
+    try { rect = activeEl.getBoundingClientRect(); } catch(e){ rect = { top: 0, left: 0 }; }
+    const candidates = fields.map(f => ({ el:f, rect: f.getBoundingClientRect() })).filter(c => c.el !== activeEl && c.rect.width > 0);
+    if (candidates.length === 0) return;
+
+    if (dir > 0) {
+      // choose nearest below
+      const below = candidates.filter(c => c.rect.top > rect.top + 6);
+      if (below.length === 0) { focusElementSmart(candidates[0].el); return; }
+      below.sort((a,b)=> (a.rect.top - b.rect.top) || (Math.abs(a.rect.left - rect.left) - Math.abs(b.rect.left - rect.left)));
+      focusElementSmart(below[0].el);
+    } else {
+      const above = candidates.filter(c => c.rect.top < rect.top - 6);
+      if (above.length === 0) { focusElementSmart(candidates[candidates.length-1].el); return; }
+      above.sort((a,b)=> (b.rect.top - a.rect.top) || (Math.abs(a.rect.left - rect.left) - Math.abs(b.rect.left - rect.left)));
+      focusElementSmart(above[0].el);
+    }
+  }
+
+  // -------------------------
+  // DATE: replace <input type="date"> with 3 small inputs (MM/DD/YYYY)
+  // Important: keyboard navigation won't open calendar because original date input is hidden
+  // -------------------------
+  function replaceDateInputs() {
+    const dateInputs = qsAll('input[type="date"]');
+    dateInputs.forEach(orig => {
+      if (orig.dataset.kbReplaced) return;
+      orig.dataset.kbReplaced = '1';
+      const wrapper = document.createElement('span');
+      wrapper.className = 'keyboard-date';
+      wrapper.dataset.kbDate = orig.id || ('kbdate_' + Math.random().toString(36).slice(2,8));
+
+      const idBase = orig.id || wrapper.dataset.kbDate;
+      const mm = document.createElement('input'); mm.type='text'; mm.maxLength=2; mm.placeholder='MM'; mm.id = idBase+'_mm';
+      const dd = document.createElement('input'); dd.type='text'; dd.maxLength=2; dd.placeholder='DD'; dd.id = idBase+'_dd';
+      const yyyy = document.createElement('input'); yyyy.type='text'; yyyy.maxLength=4; yyyy.placeholder='YYYY'; yyyy.id = idBase+'_yyyy';
+      const sep1 = document.createElement('span'); sep1.className='sep'; sep1.textContent='/';
+      const sep2 = document.createElement('span'); sep2.className='sep'; sep2.textContent='/';
+
+      wrapper.appendChild(mm); wrapper.appendChild(sep1); wrapper.appendChild(dd); wrapper.appendChild(sep2); wrapper.appendChild(yyyy);
+
+      orig.style.display = 'none';
+      orig.parentNode.insertBefore(wrapper, orig);
+
+      // Initialize values if orig has YYYY-MM-DD
+      if (orig.value) {
+        const parts = orig.value.split('-');
+        if (parts.length===3) { yyyy.value = parts[0]||''; mm.value = parts[1]||''; dd.value = parts[2]||''; }
+      }
+
+      function sync() {
+        const m = (mm.value.replace(/\D/g,'').slice(0,2)).padStart(2,'0');
+        const d = (dd.value.replace(/\D/g,'').slice(0,2)).padStart(2,'0');
+        const y = yyyy.value.replace(/\D/g,'').slice(0,4);
+        if (y || m || d) orig.value = (y.padStart(4,'0') || '0000') + '-' + (m||'00') + '-' + (d||'00');
+        else orig.value = '';
+      }
+
+      // navigation: mm -> dd -> yyyy, don't open any native calendar
+      mm.addEventListener('focus', ()=> mm.select());
+      mm.addEventListener('keydown', (e)=> {
+        if (e.key === 'ArrowRight') { e.preventDefault(); dd.focus(); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); focusMove(-1); }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); focusMoveVertical(1); }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); focusMoveVertical(-1); }
+      });
+      dd.addEventListener('keydown', (e)=> {
+        if (e.key === 'ArrowRight') { e.preventDefault(); yyyy.focus(); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); mm.focus(); }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); focusMoveVertical(1); }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); focusMoveVertical(-1); }
+      });
+      yyyy.addEventListener('keydown', (e)=> {
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); dd.focus(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); focusMoveVertical(1); }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); focusMoveVertical(-1); }
+      });
+
+      [mm,dd,yyyy].forEach(i => {
+        i.addEventListener('input', ()=> { i.value = i.value.replace(/\D/g,''); sync(); });
+        i.addEventListener('blur', sync);
+        i.setAttribute('tabindex','0');
+      });
+
+      // mark wrapper as focusable so getFocusableElements can pick it
+      wrapper.setAttribute('tabindex','0'); // so it can be focused as a unit
+    });
+  }
+
+  // -------------------------
+  // Radios: Enter selects
+  // -------------------------
+  function attachRadioEnterBehavior() {
+    qsAll('input[type="radio"]').forEach(radio => {
+      if (radio.dataset.kbRadio) return;
+      radio.dataset.kbRadio = '1';
+      radio.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        // horizontal left/right within radio group
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const group = Array.from(document.querySelectorAll(`input[type="radio"][name="${radio.name}"]`));
+          const idx = group.indexOf(radio);
+          const next = group[(idx+1)%group.length];
+          focusElementSmart(next);
+        }
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const group = Array.from(document.querySelectorAll(`input[type="radio"][name="${radio.name}"]`));
+          const idx = group.indexOf(radio);
+          const prev = group[(idx-1+group.length)%group.length];
+          focusElementSmart(prev);
+        }
+      });
+    });
+  }
+
+  // -------------------------
+  // Select wrappers: ensure key events don't bubble out when dropdown is open
+  // -------------------------
+  function attachSelectWrappers() {
+    // Select2 wrapper
+    qsAll('.select2-selection').forEach(w => {
+      if (w.dataset.kbSelect2) return;
+      w.dataset.kbSelect2 = '1';
+      w.setAttribute('tabindex','0');
+      w.addEventListener('keydown', (e) => {
+        // If dropdown is open, stop propagation so global handler doesn't steal arrows
+        if (isAnyDropdownOpen()) {
+          e.stopPropagation();
+          return; // allow default/Select2 handlers to run
+        }
+        // If dropdown not open, intercept arrows to move between fields
+        if (e.key === 'ArrowLeft') { e.preventDefault(); focusMove(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); }
+        if (e.key === 'Enter') { e.preventDefault(); try { $(w).trigger('mousedown'); } catch(err){} }
+      }, { capture: true });
+    });
+
+    // TomSelect wrapper
+    qsAll('.ts-control').forEach(w => {
+      if (w.dataset.kbTs) return;
+      w.dataset.kbTs = '1';
+      w.setAttribute('tabindex','0');
+      w.addEventListener('keydown', (e) => {
+        if (isAnyDropdownOpen()) { e.stopPropagation(); return; }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); focusMove(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          try {
+            // try to open tomselect dropdown via its instance if present
+            if (w.tomselect && typeof w.tomselect.open === 'function') w.tomselect.open();
+            else {
+              const inner = w.querySelector('input[type="text"], input:not([type])');
+              if (inner) inner.focus();
+            }
+          } catch(err){}
+        }
+      }, { capture: true });
+    });
+
+    // For native selects, ensure Enter expands them and that when expanded we do not global-handle arrows
+    qsAll('select').forEach(s => {
+      if (s.dataset.kbNative) return;
+      s.dataset.kbNative = '1';
+      s.addEventListener('keydown', (e) => {
+        // If dropdown (native) is open, we allow browser behavior (do nothing)
+        if (s.size && Number(s.size) > 0) { e.stopPropagation(); return; }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          // expand temporarily (limit size so it doesn't become huge)
+          try { s.size = Math.min(20, s.options.length || 1); } catch(err){}
+        }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); focusMove(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); }
+      });
+      s.addEventListener('blur', ()=> { try { s.size = 0; } catch(e){} });
+      s.addEventListener('change', ()=> { try { s.size = 0; } catch(e){} });
+    });
+  }
+
+  // -------------------------
+  // Specific contactRel handling
+  // -------------------------
+  function attachContactRelFix() {
+    const orig = document.getElementById('contactRel');
+    if (!orig) return;
+    // Find select2 wrapper if present
+    const wrap = orig.parentNode.querySelector('.select2-selection') || document.querySelector('.select2-selection');
+
+    // ensure wrapper has handlers (attachSelectWrappers handles this), but also make sure left arrow returns previous
+    [orig, wrap].forEach(el => {
+      if (!el) return;
+      if (el.dataset.contactRelKb) return;
+      el.dataset.contactRelKb = '1';
+      el.setAttribute('tabindex','0');
+      el.addEventListener('keydown', (e) => {
+        // If dropdown open, don't let global handler run (stopPropagation) so user can navigate list
+        if (isAnyDropdownOpen()) { e.stopPropagation(); return; }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); focusMove(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); focusMove(1); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          // open via mousedown for select2
+          try { if (wrap && wrap.classList.contains('select2-selection')) $(wrap).trigger('mousedown'); else orig.focus(); } catch(err){ orig.focus(); }
+        }
+      }, { capture: true });
+    });
+  }
+
+  // -------------------------
+  // Global keyboard handler (only runs if no dropdown/listbox is open)
+  // -------------------------
+  function globalKeyHandler(e) {
+    // If dropdown/listbox is open, do nothing global (let the widget handle keys)
+    if (isAnyDropdownOpen()) return;
+
+    // Allow caret movement in text inputs if caret isn't at boundary
+    const ae = document.activeElement;
+    const tag = ae && ae.tagName;
+    if (!e.shiftKey) {
+      if (e.key === 'ArrowLeft') {
+        if (tag === 'INPUT' && (ae.type === 'text' || ae.type === 'search' || ae.type === 'tel' || ae.type === 'password')) {
+          try { const caret = ae.selectionStart; if (typeof caret === 'number' && caret > 0) return; } catch(err){}
+        }
+        e.preventDefault(); focusMove(-1); return;
+      }
+      if (e.key === 'ArrowRight') {
+        if (tag === 'INPUT' && (ae.type === 'text' || ae.type === 'search' || ae.type === 'tel' || ae.type === 'password')) {
+          try { const caret = ae.selectionEnd; if (typeof caret === 'number' && caret < (ae.value||'').length) return; } catch(err){}
+        }
+        e.preventDefault(); focusMove(1); return;
+      }
+    }
+
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusMoveVertical(1); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); focusMoveVertical(-1); return; }
+
+    // SHIFT + arrow for page navigation
+    if (e.shiftKey) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); try { if (typeof goTo === 'function') goTo((typeof currentStep !== 'undefined' ? currentStep : 1) + 1); } catch(e){}; return; }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); try { if (typeof goTo === 'function') goTo((typeof currentStep !== 'undefined' ? currentStep : 1) - 1); } catch(e){}; return; }
+    }
+  }
+
+  // -------------------------
+  // Init
+  // -------------------------
+  function init() {
+    try {
+      replaceDateInputs();
+      attachRadioEnterBehavior();
+      attachSelectWrappers();
+      attachContactRelFix();
+
+      // global key listener uses capture so it runs early, but checks isAnyDropdownOpen() before doing anything
+      document.removeEventListener('keydown', globalKeyHandler, true);
+      document.addEventListener('keydown', globalKeyHandler, true);
+
+      // Re-attach after dynamic UI libraries initialize (if Select2/TomSelect are initialized later)
+      setTimeout(()=>{ attachSelectWrappers(); attachContactRelFix(); attachRadioEnterBehavior(); }, 600);
+
+      // expose for manual re-init if you create controls dynamically
+      window.initKeyboardFriendly = function(){ init(); };
+
+    } catch(err){ console.warn('keyboard init error', err); }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+})();
 </script>
+
 
 
 

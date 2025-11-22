@@ -1962,219 +1962,415 @@ document.getElementById('shareBtn').onclick = async () => {
 
   
 <style>
-/* ⭐ Accessible light-blue focus border */
-input:focus, select:focus, textarea:focus {
-  outline: 2px solid #66b3ff !important;
-  border-color: #66b3ff !important;
-}
+  /* accessible light-blue focus */
+  input:focus, select:focus, textarea:focus,
+  .ts-control:focus, .select2-selection:focus {
+    outline: 3px solid #66b3ff !important;
+    border-color: #66b3ff !important;
+    box-shadow: 0 0 0 3px rgba(102,179,255,0.12);
+  }
 </style>
 
 <script>
-// ------------------------------------------------------------
-// UTILITIES
-// ------------------------------------------------------------
-function getFocusableElements() {
-  return Array.from(document.querySelectorAll(`
-    input:not([type=hidden]),
-    select,
-    textarea,
-    .ts-control,
-    .select2-selection
-  `)).filter(el => !el.disabled && !el.closest('.hidden'));
-}
-
-// Horizontal focus movement (left/right)
-function focusMove(dir) {
-  const fields = getFocusableElements();
-  const active = document.activeElement;
-  let index = fields.indexOf(active);
-  if (index === -1) return;
-
-  let newIndex = index + dir;
-
-  if (newIndex < 0) newIndex = fields.length - 1;
-  if (newIndex >= fields.length) newIndex = 0;
-
-  fields[newIndex].focus();
-}
-
-// Vertical movement (up/down)
-function focusMoveVertical(dir) {
-  const fields = getFocusableElements();
-  const active = document.activeElement;
-  let index = fields.indexOf(active);
-  if (index === -1) return;
-
-  let newIndex = index + dir;
-
-  if (newIndex >= 0 && newIndex < fields.length) {
-    fields[newIndex].focus();
+(function () {
+  // ---------- helpers ----------
+  function isVisible(el) {
+    return !!(el && el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden');
   }
-}
 
-// ------------------------------------------------------------
-// DATE FIELD LOGIC (MM → DD → YYYY + auto-select month)
-// ------------------------------------------------------------
-const mm = document.getElementById("mm");
-const dd = document.getElementById("dd");
-const yyyy = document.getElementById("yyyy");
+  // Return list of interactive elements we want to navigate between
+  function getFocusableElements() {
+    // core inputs/selects/textarea + tomselect/select2 wrappers
+    const selectors = [
+      'input:not([type=hidden]):not(.nav-control):not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '.ts-control',           // TomSelect wrapper
+      '.select2-selection'     // Select2 visible selection element
+    ];
+    const all = Array.from(document.querySelectorAll(selectors.join(',')))
+      .filter(isVisible);
 
-if (mm) {
-  mm.addEventListener("focus", () => {
-    mm.select(); // highlight month so user can type right away
-  });
+    // Remove nav buttons or other elements you don't want in the loop
+    const filtered = all.filter(el => !el.classList.contains('nav-control') && !el.closest('.nav-buttons'));
 
-  mm.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") dd.focus();
-    if (e.key === "ArrowDown") focusMoveVertical(1);
-    if (e.key === "ArrowUp") focusMoveVertical(-1);
-  });
-}
-
-if (dd) {
-  dd.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") mm.focus();
-    if (e.key === "ArrowRight") yyyy.focus();
-    if (e.key === "ArrowDown") focusMoveVertical(1);
-    if (e.key === "ArrowUp") focusMoveVertical(-1);
-  });
-}
-
-if (yyyy) {
-  yyyy.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") dd.focus();
-    if (e.key === "ArrowDown") focusMoveVertical(1);
-    if (e.key === "ArrowUp") focusMoveVertical(-1);
-  });
-}
-
-// ------------------------------------------------------------
-// CONTACT RELATIONSHIP FIX:
-// LEFT arrow must go back to previous field
-// ------------------------------------------------------------
-const relationship = document.getElementById("relationship");
-if (relationship) {
-  relationship.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      focusMove(-1); // go to previous field
+    // Deduplicate elements that are visually the same (prefer the visible wrapper)
+    const uniq = [];
+    const seen = new Set();
+    for (const el of filtered) {
+      // Use the bounding rect as a heuristic key + tagName
+      const r = el.getBoundingClientRect();
+      const key = Math.round(r.top) + ':' + Math.round(r.left) + ':' + el.tagName + ':' + Math.round(r.width) + ':' + Math.round(r.height);
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniq.push(el);
+      }
     }
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      focusMove(1);
-    }
-    if (e.key === "ArrowDown") focusMoveVertical(1);
-    if (e.key === "ArrowUp") focusMoveVertical(-1);
-  });
-}
+    return uniq;
+  }
 
-// ------------------------------------------------------------
-// PAGE 2: PR / RP / SP radio buttons → ENTER selects the option
-// ------------------------------------------------------------
-const statusRadios = document.querySelectorAll("input[name='status']");
-statusRadios.forEach((radio) => {
-  radio.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      radio.checked = true;
-      e.preventDefault();
-    }
-  });
-});
-
-// ------------------------------------------------------------
-// MAIN KEYBOARD HANDLING
-// ------------------------------------------------------------
-document.addEventListener("keydown", function(e) {
-
-  // SHIFT + Arrow → page navigation
-  if (e.shiftKey) {
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      goTo(currentStep + 1);
-      return;
-    }
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      goTo(currentStep - 1);
-      return;
+  function focusElement(el) {
+    if (!el) return;
+    try {
+      el.focus({preventScroll: false});
+    } catch (e) {
+      try { el.focus(); } catch(e) {}
     }
   }
 
-  // Horizontal movement
-  if (e.key === "ArrowLeft" && !e.shiftKey) {
-    e.preventDefault();
-    focusMove(-1);
-    return;
+  // ---------- horizontal loop (left/right) ----------
+  function focusMove(dir) {
+    const items = getFocusableElements();
+    if (items.length === 0) return;
+    const active = document.activeElement;
+    let idx = items.indexOf(active);
+
+    // if active not in list, place at start or try to find nearest by geometry
+    if (idx === -1) {
+      // find the element with top/left nearest to the viewport center
+      idx = 0;
+    }
+
+    let next = idx + dir;
+    if (next < 0) next = items.length - 1;
+    if (next >= items.length) next = 0;
+    focusElement(items[next]);
   }
 
-  if (e.key === "ArrowRight" && !e.shiftKey) {
-    e.preventDefault();
-    focusMove(1);
-    return;
-  }
+  // ---------- vertical movement by geometry (up/down) ----------
+  function focusMoveVertical(dir) {
+    const items = getFocusableElements();
+    if (items.length === 0) return;
+    const active = document.activeElement;
+    const activeRect = active && active.getBoundingClientRect ? active.getBoundingClientRect() : null;
 
-  // Vertical movement
-  if (e.key === "ArrowUp" && !e.shiftKey) {
-    e.preventDefault();
-    focusMoveVertical(-1);
-    return;
-  }
-
-  if (e.key === "ArrowDown" && !e.shiftKey) {
-    e.preventDefault();
-    focusMoveVertical(1);
-    return;
-  }
-
-  // ------------------------------------------------------------
-  // ENTER → open dropdowns (Select2, TomSelect, <select>)
-  // ------------------------------------------------------------
-  if (e.key === "Enter") {
-    const el = document.activeElement;
-
-    // Native select
-    if (el.tagName === "SELECT") {
-      e.preventDefault();
-      el.size = el.options.length;
+    if (!activeRect) {
+      // fallback to simple next/prev in list
+      const idx = items.indexOf(active);
+      const targetIndex = (idx === -1) ? 0 : Math.max(0, Math.min(items.length - 1, idx + dir));
+      focusElement(items[targetIndex]);
       return;
     }
 
-    // TomSelect
-    if (el.classList.contains("ts-control")) {
-      e.preventDefault();
-      el.tomselect.open();
+    const activeCenterX = activeRect.left + activeRect.width / 2;
+    const activeTop = activeRect.top;
+
+    let candidates = items.map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(obj => obj.r.width > 0 && obj.r.height > 0 && isVisible(obj.el));
+
+    if (dir < 0) {
+      // above elements only
+      candidates = candidates.filter(c => c.r.bottom <= activeTop - 4);
+      if (candidates.length === 0) return;
+      // choose the candidate with the largest bottom (closest above), break ties with horizontal distance
+      candidates.sort((a, b) => {
+        const da = Math.abs((a.r.left + a.r.width/2) - activeCenterX);
+        const db = Math.abs((b.r.left + b.r.width/2) - activeCenterX);
+        if (b.r.bottom !== a.r.bottom) return b.r.bottom - a.r.bottom;
+        return da - db;
+      });
+      focusElement(candidates[0].el);
+    } else {
+      // below elements only
+      candidates = candidates.filter(c => c.r.top >= activeRect.bottom + 4);
+      if (candidates.length === 0) return;
+      // choose the candidate with the smallest top (closest below), break ties with horizontal distance
+      candidates.sort((a, b) => {
+        const da = Math.abs((a.r.left + a.r.width/2) - activeCenterX);
+        const db = Math.abs((b.r.left + b.r.width/2) - activeCenterX);
+        if (a.r.top !== b.r.top) return a.r.top - b.r.top;
+        return da - db;
+      });
+      focusElement(candidates[0].el);
+    }
+  }
+
+  // ---------- date field month-focus best-effort ----------
+  function trySelectDateMonth(el) {
+    if (!el || el.tagName !== 'INPUT' || el.type !== 'date') return;
+    // Attempt to highlight the month part in yyyy-mm-dd format
+    try {
+      // If browser supports selection on date (some do not), try to set caret to month
+      // Format: yyyy-mm-dd -> month characters at index 5..6 (0-based), but we'll defensively find '-'
+      const v = el.value || '';
+      if (typeof el.setSelectionRange === 'function') {
+        // if value exists in yyyy-mm-dd form, try to highlight between the first and second '-' (month)
+        const parts = v.split('-');
+        if (parts.length === 3) {
+          // compute offsets
+          const start = parts[0].length + 1; // after first '-'
+          const end = start + parts[1].length;
+          el.setSelectionRange(start, end);
+          return;
+        } else {
+          // If no value, try place caret in month location by setting a temp value for selection then clearing
+          // Some browsers won't allow selection on date inputs; trap errors silently
+          // Best-effort: call showPicker if available
+          if (typeof el.showPicker === 'function') {
+            el.showPicker();
+            return;
+          }
+        }
+      } else if (typeof el.showPicker === 'function') {
+        // show native datepicker where supported (Chrome)
+        el.showPicker();
+        return;
+      }
+    } catch (err) {
+      // ignore - browsers vary on date input selection
+      if (typeof el.showPicker === 'function') {
+        try { el.showPicker(); } catch(e) {}
+      }
+    }
+  }
+
+  // ---------- utility: find original select2/select element from wrapper ----------
+  function getOriginalSelectFromSelect2(wrapper) {
+    // select2 places original select near wrapper; try to find the nearest select in ancestors/siblings
+    if (!wrapper) return null;
+    const sel = wrapper.previousElementSibling && wrapper.previousElementSibling.tagName === 'SELECT'
+      ? wrapper.previousElementSibling
+      : wrapper.nextElementSibling && wrapper.nextElementSibling.tagName === 'SELECT'
+      ? wrapper.nextElementSibling
+      : document.querySelector('select'); // fallback
+    return sel;
+  }
+
+  // ---------- ENTER-to-open for selects & wrappers ----------
+  function openSelectFromElement(el) {
+    if (!el) return;
+    if (el.tagName === 'SELECT') {
+      // expand
+      try {
+        el.size = Math.max(5, Math.min(20, el.options.length));
+      } catch (e) {}
       return;
     }
-
+    // TomSelect (ts-control) - try to retrieve instance stored on element or window reference
+    if (el.classList.contains('ts-control')) {
+      // the TomSelect instance is often stored in `el.tomselect` or global TomSelect instances map.
+      try {
+        if (el.tomselect && typeof el.tomselect.open === 'function') {
+          el.tomselect.open();
+          return;
+        }
+        // sometimes input inside wrapper holds the instance
+        const input = el.querySelector('input');
+        if (input && input._tomselect && typeof input._tomselect.open === 'function') {
+          input._tomselect.open();
+          return;
+        }
+      } catch (err) {}
+    }
     // Select2
-    if (el.classList.contains("select2-selection")) {
-      e.preventDefault();
-      $(el).trigger("mousedown");
-      return;
+    if (el.classList.contains('select2-selection')) {
+      try {
+        // trigger the mousedown on the original element so Select2 opens
+        const sel = getOriginalSelectFromSelect2(el);
+        if (sel) $(sel).select2('open'); // if Select2 is loaded
+        else $(el).trigger('mousedown');
+      } catch (err) {}
     }
   }
 
-});
-
-// ------------------------------------------------------------
-// Collapse <select> when choosing an option
-// ------------------------------------------------------------
-document.addEventListener("change", (e) => {
-  if (e.target.tagName === "SELECT" && e.target.size) {
-    e.target.size = 0;
+  // ---------- ENTER selects radio when focused ----------
+  function handleEnterOnRadio(activeEl, e) {
+    if (!activeEl) return false;
+    // If active is a radio input, select it
+    if (activeEl.tagName === 'INPUT' && activeEl.type === 'radio') {
+      activeEl.checked = true;
+      // also dispatch change event
+      const ev = new Event('change', { bubbles: true });
+      activeEl.dispatchEvent(ev);
+      return true;
+    }
+    // If focus is inside a label containing radio, find the radio
+    const labelRadio = activeEl.closest && activeEl.closest('label') && activeEl.closest('label').querySelector('input[type="radio"]');
+    if (labelRadio) {
+      labelRadio.checked = true;
+      labelRadio.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    }
+    return false;
   }
-});
 
-// ------------------------------------------------------------
-// Close <select> on blur
-// ------------------------------------------------------------
-document.addEventListener("blur", (e) => {
-  if (e.target.tagName === "SELECT" && e.target.size) {
-    e.target.size = 0;
+  // ---------- global key handling ----------
+  document.addEventListener('keydown', function(e) {
+    // if user is typing in a text-like control, still allow arrow navigation but preserve caret behaviour when appropriate:
+    const active = document.activeElement;
+
+    // SHIFT + ARROW => page navigation (preserve your existing goTo/currentStep)
+    if (e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      try {
+        if (e.key === 'ArrowRight') goTo((typeof currentStep === 'number' ? currentStep + 1 : 2));
+        if (e.key === 'ArrowLeft') goTo((typeof currentStep === 'number' ? currentStep - 1 : 1));
+      } catch (err) {
+        // silent if goTo/currentStep not defined
+      }
+      return;
+    }
+
+    // LEFT / RIGHT navigation (loop) - do not trigger when user is editing a multi-line textarea and caret should move
+    if (!e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      // special case: if active is a text input and selection is not collapsed at edge, let default happen
+      if (active && active.tagName === 'INPUT' && active.type === 'text' || active.tagName === 'TEXTAREA') {
+        try {
+          const selStart = typeof active.selectionStart === 'number' ? active.selectionStart : null;
+          const selEnd = typeof active.selectionEnd === 'number' ? active.selectionEnd : null;
+          if (selStart !== null && selEnd !== null) {
+            // if selection not collapsed or caret not at edges, let arrow move caret normally
+            if (selStart !== selEnd) {
+              return; // allow default
+            }
+            if (e.key === 'ArrowLeft' && selStart > 0) return;
+            if (e.key === 'ArrowRight' && selEnd < (active.value ? active.value.length : 0)) return;
+          }
+        } catch (err) {}
+      }
+
+      e.preventDefault();
+
+      if (e.key === 'ArrowLeft') focusMove(-1);
+      if (e.key === 'ArrowRight') focusMove(1);
+      return;
+    }
+
+    // UP / DOWN vertical navigation
+    if (!e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      // Again, respect textarea natural caret behaviour
+      if (active && active.tagName === 'TEXTAREA') return;
+
+      e.preventDefault();
+      if (e.key === 'ArrowUp') focusMoveVertical(-1);
+      if (e.key === 'ArrowDown') focusMoveVertical(1);
+      return;
+    }
+
+    // ENTER behavior:
+    if (e.key === 'Enter') {
+      // If focused on a radio -> select it
+      if (handleEnterOnRadio(active, e)) {
+        e.preventDefault();
+        return;
+      }
+
+      // If focus is on a select / tomselect / select2 selection -> open/expand it
+      if (active) {
+        const tag = active.tagName;
+        if (tag === 'SELECT' || active.classList.contains('ts-control') || active.classList.contains('select2-selection')) {
+          e.preventDefault();
+          openSelectFromElement(active);
+          return;
+        }
+      }
+    }
+  }, { passive: false });
+
+  // ---------- collapse native selects on change/blur ----------
+  document.addEventListener('change', function(e) {
+    try {
+      const t = e.target;
+      if (t && t.tagName === 'SELECT' && t.size) {
+        t.size = 0;
+      }
+    } catch (err) {}
+  }, true);
+
+  document.addEventListener('blur', function(e) {
+    try {
+      const t = e.target;
+      if (t && t.tagName === 'SELECT' && t.size) {
+        t.size = 0;
+      }
+    } catch (err) {}
+  }, true);
+
+  // ---------- when date inputs receive focus, attempt to focus month ----------
+  document.addEventListener('focusin', function(e) {
+    const t = e.target;
+    if (t && t.tagName === 'INPUT' && t.type === 'date') {
+      // best effort: select month substring or show picker
+      trySelectDateMonth(t);
+    }
+  });
+
+  // ---------- fix contact relationship left-arrow issue by special-casing the control id(s) you use ----------
+  // We attempt to handle typical patterns:
+  // - native <select id="contactRel">
+  // - Select2: original <select id="contactRel"> + wrapper .select2-selection
+  // - TomSelect: original <select id="homeLang"> + wrapper .ts-control
+  // Add special keyboard handlers for these elements to ensure left/right/back navigation works predictably.
+  try {
+    const contactRel = document.getElementById('contactRel');
+    if (contactRel) {
+      // listen on both original select and any select2 wrapper
+      const wrapper = document.querySelector(`#contactRel ~ .select2-container .select2-selection`) || document.querySelector(`#contactRel + .select2-container .select2-selection`);
+      const handler = function(e) {
+        // gracefully allow normal left/right when editing text inside search input of select2/tomselect
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          focusMove(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          focusMove(1);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          focusMoveVertical(-1);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          focusMoveVertical(1);
+        }
+      };
+      contactRel.addEventListener('keydown', handler);
+      if (wrapper) wrapper.addEventListener('keydown', handler);
+    }
+  } catch (err) {
+    // silent
   }
-}, true);
 
+  // ---------- ENTER on student status radios (page 2 radios) ----------
+  // Your radios use name="studentStatus" and also name="immDoc" in your code.
+  ['studentStatus', 'immDoc'].forEach((group) => {
+    try {
+      const radios = document.querySelectorAll(`input[name="${group}"]`);
+      if (radios && radios.length) {
+        radios.forEach(r => {
+          r.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              this.checked = true;
+              this.dispatchEvent(new Event('change', { bubbles: true }));
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              // move to next radio visually (or to next focusable)
+              // try to focus the next radio in this group
+              const list = Array.from(document.querySelectorAll(`input[name="${group}"]`));
+              const idx = list.indexOf(this);
+              if (idx !== -1 && idx < list.length - 1) focusElement(list[idx + 1]);
+            } else if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              const list = Array.from(document.querySelectorAll(`input[name="${group}"]`));
+              const idx = list.indexOf(this);
+              if (idx > 0) focusElement(list[idx - 1]);
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              focusMoveVertical(1);
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              focusMoveVertical(-1);
+            }
+          });
+        });
+      }
+    } catch (err) {}
+  });
+
+  // ---------- small safety: close tomselect/select2 if clicks outside (optional) ----------
+  // (most libraries handle this themselves)
+})();
 </script>
+
 
 
 

@@ -1977,11 +1977,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return Array.from(document.querySelectorAll(SELECTORS));
   }
 
-  function sameRow(a, b) {
-    const A = a.getBoundingClientRect();
-    const B = b.getBoundingClientRect();
-    return Math.abs(A.top - B.top) < 25;
-  }
+ function sameRow(a, b) {
+  const A = a.getBoundingClientRect();
+  const B = b.getBoundingClientRect();
+
+  // Wider tolerance so fields like CONTACT RELATIONSHIP are included
+  const tolerance = 45; // was 25
+
+  return Math.abs(A.top - B.top) < tolerance;
+}
+
 
   function nearestAbove(cur) {
     const all = fields();

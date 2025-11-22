@@ -1963,7 +1963,8 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
-<script>
+
+  <script>
 document.addEventListener("DOMContentLoaded", () => {
   const SELECTORS = [
     "input:not([disabled])",
@@ -1977,27 +1978,32 @@ document.addEventListener("DOMContentLoaded", () => {
     return Array.from(document.querySelectorAll(SELECTORS));
   }
 
- function sameRow(a, b) {
-  const A = a.getBoundingClientRect();
-  const B = b.getBoundingClientRect();
+  /* ===========================================================
+     ROW MATCHING LOGIC (Fixes Contact Relationship inclusion)
+     =========================================================== */
+  function sameRow(a, b) {
+    // Explicit row grouping overrides geometry
+    if (a.classList.contains("row-1") && b.classList.contains("row-1")) {
+      return true;
+    }
 
-  // Wider tolerance so fields like CONTACT RELATIONSHIP are included
-  const tolerance = 45; // was 25
+    // fallback geometry (for rows without explicit grouping)
+    const A = a.getBoundingClientRect();
+    const B = b.getBoundingClientRect();
 
-  return Math.abs(A.top - B.top) < tolerance;
-}
-
+    return Math.abs(A.top - B.top) < 45;
+  }
 
   function nearestAbove(cur) {
     const all = fields();
     const c = cur.getBoundingClientRect();
-    let best = null, bestDist = Infinity;
+    let best = null, dist = Infinity;
 
     all.forEach(f => {
       const r = f.getBoundingClientRect();
       if (r.top < c.top) {
-        const d = Math.abs(c.left - r.left) + (c.top - r.top);
-        if (d < bestDist) { bestDist = d; best = f; }
+        const score = Math.abs(c.left - r.left) + (c.top - r.top);
+        if (score < dist) { dist = score; best = f; }
       }
     });
     return best;
@@ -2006,18 +2012,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function nearestBelow(cur) {
     const all = fields();
     const c = cur.getBoundingClientRect();
-    let best = null, bestDist = Infinity;
+    let best = null, dist = Infinity;
 
     all.forEach(f => {
       const r = f.getBoundingClientRect();
       if (r.top > c.top) {
-        const d = Math.abs(c.left - r.left) + (r.top - c.top);
-        if (d < bestDist) { bestDist = d; best = f; }
+        const score = Math.abs(c.left - r.left) + (r.top - c.top);
+        if (score < dist) { dist = score; best = f; }
       }
     });
     return best;
   }
 
+  /* ===========================================================
+     MAIN KEYBOARD LOGIC
+     =========================================================== */
   document.addEventListener("keydown", e => {
     const cur = document.activeElement;
     if (!cur) return;
@@ -2025,9 +2034,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const all = fields();
     const i = all.indexOf(cur);
 
-    /* ===========================================================
-       1) SHIFT + LEFT/RIGHT → Page Navigation Only
-       =========================================================== */
+    /* SHIFT + LEFT/RIGHT = PAGE NAVIGATION */
     if (e.shiftKey && e.key === "ArrowLeft") {
       e.preventDefault();
       const page = Number(document.querySelector(".page:not(.hidden)")?.dataset.step);
@@ -2042,15 +2049,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    /* ===========================================================
-       2) LEFT / RIGHT → Horizontal Loop (No Page Navigation)
-       =========================================================== */
+    /* LEFT / RIGHT = HORIZONTAL LOOP */
     if (!e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
       e.preventDefault();
       const dir = e.key === "ArrowRight" ? 1 : -1;
 
-      for (let k = 1; k <= all.length; k++) {
+      for (let k = 1; k < all.length; k++) {
         const idx = (i + dir * k + all.length) % all.length;
+
         if (sameRow(all[idx], cur)) {
           all[idx].focus();
           return;
@@ -2058,9 +2064,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    /* ===========================================================
-       3) UP / DOWN → Vertical navigation
-       =========================================================== */
+    /* UP / DOWN = VERTICAL MOVEMENT */
     if (e.key === "ArrowUp") {
       e.preventDefault();
       const above = nearestAbove(cur);
@@ -2075,13 +2079,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    /* ===========================================================
-       4) ENTER → Selects / Opens dropdowns / Navigates in lists
-       =========================================================== */
+    /* ENTER KEY BEHAVIOR */
     if (e.key === "Enter") {
       const tag = cur.tagName.toLowerCase();
 
-      // RADIO selects
+      // RADIO
       if (tag === "input" && cur.type === "radio") {
         e.preventDefault();
         cur.checked = true;
@@ -2089,27 +2091,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Native SELECT → open expanded mode
+      // Native SELECT (expand then collapse on confirm)
       if (tag === "select") {
         e.preventDefault();
         if (cur.size < 2) {
           cur.size = cur.options.length;
-          return;
         } else {
-          // collapse and commit selection
           cur.size = 0;
-          return;
         }
+        return;
       }
 
-      // Select2 open
+      // Select2
       if (cur.classList.contains("select2-selection")) {
         e.preventDefault();
         cur.click();
         return;
       }
 
-      // TomSelect open
+      // TomSelect
       if (cur.classList.contains("ts-control")) {
         e.preventDefault();
         cur.tomselect.open();
@@ -2119,6 +2119,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
 
 
 

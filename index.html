@@ -1963,177 +1963,157 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 
-  <script>
-/* ===========================================================
-   KEYBOARD NAVIGATION ENGINE
-   =========================================================== */
-
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  const focusables = [
+  const SELECTORS = [
     "input:not([disabled])",
     "select:not([disabled])",
     "textarea:not([disabled])",
-    "button:not([disabled])",
-    ".ts-control",         // TomSelect wrapper
-    ".select2-selection"   // Select2 wrapper
+    ".select2-selection",
+    ".ts-control"
   ].join(",");
 
-  function getAllFields() {
-    return Array.from(document.querySelectorAll(focusables));
-  }
-
-  function getCurrentField() {
-    return document.activeElement;
+  function fields() {
+    return Array.from(document.querySelectorAll(SELECTORS));
   }
 
   function sameRow(a, b) {
-    const ax = a.getBoundingClientRect();
-    const bx = b.getBoundingClientRect();
-    return Math.abs(ax.top - bx.top) < 25;
+    const A = a.getBoundingClientRect();
+    const B = b.getBoundingClientRect();
+    return Math.abs(A.top - B.top) < 25;
   }
 
-  function nearestAbove(current) {
-    const fields = getAllFields();
-    const c = current.getBoundingClientRect();
-    let best = null;
-    let bestDist = Infinity;
+  function nearestAbove(cur) {
+    const all = fields();
+    const c = cur.getBoundingClientRect();
+    let best = null, bestDist = Infinity;
 
-    fields.forEach(f => {
+    all.forEach(f => {
       const r = f.getBoundingClientRect();
       if (r.top < c.top) {
-        const dist = Math.abs(c.left - r.left) + (c.top - r.top);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = f;
-        }
+        const d = Math.abs(c.left - r.left) + (c.top - r.top);
+        if (d < bestDist) { bestDist = d; best = f; }
       }
     });
-
     return best;
   }
 
-  function nearestBelow(current) {
-    const fields = getAllFields();
-    const c = current.getBoundingClientRect();
-    let best = null;
-    let bestDist = Infinity;
+  function nearestBelow(cur) {
+    const all = fields();
+    const c = cur.getBoundingClientRect();
+    let best = null, bestDist = Infinity;
 
-    fields.forEach(f => {
+    all.forEach(f => {
       const r = f.getBoundingClientRect();
       if (r.top > c.top) {
-        const dist = Math.abs(c.left - r.left) + (r.top - c.top);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = f;
-        }
+        const d = Math.abs(c.left - r.left) + (r.top - c.top);
+        if (d < bestDist) { bestDist = d; best = f; }
       }
     });
-
     return best;
   }
 
-  /* ===========================================================
-     Main keyboard handler
-     =========================================================== */
   document.addEventListener("keydown", e => {
-    const cur = getCurrentField();
+    const cur = document.activeElement;
     if (!cur) return;
 
-    const fields = getAllFields();
-    const i = fields.indexOf(cur);
+    const all = fields();
+    const i = all.indexOf(cur);
 
-    /* ---------------- Arrow Left / Right ---------------- */
-    if (!e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
-      e.preventDefault();
-
-      let nextIndex;
-      if (e.key === "ArrowLeft") {
-        // find previous on same row (loop)
-        for (let k = i - 1; k >= -fields.length; k--) {
-          const idx = (k + fields.length) % fields.length;
-          if (sameRow(fields[idx], cur)) {
-            fields[idx].focus();
-            return;
-          }
-        }
-      }
-
-      if (e.key === "ArrowRight") {
-        // find next on same row (loop)
-        for (let k = i + 1; k < i + fields.length; k++) {
-          const idx = k % fields.length;
-          if (sameRow(fields[idx], cur)) {
-            fields[idx].focus();
-            return;
-          }
-        }
-      }
-    }
-
-    /* ---------------- Arrow Up / Down ---------------- */
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const above = nearestAbove(cur);
-      if (above) above.focus();
-    }
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const below = nearestBelow(cur);
-      if (below) below.focus();
-    }
-
-    /* ---------------- SHIFT + ← / → triggers page navigation ---------------- */
+    /* ===========================================================
+       1) SHIFT + LEFT/RIGHT → Page Navigation Only
+       =========================================================== */
     if (e.shiftKey && e.key === "ArrowLeft") {
       e.preventDefault();
       const page = Number(document.querySelector(".page:not(.hidden)")?.dataset.step);
       if (page > 1) goTo(page - 1);
+      return;
     }
 
     if (e.shiftKey && e.key === "ArrowRight") {
       e.preventDefault();
       const page = Number(document.querySelector(".page:not(.hidden)")?.dataset.step);
       goTo(page + 1);
+      return;
     }
 
-    /* ---------------- ENTER KEY BEHAVIOR ---------------- */
+    /* ===========================================================
+       2) LEFT / RIGHT → Horizontal Loop (No Page Navigation)
+       =========================================================== */
+    if (!e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+      e.preventDefault();
+      const dir = e.key === "ArrowRight" ? 1 : -1;
+
+      for (let k = 1; k <= all.length; k++) {
+        const idx = (i + dir * k + all.length) % all.length;
+        if (sameRow(all[idx], cur)) {
+          all[idx].focus();
+          return;
+        }
+      }
+    }
+
+    /* ===========================================================
+       3) UP / DOWN → Vertical navigation
+       =========================================================== */
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const above = nearestAbove(cur);
+      if (above) above.focus();
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const below = nearestBelow(cur);
+      if (below) below.focus();
+      return;
+    }
+
+    /* ===========================================================
+       4) ENTER → Selects / Opens dropdowns / Navigates in lists
+       =========================================================== */
     if (e.key === "Enter") {
       const tag = cur.tagName.toLowerCase();
 
-      // Radio → toggle selection
+      // RADIO selects
       if (tag === "input" && cur.type === "radio") {
         e.preventDefault();
         cur.checked = true;
         cur.dispatchEvent(new Event("change", { bubbles: true }));
+        return;
       }
 
-      // Select2 → open/close
+      // Native SELECT → open expanded mode
+      if (tag === "select") {
+        e.preventDefault();
+        if (cur.size < 2) {
+          cur.size = cur.options.length;
+          return;
+        } else {
+          // collapse and commit selection
+          cur.size = 0;
+          return;
+        }
+      }
+
+      // Select2 open
       if (cur.classList.contains("select2-selection")) {
         e.preventDefault();
         cur.click();
+        return;
       }
 
-      // TomSelect → open dropdown
+      // TomSelect open
       if (cur.classList.contains("ts-control")) {
         e.preventDefault();
         cur.tomselect.open();
-      }
-
-      // Native select
-      if (tag === "select") {
-        e.preventDefault();
-        cur.size = cur.options.length; // expand like dropdown
-        cur.addEventListener(
-          "blur",
-          () => (cur.size = 0),
-          { once: true }
-        );
+        return;
       }
     }
   });
 });
 </script>
-
 
 
 

@@ -1961,7 +1961,7 @@ document.getElementById('shareBtn').onclick = async () => {
 
 
 <style>
-  /* 1. More visible focus border */
+  /* Visible focus for accessibility */
   input:focus, select:focus, textarea:focus, .ts-control:focus, .select2-selection:focus {
     outline: 2px solid #4db8ff !important;
   }
@@ -1970,9 +1970,6 @@ document.getElementById('shareBtn').onclick = async () => {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-  // -----------------------------
-  // Helper: all focusable elements
-  // -----------------------------
   function getFocusableElements() {
     return Array.from(document.querySelectorAll(`
       input:not([type=hidden]),
@@ -1984,9 +1981,6 @@ document.addEventListener("DOMContentLoaded", () => {
     `)).filter(el => !el.disabled && !el.closest('.hidden'));
   }
 
-  // -----------------------------
-  // Focus move horizontal/vertical
-  // -----------------------------
   function focusMove(dir) {
     const fields = getFocusableElements();
     const active = document.activeElement;
@@ -1995,39 +1989,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let newIndex = index + dir;
 
-    // loop around
     if (newIndex < 0) newIndex = fields.length - 1;
     if (newIndex >= fields.length) newIndex = 0;
 
     fields[newIndex].focus();
   }
 
-  // -----------------------------
-  // Keyboard handling
-  // -----------------------------
   document.addEventListener("keydown", (e) => {
     const el = document.activeElement;
 
-    // ---- Arrow navigation ----
-    if (["ArrowLeft","ArrowRight"].includes(e.key) && !e.shiftKey) {
-      e.preventDefault();
-      focusMove(e.key === "ArrowRight" ? 1 : -1);
-      return;
+    // Prevent arrow focus movement when inside dropdown list
+    const dropdownOpen = el.tagName === "SELECT" && el.size > 1;
+    const isTomSelectOpen = el.classList.contains("ts-control") && el.tomselect && el.tomselect.isOpen;
+    const isSelect2Open = el.classList.contains("select2-selection") && $(el).data('select2')?.isOpen();
+
+    if (!dropdownOpen && !isTomSelectOpen && !isSelect2Open) {
+      if (["ArrowLeft","ArrowRight"].includes(e.key) && !e.shiftKey) {
+        e.preventDefault();
+        focusMove(e.key === "ArrowRight" ? 1 : -1);
+        return;
+      }
+
+      if (["ArrowUp","ArrowDown"].includes(e.key)) {
+        e.preventDefault();
+        focusMove(e.key === "ArrowDown" ? 1 : -1);
+        return;
+      }
     }
 
-    // ---- Up/Down navigation ----
-    if (["ArrowUp","ArrowDown"].includes(e.key)) {
-      e.preventDefault();
-      focusMove(e.key === "ArrowDown" ? 1 : -1);
-      return;
-    }
-
-    // ---- ENTER for dropdowns ----
+    // ENTER key handling
     if (e.key === "Enter") {
       // Native select
       if (el.tagName === "SELECT") {
         e.preventDefault();
-        el.size = el.options.length; // open dropdown
+        el.size = el.options.length;
         return;
       }
 
@@ -2045,13 +2040,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Radio button ENTER selection
+      // Radio buttons
       if (el.type === "radio") {
         e.preventDefault();
         el.checked = true;
         return;
       }
     }
+
   });
 
   // Collapse native select on change or blur
@@ -2062,36 +2058,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target.tagName === "SELECT" && e.target.size) e.target.size = 0;
   }, true);
 
-  // -----------------------------
-  // Date input MM/DD/YYYY navigation
-  // -----------------------------
+  // Date MM/DD/YYYY keyboard navigation
   document.querySelectorAll('input[type="date"]').forEach(dateInput => {
-
     dateInput.addEventListener("focus", () => {
-      // select MM automatically
-      dateInput.setSelectionRange(0, 2);
+      dateInput.setSelectionRange(0, 2); // start on MM
     });
 
     dateInput.addEventListener("keydown", (e) => {
       const pos = dateInput.selectionStart;
-
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        if (pos < 3) dateInput.setSelectionRange(3, 5);        // MM → DD
-        else if (pos < 6) dateInput.setSelectionRange(6, 10);  // DD → YYYY
+        if (pos < 3) dateInput.setSelectionRange(3, 5); // MM → DD
+        else if (pos < 6) dateInput.setSelectionRange(6, 10); // DD → YYYY
       }
-
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        if (pos > 5) dateInput.setSelectionRange(3, 5);        // YYYY → DD
-        else if (pos > 2) dateInput.setSelectionRange(0, 2);   // DD → MM
+        if (pos > 5) dateInput.setSelectionRange(3, 5); // YYYY → DD
+        else if (pos > 2) dateInput.setSelectionRange(0, 2); // DD → MM
       }
     });
-
   });
 
 });
 </script>
+
 
 
 

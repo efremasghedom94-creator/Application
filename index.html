@@ -129,6 +129,10 @@
 
 
 
+
+
+
+
       <section class="page hidden" data-step="2">
         <h2 class="font-medium mb-3">Page 2</h2>
         <div class="grid grid-cols-12 gap-3 mb-3">
@@ -249,3 +253,170 @@
       </div>
     </div>
   </div>
+
+
+
+
+
+
+  <script>
+  let currentStep = 1;
+  let studentCount = 0;
+  let countries = [];
+  let countriesLoaded = false;
+  const loadCountriesPromise = loadCountries(); 
+
+  // --- UTILS ---
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function checkboxMark(cond){ return cond ? '☑' : '☐' }
+  function getRadioValue(name){ const r=document.querySelector(`input[name='${name}']:checked`); return r? r.value : '' }
+  function goTo(step){
+    if (step < 1 || step > 6) return;
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    document.querySelector(`.page[data-step='${step}']`)?.classList.remove('hidden');
+    currentStep = step; window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function toggleOtherField(id, el){ const inp = document.getElementById(id); if(el.value==='Other'&&el.checked){inp.classList.remove('hidden');inp.focus();}else{inp.classList.add('hidden');inp.value='';} }
+  function toggleAttendance(isYes){ const d=document.getElementById('prevDetails'); d.disabled=!isYes; isYes?d.classList.remove('disabled-input'):d.classList.add('disabled-input'); if(!isYes)d.value=''; }
+  function toggleLimitedProfile(isYes){ const b=document.getElementById('limitedProfileBox'); isYes?b.classList.remove('hidden'):b.classList.add('hidden'); if(!isYes)document.getElementById('limitedProfileDetails').value=''; }
+  function formatPhone(input) { let v = input.value.replace(/\D/g, ''); if(v.length>6) input.value=`(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6,10)}`; else if(v.length>3) input.value=`(${v.slice(0,3)}) ${v.slice(3)}`; else input.value=v; }
+  function enforcePostalFormat(input) { let v = input.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); let f=''; if(v.length>0)f+=v[0]; if(v.length>1)f+=v[1]; if(v.length>2)f+=v[2]; if(v.length>3)f+=' '+v[3]; if(v.length>4)f+=v[4]; if(v.length>5)f+=v[5]; input.value=f; }
+
+  // --- COUNTRY API ---
+  async function loadCountries(){ try{const r=await fetch("https://restcountries.com/v3.1/all?fields=name"); const d=await r.json(); countries=d.map(c=>c.name?.common).sort(); countriesLoaded=true;}catch(e){countries=["Canada","Other"];} }
+  function populateCountrySelectById(el, val){ 
+    const s=$(el); s.empty(); s.append('<option disabled selected hidden>Select...</option>'); 
+    countries.forEach(c=>s.append(new Option(c,c))); 
+    s.select2({width:'100%', dropdownParent:$(document.body)}); 
+    if(val) s.val(val).trigger('change'); 
+  }
+
+  // --- DYNAMIC STUDENT ROWS ---
+  function addStudent(prefill){
+    studentCount++; const id = studentCount;
+    const div = document.createElement('div'); div.className='p-4 border rounded bg-gray-50 mb-4'; div.id=`student-${id}`;
+    div.innerHTML = `
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-3"><label class="text-xs font-bold">SURNAME</label><input type="text" id="s_${id}_surname" class="w-full border p-1" value="${prefill?.surname||''}"></div>
+        <div class="col-span-3"><label class="text-xs font-bold">GIVEN NAME</label><input type="text" id="s_${id}_given" class="w-full border p-1" value="${prefill?.given||''}"></div>
+        <div class="col-span-3"><label class="text-xs font-bold">DOB</label><input type="date" id="s_${id}_dob" class="w-full border p-1" value="${prefill?.dob||''}"></div>
+        <div class="col-span-3"><label class="text-xs font-bold">BIRTH COUNTRY</label><select id="s_${id}_birth" class="w-full border p-1"></select></div>
+      </div>
+      <div class="grid grid-cols-12 gap-4 mt-2">
+        <div class="col-span-4"><label class="text-xs font-bold">LAST GRADE</label><select id="s_${id}_lastgrade" class="w-full border p-1"><option>Pre KG</option><option>KG</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></select></div>
+        <div class="col-span-8"><label class="text-xs font-bold">PROGRAM</label>
+           <div class="flex gap-2"><label><input type="radio" name="s_${id}_progType" value="Regular"> Reg</label><label><input type="radio" name="s_${id}_progType" value="Special"> Spec</label></div>
+           <select id="s_${id}_prog_dropdown" class="w-full border p-1 mt-1"><option>French Immersion</option><option>Spanish Bilingual</option><option>Other</option></select>
+        </div>
+      </div>
+      <div class="grid grid-cols-12 gap-4 mt-2">
+        <div class="col-span-6"><label class="text-xs font-bold">GENDER</label><div class="flex gap-2"><label><input type="radio" name="s_${id}_gender" value="F"> F</label><label><input type="radio" name="s_${id}_gender" value="M"> M</label></div></div>
+        <div class="col-span-6"><label class="text-xs font-bold">YEAR</label><div class="flex gap-2"><label><input type="radio" name="s_${id}_year" value="ThisYear"> This</label><label><input type="radio" name="s_${id}_year" value="NextYear"> Next</label></div></div>
+      </div>`;
+    document.getElementById('studentsContainer').appendChild(div);
+    const sel = div.querySelector(`#s_${id}_birth`);
+    if(countriesLoaded) populateCountrySelectById(sel, prefill?.birth); else loadCountriesPromise.then(()=>populateCountrySelectById(sel, prefill?.birth));
+  }
+  function removeStudent(){ if(studentCount>0){ document.getElementById(`student-${studentCount}`).remove(); studentCount--; } }
+  addStudent();
+
+  // --- GENERATE FINAL FORM (FIXED) ---
+  function generateFinal(){
+    const final = document.getElementById('finalArea'); final.innerHTML = '';
+    final.insertAdjacentHTML('beforeend', '<h1 class="text-xl font-bold mb-4">INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS</h1>');
+    
+    const tbl = document.createElement('table'); tbl.className = 'yellow-table';
+    const c = (lbl, val) => `<div class="font-semibold">${lbl}</div><div class="cell-content">${escapeHtml(val)}</div>`;
+    
+    // ROW 1
+    const r1 = `<tr>
+      <td width="15%">${c('DATE', document.getElementById('date').value)}</td>
+      <td width="25%">${c('TAKEN BY', document.getElementById('takenBy').value)}</td>
+      <td width="25%">${c('CONTACT NAME/SURNAME', document.getElementById('contactName').value)}</td>
+      <td width="15%">${c('PHONE #', document.getElementById('contactPhone').value)}</td>
+      <td width="20%">${c('RELATIONSHIP', document.getElementById('contactRel').value)}</td>
+    </tr>`;
+
+    // ROW 2
+    const r2 = `<tr>
+      <td>${c("STATUS", getRadioValue('studentStatus'))}</td>
+      <td>${c("IMMIGRATION DOC", getRadioValue('immDoc'))}</td>
+      <td>${c("EXPIRY", document.getElementById('expiry').value)}</td>
+      <td>${c("PREV ATTEND?", getRadioValue('prevAttend'))}</td>
+      <td>${c("DATE LANDED", document.getElementById('landed').value)}</td>
+    </tr>`;
+
+    // ROW 3 (Parents - Fixed Borders)
+    const r3 = `<tr><td colspan="5" class="no-padding"><table class="nested-table"><tr>
+      <td width="25%">${c("FATHER'S SURNAME", document.getElementById('fatherSurname').value)}</td>
+      <td width="25%">${c("FATHER'S GIVEN NAME", document.getElementById('fatherGiven').value)}</td>
+      <td width="25%">${c("MOTHER'S SURNAME", document.getElementById('motherSurname').value)}</td>
+      <td width="25%">${c("MOTHER'S GIVEN NAME", document.getElementById('motherGiven').value)}</td>
+    </tr></table></td></tr>`;
+
+    // ROW 4 (Address - Fixed Borders)
+    const r4 = `<tr><td colspan="5" class="no-padding"><table class="nested-table"><tr>
+      <td width="20%">${c("APARTMENT #", document.getElementById('apt').value)}</td>
+      <td width="60%">${c("FAMILY ADDRESS", document.getElementById('address').value)}</td>
+      <td width="20%">${c("POSTAL CODE", document.getElementById('postal').value)}</td>
+    </tr></table></td></tr>`;
+
+    // ROW 5 (Info - Fixed Borders)
+    const r5 = `<tr><td colspan="5" class="no-padding"><table class="nested-table"><tr>
+      <td width="30%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td>
+      <td width="40%">${c("HOME LANGUAGE", '')}</td> <td width="30%">${c("CATHOLIC", getRadioValue('catholic'))}</td>
+    </tr></table></td></tr>`;
+
+    // ROW 6 (Students - BALANCED WIDTHS FIX)
+    // Surname 20%, Given 20%, Gender 10%, DOB 12%, Country 13%, Grade 8%, Year 8%, Program 9%
+    let sRows = '';
+    for(let i=1; i<=studentCount; i++){
+       if(document.getElementById(`s_${i}_surname`)){
+         sRows += `<tr>
+           <td class="cell-content">${escapeHtml(document.getElementById(`s_${i}_surname`).value)}</td>
+           <td class="cell-content">${escapeHtml(document.getElementById(`s_${i}_given`).value)}</td>
+           <td class="text-center">${getRadioValue(`s_${i}_gender`)}</td>
+           <td class="text-center">${document.getElementById(`s_${i}_dob`).value}</td>
+           <td class="text-center">${document.getElementById(`s_${i}_birth`).value}</td>
+           <td class="text-center">${document.getElementById(`s_${i}_lastgrade`).value}</td>
+           <td class="text-center">${getRadioValue(`s_${i}_year`)==='ThisYear'?'This':'Next'}</td>
+           <td class="text-center">${getRadioValue(`s_${i}_progType`)}</td>
+         </tr>`;
+       }
+    }
+    
+    const r6 = `<tr><td colspan="5" class="no-padding"><table class="nested-table">
+       <tr class="bg-yellow-100">
+         <th width="20%">SURNAME</th>
+         <th width="20%">GIVEN NAME</th>
+         <th width="8%">GENDER</th>
+         <th width="12%">DOB</th>
+         <th width="12%">COUNTRY</th>
+         <th width="10%">GRADE</th>
+         <th width="8%">YEAR</th>
+         <th width="10%">PROG</th>
+       </tr>
+       ${sRows}
+    </table></td></tr>`;
+
+    // ROW 7 & 8
+    const r7 = `<tr><td colspan="5">
+      <div class="font-bold">LIMITED SCHOOLING? ${checkboxMark(getRadioValue('limitedProfile')==='Yes')} Yes ${checkboxMark(getRadioValue('limitedProfile')==='No')} No</div>
+      <div>${escapeHtml(document.getElementById('limitedProfileDetails').value)}</div>
+    </td></tr>`;
+    
+    const r8 = `<tr><td colspan="5"><div class="font-bold">NOTES</div><div>${escapeHtml(document.getElementById('notes').value)}</div></td></tr>`;
+
+    tbl.innerHTML = r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8;
+    final.appendChild(tbl);
+    
+    document.getElementById('wizardRoot').classList.add('hidden');
+    document.getElementById('finalWrap').classList.remove('hidden');
+  }
+
+  // --- INIT ---
+  $(document).ready(function(){ $('#contactRel').select2(); });
+  document.getElementById('editBtn').onclick=()=>{document.getElementById('wizardRoot').classList.remove('hidden'); document.getElementById('finalWrap').classList.add('hidden');}
+  document.getElementById('pdfBtn').onclick=()=>{ const e=document.getElementById('finalArea'); e.classList.add('pdf-scale'); html2pdf().from(e).save().then(()=>e.classList.remove('pdf-scale')); }
+  document.getElementById('newFormBtn').onclick=()=>{location.reload();}
+</script>

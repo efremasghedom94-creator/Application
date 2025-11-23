@@ -1476,423 +1476,477 @@ function toggleOtherProg(id){
 
     
     
- // Ensure necessary helper functions are globally accessible or defined here
-// Assuming these helper functions are defined elsewhere in the script:
-// - getRadioValue(name)
-// - checkboxMark(cond)
-// - escapeHtml(str)
-// - studentCount (global variable)
-// - addStudent(prefill)
-// - goTo(step)
-// - getContactRelationship() (Assumed to be defined/available globally)
-
-
-function generateFinal() {
-    const final = document.getElementById('finalArea');
-    final.innerHTML = '';
-
-    // --- 1. TITLE ---
-    final.insertAdjacentHTML(
-        'beforeend',
-        '<h1 class="text-xl font-semibold mb-6 ml-0 pl-0.5">INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS</h1>'
-    );
-
-    // --- 2. MAIN TABLE SETUP ---
-    const tbl = document.createElement('table');
-    tbl.className = 'yellow-table w-full';
-    tbl.style.border = "1px solid #000";
-    tbl.style.fontSize = '0.75em'; // Optional: Slightly reduce font size for better fitting
-
-    // Helper: return a cell where label is above the answer (same box)
-    function cellStacked(label, val, muted) {
-        return `<td class="p-2" style="border:1px solid #000; vertical-align: top;">
-                    <div class="font-semibold" style="margin-bottom:4px; font-size:0.9em;">${escapeHtml(label)}</div>
-                    <div class="${muted ? 'muted' : ''}">${val || ''}</div>
-                </td>`
-    }
+<script>
+    // ===========================================
+    // GLOBAL VARIABLES AND CORE HELPERS (FIXES)
+    // ===========================================
+    let currentStep = 1;
+    // IMPORTANT: studentCount MUST be managed by your form's dynamic 'add student' logic.
+    // We initialize it here and include logic to check the DOM if it's 0.
+    window.studentCount = 0; 
     
-    // --- 3. ROW: DATE, TAKEN BY, CONTACT INFO ---
-    // NOTE: Using the assumed global function getContactRelationship()
-    const getContactRelationship = window.getContactRelationship || (() => document.getElementById('contactRelSpec')?.value || getRadioValue('contactRelType'));
-    
-    const trContactRel = document.createElement('tr');
-    trContactRel.innerHTML = `
-        ${cellStacked('DATE', escapeHtml(document.getElementById('date').value))}
-        ${cellStacked('TAKEN BY', escapeHtml(document.getElementById('takenBy').value))}
-        ${cellStacked('CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value))}
-        ${cellStacked('CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))}
-        ${cellStacked('CONTACT RELATIONSHIP', escapeHtml(getContactRelationship()))}
-    `;
-    tbl.appendChild(trContactRel);
-
-    // --- 4. ROW: IMMIGRATION AND ATTENDANCE ---
-    const sStatus = getRadioValue('studentStatus');
-    const sStatusOther = document.getElementById('studentStatusOther')?.value || '';
-    const imm = getRadioValue('immDoc');
-    const immOther = document.getElementById('immDocOther')?.value || '';
-
-    const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '');
-    const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '');
-    const expiry = escapeHtml(document.getElementById('expiry').value);
-    const landedDate = escapeHtml(document.getElementById('landed').value);
-    
-    // Previous attendance
-    const prevAttendVal = getRadioValue('prevAttend');
-    let prevAttendText = '';
-    if (prevAttendVal === 'Yes') prevAttendText = `${checkboxMark(true)} Yes`;
-    else if (prevAttendVal === 'No') prevAttendText = `${checkboxMark(true)} No`;
-    
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        ${cellStacked("STUDENT'S STATUS", statusText)}
-        ${cellStacked("IMMIGRATION DOCUMENT (PARENT/GUARDIAN)", immText)}
-        ${cellStacked("EXPIRY DATE (RC / SP / WP)", expiry)}
-        ${cellStacked("PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?", prevAttendText)}
-        ${cellStacked("DATE STUDENT(S) LANDED IN CANADA", landedDate)}
-    `;
-    tbl.appendChild(tr);
-
-    // --- 5. ROW: PARENT/GUARDIAN NAMES (NESTED TABLE) ---
-    const trParents = document.createElement('tr');
-    trParents.innerHTML = `
-        <td colspan="5" style="padding:0; border: none;">
-            <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
-                <tr>
-                    <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">FATHER'S SURNAME</div>
-                        <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
-                    </td>
-                    <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">FATHER'S GIVEN NAME</div>
-                        <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
-                    </td>
-                    <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">MOTHER'S SURNAME</div>
-                        <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
-                    </td>
-                    <td class="p-2" style="border-bottom:1px solid #000; width:25%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">MOTHER'S GIVEN NAME</div>
-                        <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    `;
-    tbl.appendChild(trParents);
-
-    // --- 6. ROW: ADDRESS (NESTED TABLE) ---
-    const trAddress = document.createElement('tr');
-    trAddress.innerHTML = `
-        <td colspan="5" style="padding:0; border:none;">
-            <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
-                <tr>
-                    <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">APARTMENT #</div>
-                        <div>${escapeHtml(document.getElementById('apt').value)}</div>
-                    </td>
-                    <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">FAMILY ADDRESS</div>
-                        <div>${escapeHtml(document.getElementById('address').value)}</div>
-                    </td>
-                    <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">POSTAL CODE</div>
-                        <div>${escapeHtml(document.getElementById('postal').value)}</div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    `;
-    tbl.appendChild(trAddress);
-
-    // --- 7. ROW: CONTACT INFO, HOME LANGUAGE, CATHOLIC (NESTED TABLE) ---
-    
-    // Catholic Status logic
-    const cath = (() => {
-        const selected = getRadioValue('catholic');
-        const inputText = escapeHtml(document.getElementById('religionOther').value.trim());
-        const label = selected === 'Yes' ? 'Additional Note' : 'Religion';
-        let result = `${checkboxMark(selected === 'Yes')} Yes&nbsp;&nbsp;${checkboxMark(selected === 'No')} No`;
-        if (inputText) {
-            result += `<br><strong>${label}:</strong> ${inputText}`;
-        }
-        return result;
-    })();
-
-    // Home Language collection (Tom Select compatible)
-    let homeLangs = '';
-    const homeLangSelect = document.getElementById('homeLang');
-    if (homeLangSelect?.tomselect) {
-        homeLangs = (Array.isArray(homeLangSelect.tomselect.getValue()) ? homeLangSelect.tomselect.getValue().join(', ') : homeLangSelect.tomselect.getValue()) || '';
-    } else {
-        homeLangs = Array.from(homeLangSelect.selectedOptions).map(opt => opt.value.trim()).filter(v => v !== '').join(', ') || '';
+    // 1. Data Retrieval Helper (REQUIRED)
+    function getRadioValue(name) {
+        const r = document.querySelector(`input[name='${name}']:checked`);
+        return r ? r.value : '';
     }
 
+    // 2. HTML Sanitization Helper (REQUIRED)
+    function escapeHtml(str) {
+        if (!str) return '';
+        const s = String(str); 
+        return s
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
-    const trContactInfo = document.createElement('tr');
-    trContactInfo.innerHTML = `
-        <td colspan="5" style="padding:0; border:none;">
-            <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
-                <tr>
-                    <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">FAMILY PHONE #</div>
-                        <div>${escapeHtml(document.getElementById('familyPhone').value)}</div>
-                    </td>
-                    <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">HOME LANGUAGE</div>
-                        <div>${escapeHtml(homeLangs)}</div>
-                    </td>
-                    <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
-                        <div class="font-semibold" style="margin-bottom:4px;">CATHOLIC</div>
-                        <div>${cath}</div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    `;
-    tbl.appendChild(trContactInfo);
+    // 3. Checkbox Rendering Helper (REQUIRED)
+    function checkboxMark(cond) { 
+        return cond ? '&#9745;' : '&#9744;'; // Checked or Unchecked Box
+    }
 
-    // --- 8. ROW: STUDENT DETAILS TABLE ---
-    const studentCell = document.createElement('tr');
-    const studentCellInner = document.createElement('td');
-    studentCellInner.colSpan = 5;
-    studentCellInner.style.padding = '0';
-    studentCellInner.style.border = 'none';
+    // 4. Contact Relationship Helper (REQUIRED by Section 3)
+    function getContactRelationship() {
+        const rel = document.getElementById('contactRel')?.value;
+        const other = document.getElementById('otherRelation')?.value;
+        // This logic is designed to capture the value from either a direct input or a radio/select group
+        return rel === 'Other' ? (other || 'Other') : (rel || document.getElementById('contactRelSpec')?.value || getRadioValue('contactRelType'));
+    }
 
-    let studentTableHtml = `
-        <table class="yellow-table" style="width:100%; border-collapse:collapse; border:1px solid #000; font-size:0.95em;">
-            <tr style="background-color:#fff8dc;">
-                <th class="p-2" style="border:1px solid #000;">SURNAME</th>
-                <th class="p-2" style="border:1px solid #000;">GIVEN NAME</th>
-                <th class="p-2" style="border:1px solid #000;">GENDER</th>
-                <th class="p-2" style="border:1px solid #000;">DOB</th>
-                <th class="p-2" style="border:1px solid #000;">BIRTH COUNTRY</th>
-                <th class="p-2" style="border:1px solid #000;">LAST GRADE</th>
-                <th class="p-2" style="border:1px solid #000;">SCHOOL YEAR</th>
-                <th class="p-2" style="border:1px solid #000;">PROGRAM</th>
-            </tr>`;
-
-    // Generate student rows
-    for (let i = 1; i <= studentCount; i++) { // studentCount is assumed to be global
-        const surname = document.getElementById(`s_${i}_surname`)?.value || '';
-        const given = document.getElementById(`s_${i}_given`)?.value || '';
-        const gender = document.querySelector(`input[name='s_${i}_gender']:checked`)?.value || '';
-        const dob = document.getElementById(`s_${i}_dob`)?.value || '';
-        const birth = document.getElementById(`s_${i}_birth`)?.value || '';
-        const last = document.getElementById(`s_${i}_lastgrade`)?.value || '';
-        const year = document.querySelector(`input[name='s_${i}_year']:checked`)?.value || '';
-
-        // Program logic (consolidated)
-        const progType = document.querySelector(`input[name="s_${i}_progType"]:checked`)?.value || '';
-        const dropdown = document.getElementById(`s_${i}_prog_dropdown`);
-        const specialProg = dropdown && !dropdown.classList.contains('hidden') ? dropdown.value : '';
-        const progSpecInput = document.getElementById(`s_${i}_prog_spec`);
-        const progSpec = progSpecInput && !progSpecInput.classList.contains('hidden') ? progSpecInput.value : '';
-
-        let finalProgram = progType === 'Regular' ? 'Regular' : '';
-        if (progType === 'Special') {
-            if (specialProg === 'Other') {
-                finalProgram = `Special: ${progSpec || 'Other'}`;
-            } else if (specialProg) {
-                finalProgram = `Special: ${specialProg}`;
+    // 5. Wizard Navigation (REQUIRED for goTo(step) and 'Back to Edit' button)
+    function goTo(step) {
+        currentStep = step;
+        document.querySelectorAll('.page').forEach(page => {
+            if (parseInt(page.getAttribute('data-step')) === step) {
+                page.classList.remove('hidden');
             } else {
-                finalProgram = 'Special';
+                page.classList.add('hidden');
             }
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 6. Student Dynamic Row Logic (REQUIRED for the 'Start New Form' button)
+    // You must also have a function like this defined in your actual form to ADD students
+    function addStudent(prefill = {}) {
+        window.studentCount++;
+        // Placeholder: In your actual form, this function would insert HTML for a new student row.
+        // For the final generation script, we only need the counter logic.
+    }
+    
+    // Ensure initial state: Check how many students exist if the form loaded dynamically
+    document.addEventListener('DOMContentLoaded', () => {
+        let maxI = 0;
+        while(document.getElementById(`s_${maxI + 1}_surname`)) {
+            maxI++;
+        }
+        if (maxI === 0) {
+            addStudent(); // Start with at least one student if none exist
+        } else {
+            window.studentCount = maxI; // Set counter to existing students
+        }
+        goTo(1); // Start on step 1
+    });
+
+    // ===========================================
+    // GENERATE FINAL FORM FUNCTION (Your original code, now fully supported)
+    // ===========================================
+
+    function generateFinal() {
+        // Fallback for studentCount just before generation
+        if (window.studentCount === 0) {
+            let maxI = 0;
+            while(document.getElementById(`s_${maxI + 1}_surname`)) {
+                maxI++;
+            }
+            window.studentCount = maxI > 0 ? maxI : 1;
+        }
+
+        const final = document.getElementById('finalArea');
+        final.innerHTML = '';
+
+        // --- 1. TITLE ---
+        final.insertAdjacentHTML(
+            'beforeend',
+            '<h1 class="text-xl font-semibold mb-6 ml-0 pl-0.5">INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS</h1>'
+        );
+
+        // --- 2. MAIN TABLE SETUP ---
+        const tbl = document.createElement('table');
+        tbl.className = 'yellow-table w-full';
+        tbl.style.border = "1px solid #000";
+        tbl.style.fontSize = '0.75em';
+
+        // Helper: return a cell where label is above the answer (same box)
+        function cellStacked(label, val, muted) {
+            return `<td class="p-2" style="border:1px solid #000; vertical-align: top;">
+                        <div class="font-semibold" style="margin-bottom:4px; font-size:0.9em;">${escapeHtml(label)}</div>
+                        <div class="${muted ? 'muted' : ''}">${val || ''}</div>
+                    </td>`
         }
         
-        // Format DOB for better readability in PDF
-        const dobFormatted = dob ? new Date(dob).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }) : '';
+        // --- 3. ROW: DATE, TAKEN BY, CONTACT INFO ---
+        const trContactRel = document.createElement('tr');
+        trContactRel.innerHTML = `
+            ${cellStacked('DATE', escapeHtml(document.getElementById('date').value))}
+            ${cellStacked('TAKEN BY', escapeHtml(document.getElementById('takenBy').value))}
+            ${cellStacked('CONTACT NAME/SURNAME', escapeHtml(document.getElementById('contactName').value))}
+            ${cellStacked('CONTACT PHONE #', escapeHtml(document.getElementById('contactPhone').value))}
+            ${cellStacked('CONTACT RELATIONSHIP', escapeHtml(getContactRelationship()))}
+        `;
+        tbl.appendChild(trContactRel);
 
+        // --- 4. ROW: IMMIGRATION AND ATTENDANCE ---
+        const sStatus = getRadioValue('studentStatus');
+        const sStatusOther = document.getElementById('studentStatusOther')?.value || '';
+        const imm = getRadioValue('immDoc');
+        const immOther = document.getElementById('immDocOther')?.value || '';
 
-        if (surname || given || birth || last) {
-            studentTableHtml += `
-                <tr>
-                    <td class="p-2" style="border:1px solid #000;">${escapeHtml(surname)}</td>
-                    <td class="p-2" style="border:1px solid #000;">${escapeHtml(given)}</td>
-                    <td class="p-2 text-center" style="border:1px solid #000;">
-                        ${checkboxMark(gender === 'F')} F&nbsp;&nbsp;${checkboxMark(gender === 'M')} M
-                    </td>
-                    <td class="p-2 text-center" style="border:1px solid #000;">${dobFormatted}</td>
-                    <td class="p-2" style="border:1px solid #000;">${escapeHtml(birth)}</td>
-                    <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(last)}</td>
-                    <td class="p-2 text-center" style="border:1px solid #000;">
-                        ${year === 'ThisYear' ? 'This year' : (year === 'NextYear' ? 'Next year' : '')}
-                    </td>
-                    <td class="p-2" style="border:1px solid #000;">${escapeHtml(finalProgram)}</td>
-                </tr>`;
+        const statusText = sStatus === 'Other' ? escapeHtml(sStatusOther) : escapeHtml(sStatus || '');
+        const immText = imm === 'Other' ? escapeHtml(immOther) : escapeHtml(imm || '');
+        const expiry = escapeHtml(document.getElementById('expiry').value);
+        const landedDate = escapeHtml(document.getElementById('landed').value);
+        
+        // Previous attendance
+        const prevAttendVal = getRadioValue('prevAttend');
+        let prevAttendText = '';
+        if (prevAttendVal === 'Yes') prevAttendText = `${checkboxMark(true)} Yes`;
+        else if (prevAttendVal === 'No') prevAttendText = `${checkboxMark(true)} No`;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            ${cellStacked("STUDENT'S STATUS", statusText)}
+            ${cellStacked("IMMIGRATION DOCUMENT (PARENT/GUARDIAN)", immText)}
+            ${cellStacked("EXPIRY DATE (RC / SP / WP)", expiry)}
+            ${cellStacked("PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?", prevAttendText)}
+            ${cellStacked("DATE STUDENT(S) LANDED IN CANADA", landedDate)}
+        `;
+        tbl.appendChild(tr);
+
+        // --- 5. ROW: PARENT/GUARDIAN NAMES (NESTED TABLE) ---
+        const trParents = document.createElement('tr');
+        trParents.innerHTML = `
+            <td colspan="5" style="padding:0; border: none;">
+                <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
+                    <tr>
+                        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">FATHER'S SURNAME</div>
+                            <div>${escapeHtml(document.getElementById('fatherSurname').value)}</div>
+                        </td>
+                        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">FATHER'S GIVEN NAME</div>
+                            <div>${escapeHtml(document.getElementById('fatherGiven').value)}</div>
+                        </td>
+                        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:25%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">MOTHER'S SURNAME</div>
+                            <div>${escapeHtml(document.getElementById('motherSurname').value)}</div>
+                        </td>
+                        <td class="p-2" style="border-bottom:1px solid #000; width:25%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">MOTHER'S GIVEN NAME</div>
+                            <div>${escapeHtml(document.getElementById('motherGiven').value)}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        `;
+        tbl.appendChild(trParents);
+
+        // --- 6. ROW: ADDRESS (NESTED TABLE) ---
+        const trAddress = document.createElement('tr');
+        trAddress.innerHTML = `
+            <td colspan="5" style="padding:0; border:none;">
+                <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
+                    <tr>
+                        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">APARTMENT #</div>
+                            <div>${escapeHtml(document.getElementById('apt').value)}</div>
+                        </td>
+                        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">FAMILY ADDRESS</div>
+                            <div>${escapeHtml(document.getElementById('address').value)}</div>
+                        </td>
+                        <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">POSTAL CODE</div>
+                            <div>${escapeHtml(document.getElementById('postal').value)}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        `;
+        tbl.appendChild(trAddress);
+
+        // --- 7. ROW: CONTACT INFO, HOME LANGUAGE, CATHOLIC (NESTED TABLE) ---
+        
+        // Catholic Status logic
+        const cath = (() => {
+            const selected = getRadioValue('catholic');
+            const inputText = escapeHtml(document.getElementById('religionOther')?.value.trim());
+            const label = selected === 'Yes' ? 'Additional Note' : 'Religion';
+            let result = `${checkboxMark(selected === 'Yes')} Yes&nbsp;&nbsp;${checkboxMark(selected === 'No')} No`;
+            if (inputText) {
+                result += `<br><strong>${label}:</strong> ${inputText}`;
+            }
+            return result;
+        })();
+
+        // Home Language collection (Tom Select compatible)
+        let homeLangs = '';
+        const homeLangSelect = document.getElementById('homeLang');
+        if (homeLangSelect?.tomselect) {
+            homeLangs = (Array.isArray(homeLangSelect.tomselect.getValue()) ? homeLangSelect.tomselect.getValue().join(', ') : homeLangSelect.tomselect.getValue()) || '';
+        } else if (homeLangSelect) {
+            homeLangs = Array.from(homeLangSelect.selectedOptions).map(opt => opt.value.trim()).filter(v => v !== '').join(', ') || '';
         }
-    }
 
-    studentTableHtml += `</table>`;
-    studentCellInner.innerHTML = studentTableHtml;
-    studentCell.appendChild(studentCellInner);
-    tbl.appendChild(studentCell);
 
-    // --- 9. ROW: LIMITED FORMAL SCHOOLING PROFILE (WITH WRAP FIX) ---
-    const limited = getRadioValue('limitedProfile');
-    const limitedDetails = escapeHtml(document.getElementById('limitedProfileDetails')?.value || '');
+        const trContactInfo = document.createElement('tr');
+        trContactInfo.innerHTML = `
+            <td colspan="5" style="padding:0; border:none;">
+                <table style="width:100%; border-collapse:collapse; border:1px solid #000; border-spacing:0;">
+                    <tr>
+                        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">FAMILY PHONE #</div>
+                            <div>${escapeHtml(document.getElementById('familyPhone').value)}</div>
+                        </td>
+                        <td class="p-2" style="border-right:1px solid #000; border-bottom:1px solid #000; width:33.33%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">HOME LANGUAGE</div>
+                            <div>${escapeHtml(homeLangs)}</div>
+                        </td>
+                        <td class="p-2" style="border-bottom:1px solid #000; width:33.33%;">
+                            <div class="font-semibold" style="margin-bottom:4px;">CATHOLIC</div>
+                            <div>${cath}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        `;
+        tbl.appendChild(trContactInfo);
 
-    const trLimited = document.createElement('tr');
-    const tdLimited = document.createElement('td');
-    tdLimited.colSpan = 5;
-    tdLimited.style.border = '1px solid #000';
-    tdLimited.style.padding = '8px';
+        // --- 8. ROW: STUDENT DETAILS TABLE ---
+        const studentCell = document.createElement('tr');
+        const studentCellInner = document.createElement('td');
+        studentCellInner.colSpan = 5;
+        studentCellInner.style.padding = '0';
+        studentCellInner.style.border = 'none';
 
-    tdLimited.innerHTML = `
-        <div style="font-weight:600; margin-bottom:6px;">
-            POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
-        </div>
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:${limited === 'Yes' && limitedDetails ? '6px' : '0'};">
-            <div>${checkboxMark(limited === 'Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited === 'No')} No</div>
-        </div>
-        ${
-            limited === 'Yes' && limitedDetails
-                ? `<div class="limited-details" style="
+        let studentTableHtml = `
+            <table class="yellow-table" style="width:100%; border-collapse:collapse; border:1px solid #000; font-size:0.95em;">
+                <tr style="background-color:#fff8dc;">
+                    <th class="p-2" style="border:1px solid #000;">SURNAME</th>
+                    <th class="p-2" style="border:1px solid #000;">GIVEN NAME</th>
+                    <th class="p-2" style="border:1px solid #000;">GENDER</th>
+                    <th class="p-2" style="border:1px solid #000;">DOB</th>
+                    <th class="p-2" style="border:1px solid #000;">BIRTH COUNTRY</th>
+                    <th class="p-2" style="border:1px solid #000;">LAST GRADE</th>
+                    <th class="p-2" style="border:1px solid #000;">SCHOOL YEAR</th>
+                    <th class="p-2" style="border:1px solid #000;">PROGRAM</th>
+                </tr>`;
+
+        // Generate student rows
+        for (let i = 1; i <= window.studentCount; i++) { 
+            const surname = document.getElementById(`s_${i}_surname`)?.value || '';
+            const given = document.getElementById(`s_${i}_given`)?.value || '';
+            const gender = document.querySelector(`input[name='s_${i}_gender']:checked`)?.value || '';
+            const dob = document.getElementById(`s_${i}_dob`)?.value || '';
+            const birth = document.getElementById(`s_${i}_birth`)?.value || '';
+            const last = document.getElementById(`s_${i}_lastgrade`)?.value || '';
+            const year = document.querySelector(`input[name='s_${i}_year']:checked`)?.value || '';
+
+            // Program logic (consolidated)
+            const progType = document.querySelector(`input[name="s_${i}_progType"]:checked`)?.value || '';
+            const dropdown = document.getElementById(`s_${i}_prog_dropdown`);
+            const specialProg = dropdown && !dropdown.classList.contains('hidden') ? dropdown.value : '';
+            const progSpecInput = document.getElementById(`s_${i}_prog_spec`);
+            const progSpec = progSpecInput && !progSpecInput.classList.contains('hidden') ? progSpecInput.value : '';
+
+            let finalProgram = progType === 'Regular' ? 'Regular' : '';
+            if (progType === 'Special') {
+                if (specialProg === 'Other') {
+                    finalProgram = `Special: ${progSpec || 'Other'}`;
+                } else if (specialProg) {
+                    finalProgram = `Special: ${specialProg}`;
+                } else {
+                    finalProgram = 'Special';
+                }
+            }
+            
+            // Format DOB for better readability in PDF
+            const dobFormatted = dob ? new Date(dob).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }) : '';
+
+
+            if (surname || given || birth || last) {
+                studentTableHtml += `
+                    <tr>
+                        <td class="p-2" style="border:1px solid #000;">${escapeHtml(surname)}</td>
+                        <td class="p-2" style="border:1px solid #000;">${escapeHtml(given)}</td>
+                        <td class="p-2 text-center" style="border:1px solid #000;">
+                            ${checkboxMark(gender === 'F')} F&nbsp;&nbsp;${checkboxMark(gender === 'M')} M
+                        </td>
+                        <td class="p-2 text-center" style="border:1px solid #000;">${dobFormatted}</td>
+                        <td class="p-2" style="border:1px solid #000;">${escapeHtml(birth)}</td>
+                        <td class="p-2 text-center" style="border:1px solid #000;">${escapeHtml(last)}</td>
+                        <td class="p-2 text-center" style="border:1px solid #000;">
+                            ${year === 'ThisYear' ? 'This year' : (year === 'NextYear' ? 'Next year' : '')}
+                        </td>
+                        <td class="p-2" style="border:1px solid #000;">${escapeHtml(finalProgram)}</td>
+                    </tr>`;
+            }
+        }
+
+        studentTableHtml += `</table>`;
+        studentCellInner.innerHTML = studentTableHtml;
+        studentCell.appendChild(studentCellInner);
+        tbl.appendChild(studentCell);
+
+        // --- 9. ROW: LIMITED FORMAL SCHOOLING PROFILE (WITH WRAP FIX) ---
+        const limited = getRadioValue('limitedProfile');
+        const limitedDetails = escapeHtml(document.getElementById('limitedProfileDetails')?.value || '');
+
+        const trLimited = document.createElement('tr');
+        const tdLimited = document.createElement('td');
+        tdLimited.colSpan = 5;
+        tdLimited.style.border = '1px solid #000';
+        tdLimited.style.padding = '8px';
+
+        tdLimited.innerHTML = `
+            <div style="font-weight:600; margin-bottom:6px;">
+                POTENTIAL LIMITED FORMAL SCHOOLING PROFILE
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:${limited === 'Yes' && limitedDetails ? '6px' : '0'};">
+                <div>${checkboxMark(limited === 'Yes')} Yes&nbsp;&nbsp;${checkboxMark(limited === 'No')} No</div>
+            </div>
+            ${
+                limited === 'Yes' && limitedDetails
+                    ? `<div class="limited-details" style="
+                        font-size:1em;
+                        color:#000;
+                        margin-left:24px;
+                        line-height:1.4;
+                        white-space: pre-wrap; /* 💡 FIX: Ensures content wraps */
+                    ">
+                        ${limitedDetails}
+                    </div>`
+                    : ''
+            }
+        `;
+
+        trLimited.appendChild(tdLimited);
+        tbl.appendChild(trLimited);
+
+        // --- 10. ROW: NOTES (WITH WRAP FIX) ---
+        const notesContent = escapeHtml(document.getElementById('notes').value || '');
+        const trNotes = document.createElement('tr');
+        trNotes.innerHTML = `
+            <td colspan="5" style="
+                border:1px solid #000;
+                padding:8px;
+                font-weight:600;
+            ">
+                NOTES
+                <div style="
+                    margin-top:6px;
+                    margin-left:24px;
                     font-size:1em;
                     color:#000;
-                    margin-left:24px;
                     line-height:1.4;
                     white-space: pre-wrap; /* 💡 FIX: Ensures content wraps */
                 ">
-                    ${limitedDetails}
-                </div>`
-                : ''
-        }
-    `;
+                    ${notesContent}
+                </div>
+            </td>
+        `;
+        tbl.appendChild(trNotes);
 
-    trLimited.appendChild(tdLimited);
-    tbl.appendChild(trLimited);
+        final.appendChild(tbl);
+        
+        // --- 11. NAVIGATION & BUTTON HANDLERS (REQUIRED for 'Back to Edit'/'New Form') ---
+        
+        document.getElementById('wizardRoot')?.classList.add('hidden');
+        document.getElementById('finalWrap')?.classList.remove('hidden');
 
-    // --- 10. ROW: NOTES (WITH WRAP FIX) ---
-    const notesContent = escapeHtml(document.getElementById('notes').value || '');
-    const trNotes = document.createElement('tr');
-    trNotes.innerHTML = `
-        <td colspan="5" style="
-            border:1px solid #000;
-            padding:8px;
-            font-weight:600;
-        ">
-            NOTES
-            <div style="
-                margin-top:6px;
-                margin-left:24px;
-                font-size:1em;
-                color:#000;
-                line-height:1.4;
-                white-space: pre-wrap; /* 💡 FIX: Ensures content wraps */
-            ">
-                ${notesContent}
-            </div>
-        </td>
-    `;
-    tbl.appendChild(trNotes);
+        // Download PDF Button Handler (Requires html2pdf.js library to be loaded in your HTML)
+        document.getElementById('pdfBtn').onclick = () => {
+            const final = document.getElementById('finalArea');
+            final.classList.add('pdf-scale');
 
-    final.appendChild(tbl);
+            const opt = {
+                margin: 0.5,
+                filename: 'one-world-one-centre-intake.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 4, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
 
-    // --- 11. NAVIGATION & BUTTON HANDLERS ---
-    
-    // Show final and hide wizard
-    document.getElementById('wizardRoot').classList.add('hidden');
-    document.getElementById('finalWrap').classList.remove('hidden');
-
-    // Download PDF Button Handler
-    document.getElementById('pdfBtn').onclick = () => {
-        const final = document.getElementById('finalArea');
-
-        // Apply scaling ONLY for the PDF output
-        final.classList.add('pdf-scale');
-
-        const opt = {
-            margin: 0.5, // IMPROVED margin for better fit
-            filename: 'one-world-one-centre-intake.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 4, // IMPROVED scale for higher resolution/quality
-                useCORS: true 
-            },
-            jsPDF: { 
-                unit: 'in', 
-                format: 'letter', // Common North American size
-                orientation: 'portrait' 
-            }
-        };
-
-        html2pdf()
-            .set(opt)
-            .from(final)
-            .save()
-            .then(() => {
-                // Remove PDF scaling so screen version stays unchanged
+            html2pdf().set(opt).from(final).save().then(() => {
                 final.classList.remove('pdf-scale');
             });
-    };
-
-    // Back to Edit Button Handler
-    document.getElementById('editBtn').onclick = () => {
-        document.getElementById('wizardRoot').classList.remove('hidden');
-        document.getElementById('finalWrap').classList.add('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // Start New Form Button Handler
-    document.getElementById('newFormBtn').onclick = () => {
-        if (!confirm('Are you sure you want to start a new form? All current data will be lost.')) return;
-
-        // Reset all form fields
-        document.querySelectorAll('input, textarea, select').forEach(el => {
-            if (el.type === 'radio' || el.type === 'checkbox') {
-                el.checked = false;
-            } else if (el.tagName.toLowerCase() === 'select') {
-                el.selectedIndex = 0;
-            } else {
-                el.value = '';
-            }
-        });
-
-        // Reset Tom Select if active
-        const homeLangSelect = document.getElementById('homeLang');
-        if (homeLangSelect?.tomselect) {
-            homeLangSelect.tomselect.clear();
-        }
-
-        // Reset student list to one blank entry
-        const container = document.getElementById('studentsContainer');
-        container.innerHTML = '';
-        window.studentCount = 0; // Reset global student counter
-        addStudent(); // Requires addStudent to be globally accessible
-
-        // Return to first page
-        document.getElementById('wizardRoot').classList.remove('hidden');
-        document.getElementById('finalWrap').classList.add('hidden');
-        goTo(1); // Requires goTo(step) to be globally accessible
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // Share Button Handler
-    document.getElementById('shareBtn').onclick = async () => {
-        const shareData = {
-            title: 'One World One Centre Student Intake Form',
-            text: 'Here is the student intake form I filled out.',
-            url: window.location.href
         };
 
-        if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-                alert('Form shared successfully!');
-            } catch (err) {
-                console.error('Share canceled or failed:', err);
-            }
-        } else {
-            // fallback for browsers without Web Share API
-            navigator.clipboard.writeText(window.location.href)
-                .then(() => alert('Link copied to clipboard!'))
-                .catch(() => alert('Could not copy link. Please copy manually.'));
-        }
-    };
-}
+        // Back to Edit Button Handler
+        document.getElementById('editBtn').onclick = () => {
+            document.getElementById('wizardRoot').classList.remove('hidden');
+            document.getElementById('finalWrap').classList.add('hidden');
+            goTo(currentStep);
+        };
 
-// Expose generate function to global scope for the final page button
-window.generateFinal = generateFinal;
+        // Start New Form Button Handler
+        document.getElementById('newFormBtn').onclick = () => {
+            if (!confirm('Are you sure you want to start a new form? All current data will be lost.')) return;
+
+            // Reset all form fields
+            document.querySelectorAll('input, textarea, select').forEach(el => {
+                if (el.type === 'radio' || el.type === 'checkbox') {
+                    el.checked = false;
+                } else if (el.tagName.toLowerCase() === 'select') {
+                    if (el.tomselect) el.tomselect.clear();
+                    else el.selectedIndex = 0;
+                } else {
+                    el.value = '';
+                }
+            });
+
+            // Reset student list to one blank entry
+            const container = document.getElementById('studentsContainer');
+            if (container) container.innerHTML = '';
+            window.studentCount = 0; 
+            addStudent(); 
+
+            // Return to first page
+            document.getElementById('wizardRoot').classList.remove('hidden');
+            document.getElementById('finalWrap').classList.add('hidden');
+            goTo(1); 
+        };
+
+        // Share Button Handler (Optional)
+        document.getElementById('shareBtn').onclick = async () => {
+            const shareData = {
+                title: 'One World One Centre Student Intake Form',
+                text: 'Here is the student intake form I filled out.',
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    alert('Form shared successfully!');
+                } catch (err) {
+                    console.error('Share canceled or failed:', err);
+                }
+            } else {
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => alert('Link copied to clipboard!'))
+                    .catch(() => alert('Could not copy link. Please copy manually.'));
+            }
+        };
+    }
+
+    // Expose the generate function globally
+    window.generateFinal = generateFinal;
+
+</script>
 
 
 

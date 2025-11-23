@@ -80,43 +80,52 @@
 
   <!-- Print-specific styling -->
   <style>
-    @media print {
-      body {
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        background: white;
-      }
+ @media print {
 
-      .wizard { display: none; }
+  /* Hide wizard pages on print */
+  .wizard { display: none !important; }
 
-      #finalArea {
-        width: 148mm;  /* half A4 width (A5) */
-        height: 210mm; /* half A4 height */
-        margin: 0 auto;
-        padding: 10mm;
-        transform: scale(0.7);
-        transform-origin: top left;
-        font-size: 0.8em;
-        page-break-after: always;
-      }
+  /* Hide all buttons during print */
+  #printBtn, #pdfBtn, #editBtn, #newFormBtn, #shareBtn {
+    display: none !important;
+  }
 
-      table.yellow-table td, table.yellow-table th {
-        padding: 4px !important;
-        font-size: 0.75em;
-      }
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
 
-      table { page-break-inside: avoid; }
+  /* Print area — HALF A4 (A5 size) */
+  #finalArea {
+    width: 148mm;      /* half A4 width (A5) */
+    padding: 6mm;      /* internal spacing */
+    margin: 0 auto;    /* centered */
+    background: #fff9c4;   /* keep yellow */
+    transform: scale(0.82); /* shrink to fit */
+    transform-origin: top left;
+    font-size: 0.72rem;
+    page-break-after: always;
+  }
 
-      #printBtn, #pdfBtn, #editBtn, #newFormBtn, #shareBtn { display: none !important; }
+  table.yellow-table td, table.yellow-table th {
+    padding: 3px !important;
+    font-size: 0.68rem !important;
+  }
 
-      @page {
-        size: A5 portrait;
-        margin: 0;
-      }
-    }
+  table { page-break-inside: avoid; }
+
+  @page {
+    size: A5 portrait;
+    margin: 0;
+  }
+}
+
   </style>
+
+
+
+  
 </head>
 
 <body class="bg-gray-100 text-gray-800">
@@ -1864,10 +1873,30 @@ tbl.appendChild(trNotes);
       document.getElementById('finalWrap').classList.remove('hidden')
 
       // pdf button logic
-      document.getElementById('pdfBtn').onclick = ()=>{
-        const opt = { margin:0.2, filename:'one-world-one-centre-intake.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'} }
-        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
-      }
+    document.getElementById('pdfBtn').onclick = ()=>{
+  
+  const area = document.getElementById('finalArea');
+
+  // temporarily shrink for PDF
+  area.classList.add('pdf-mode');
+
+  const opt = {
+    margin: 0,
+    filename: 'one-world-one-centre-intake.pdf',
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+  };
+
+  html2pdf()
+    .set(opt)
+    .from(area)
+    .save()
+    .then(() => {
+      // restore on-screen view
+      area.classList.remove('pdf-mode');
+    });
+};
+
 
       // edit/back button
       document.getElementById('editBtn').onclick = ()=>{

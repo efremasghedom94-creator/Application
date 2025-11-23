@@ -79,67 +79,47 @@
   </style>
 
   <!-- Print-specific styling -->
- /* Update your existing print-specific CSS block: */
 <style>
   @media print {
-    /* Set container properties */
+    /* Hide navigation and wizard elements during print */
+    .wizard { display: none; }
+    #printBtn, #pdfBtn, #editBtn, #newFormBtn, #shareBtn { display: none !important; }
+
+    /* Target the container for the entire form */
     #finalArea {
-      font-size: 7.5pt !important; /* Base font size reduction */
-      padding: 0 !important; /* Remove container padding */
-      margin: 0 !important; /* Remove container margin */
-      width: 100% !important;
-      height: 100% !important;
-      transform: none !important; /* Essential: prevent scaling */
+      /* Reset any conflicting styles */
+      width: auto !important;
+      height: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+
+      /* *** THE KEY: Scale the entire content down proportionally *** */
+      transform: scale(0.65); /* Adjust this value (e.g., 0.6 to 0.7) if needed */
+      transform-origin: top left; /* Ensures it scales from the top-left corner */
+
+      /* Make sure background is white for PDF */
+      background-color: white !important;
+
+      /* Ensure tables don't break across pages if possible */
+      page-break-inside: avoid; 
     }
 
-    /* Reduce the size of the main title */
-    #finalArea h1 {
-      font-size: 10pt !important; /* Title font size */
-      margin-top: 0 !important;
-      margin-bottom: 0.3rem !important; /* Tighten up space below title */
-      padding: 2px !important;
+    /* Important: Ensure table cells don't have unnecessary max-widths or wrapping issues */
+    table.yellow-table td div {
+      white-space: normal !important; 
+      word-wrap: break-word !important; 
+      overflow-wrap: anywhere !important; 
+      max-width: none !important; /* Remove max-width that might conflict with scaling */
     }
 
-    /* Aggressive reduction of padding and font size for table cells */
-    .yellow-table td, .yellow-table th, #finalArea .p-2 {
-      padding: 2px 4px !important; /* Very small top/bottom padding */
-      font-size: 7.5pt !important;
-      line-height: 1.2 !important; /* Tighten line height */
-    }
-    
-    /* Ensure the table borders are thin */
-    table.yellow-table, table.yellow-table td, table.yellow-table th {
-        border-width: 1px !important; 
-    }
-
-    /* Reduce space below the labels (font-semibold) */
-    .yellow-table .font-semibold {
-      font-size: 7.5pt !important;
-      margin-bottom: 1px !important; /* Minimum margin below the label */
-    }
-    
-    /* Target the text below the label (data fields) */
-    .yellow-table td > div:not(.font-semibold) {
-      font-size: 7.5pt !important;
-    }
-
-    /* Target the full-width independent rows (Limited Schooling & Notes) */
-    #finalArea .limited-details,
-    #finalArea > td > div[style*="margin-top:6px;"] {
-      margin-top: 1px !important;
-      margin-bottom: 1px !important;
-      line-height: 1.2 !important;
-      margin-left: 5px !important;
-    }
-
-    /* Set A5 page size explicitly */
+    /* Set the page size for the PDF */
     @page {
-      size: A5 portrait;
-      margin: 0;
+      size: A5 portrait; /* Explicitly set to A5 portrait */
+      margin: 0; /* No page margins */
     }
   }
 </style>
-
 
 
   
@@ -1893,14 +1873,12 @@ tbl.appendChild(trNotes);
       // pdf button logic
 // pdf button logic
 document.getElementById('pdfBtn').onclick = ()=>{
-  // Setting format to 'a5' for half A4 size (148mm x 210mm)
   const opt = { 
-    margin:0.0, // <-- Set margin to zero for maximum space
+    margin:0.0, // <-- Set margin to zero for maximum content area
     filename:'one-world-one-centre-intake.pdf', 
     image:{type:'jpeg',quality:0.98}, 
     html2canvas:{scale:2}, 
-    // Use the A5 format
-    jsPDF:{unit:'in',format:'a5',orientation:'portrait'} 
+    jsPDF:{unit:'in',format:'a5',orientation:'portrait'} // <-- A5 format
   }
   html2pdf().set(opt).from(document.getElementById('finalArea')).save()
 }

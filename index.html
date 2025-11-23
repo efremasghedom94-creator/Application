@@ -1168,6 +1168,57 @@ document.querySelectorAll('input[type="radio"]').forEach(radio => {
 </div>
 
       </section>
+  <script>
+document.addEventListener('keydown', function(e) {
+  const activeEl = document.activeElement;
+  const key = e.key;
+
+  // Helper: check if an element is a Last Grade dropdown
+  function isGradeDropdown(el) {
+    return el.tagName === 'SELECT' && el.id.match(/^s_\d+_lastgrade$/);
+  }
+
+  // Helper: check if an element is a Special Program dropdown
+  function isProgramDropdown(el) {
+    return el.tagName === 'SELECT' && el.id.match(/^s_\d+_prog_dropdown$/);
+  }
+
+  // --- LAST GRADE COMPLETED NAVIGATION ---
+  if (isGradeDropdown(activeEl)) {
+    e.preventDefault();
+    const options = Array.from(activeEl.options);
+    let idx = activeEl.selectedIndex;
+
+    if (key === 'ArrowDown') idx = (idx + 1) % options.length;
+    if (key === 'ArrowUp') idx = (idx - 1 + options.length) % options.length;
+    if (key === 'Enter') {
+      activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+      return;
+    }
+
+    activeEl.selectedIndex = idx;
+    return;
+  }
+
+  // --- PROGRAM DROPDOWN NAVIGATION (only if visible) ---
+  if (isProgramDropdown(activeEl) && !activeEl.classList.contains('hidden')) {
+    e.preventDefault();
+    const options = Array.from(activeEl.options);
+    let idx = activeEl.selectedIndex;
+
+    if (key === 'ArrowDown') idx = (idx + 1) % options.length;
+    if (key === 'ArrowUp') idx = (idx - 1 + options.length) % options.length;
+    if (key === 'Enter') {
+      activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+      return;
+    }
+
+    activeEl.selectedIndex = idx;
+    return;
+  }
+});
+</script>
+
 
 
 <!-- PAGE 6 Schooling profile & notes -->

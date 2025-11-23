@@ -2154,8 +2154,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- C. SELECTION / INTERACTION (Enter) ---
-        if (key === 'Enter') {
-            event.preventDefault(); // Stop form submit
+       if (key === 'Enter') {
+
+    // Allow Enter to open native <select> normally
+    if (activeEl.tagName === "SELECT") {
+        return; 
+    }
+
+    event.preventDefault(); // keep blocking for everything else
+
 
            // 1. Radio Buttons (Toggle Select / Unselect)
 if (activeEl.type === 'radio') {
@@ -2201,11 +2208,7 @@ if (activeEl.type === 'radio') {
                 return;
             }
             
-            // 4. Native Select (Open)
-            if (activeEl.tagName === 'SELECT') {
-                activeEl.click(); // Works in most browsers to open dropdown
-                return;
-            }
+
 
             // 5. Buttons (Click - e.g. Add Student)
             if (activeEl.tagName === 'BUTTON') {

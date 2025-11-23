@@ -1864,29 +1864,10 @@ tbl.appendChild(trNotes);
       document.getElementById('finalWrap').classList.remove('hidden')
 
       // pdf button logic
-document.getElementById('pdfBtn').onclick = () => {
-  const element = document.getElementById('finalArea');
-
-  const opt = {
-    margin: 5,
-    filename: 'one-world-one-centre-intake.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: {
-      scale: 2,          // increase scale for better quality
-      useCORS: true,
-      letterRendering: true
-    },
-    jsPDF: {
-      unit: 'mm',
-      format: [148, 210], // A5 portrait
-      orientation: 'portrait'
-    }
-  };
-
-  html2pdf().set(opt).from(element).save();
-};
-
-
+      document.getElementById('pdfBtn').onclick = ()=>{
+        const opt = { margin:0.2, filename:'one-world-one-centre-intake.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'} }
+        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
+      }
 
       // edit/back button
       document.getElementById('editBtn').onclick = ()=>{

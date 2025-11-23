@@ -475,38 +475,6 @@
     }
   }
 </script>
-<script>
-document.querySelectorAll('input[type="radio"]').forEach(radio => {
-  radio.addEventListener("click", function (e) {
-    // If already checked → uncheck it
-    if (this.wasChecked) {
-      this.checked = false;
-      this.wasChecked = false;
-
-      // Hide any connected "Other" field
-      if (this.value === "Other") {
-        const target = this.getAttribute("onchange")
-          ?.match(/'(.*?)'/)?.[1];
-        if (target) {
-          const input = document.getElementById(target);
-          input.classList.add("hidden");
-          input.value = "";
-        }
-      }
-
-      // Stop onchange from firing
-      e.stopImmediatePropagation();
-      return;
-    }
-
-    // Mark as checked for next click
-    document
-      .querySelectorAll(`input[name="${this.name}"]`)
-      .forEach(r => (r.wasChecked = false));
-    this.wasChecked = true;
-  });
-});
-</script>
 
       
       <!-- PAGE 3 Parents -->
@@ -1168,144 +1136,6 @@ document.querySelectorAll('input[type="radio"]').forEach(radio => {
 </div>
 
       </section>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-
-  // --- 1. Get all focusable elements on a page ---
-  function getFocusableElements(container) {
-    if (!container) return [];
-    const selector = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]';
-    let elements = Array.from(container.querySelectorAll(selector));
-
-    // Include TomSelect and Select2 triggers
-    const select2Triggers = Array.from(container.querySelectorAll('.select2-selection'));
-    const tomSelectInputs = Array.from(container.querySelectorAll('.ts-control input'));
-
-    const allCandidates = [...elements, ...select2Triggers, ...tomSelectInputs];
-
-    return allCandidates.filter(el => {
-      if (el.closest('.nav-buttons')) return false;       // skip navigation buttons
-      if (el.offsetParent === null) return false;       // skip hidden
-      if (el.closest('.hidden')) return false;
-      if (el.tagName === 'SELECT' && (el.classList.contains('select2-hidden-accessible') || el.style.display === 'none')) return false;
-      return true;
-    }).sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
-  }
-
-  // --- 2. Keydown Handler ---
-  document.addEventListener('keydown', function(event) {
-    const currentStep = document.querySelector('.page:not(.hidden)');
-    if (!currentStep) return;
-
-    const activeEl = document.activeElement;
-    const key = event.key;
-    const isShift = event.shiftKey;
-
-    // --- PAGE NAVIGATION (Shift + Left/Right) ---
-    if (isShift && (key === 'ArrowLeft' || key === 'ArrowRight')) {
-      event.preventDefault();
-      const currentStepNum = parseInt(currentStep.dataset.step, 10);
-      let nextStepNum = key === 'ArrowRight' ? currentStepNum + 1 : currentStepNum - 1;
-      const maxPages = 6;
-      if (nextStepNum >= 1 && nextStepNum <= maxPages) {
-        if (typeof goTo === 'function') goTo(nextStepNum);
-        setTimeout(() => {
-          const newPage = document.querySelector(`.page[data-step="${nextStepNum}"]`);
-          const focusables = getFocusableElements(newPage);
-          if (focusables[0]) focusables[0].focus();
-        }, 50);
-      }
-      return;
-    }
-
-    // --- FIELD NAVIGATION (Arrow Keys) ---
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)) {
-      // Allow internal dropdown libraries to handle keys
-      const isSelect2Open = document.querySelector('.select2-container--open');
-      const tsWrapper = activeEl.closest('.ts-wrapper');
-      const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('input-active') && activeEl.closest('.ts-control');
-      if (isSelect2Open || isTomSelectOpen) return;
-
-      // Text inputs: move only at start/end
-      const isTextLike = activeEl.tagName === 'INPUT' && ['text','password','email','tel','number','search','url'].includes(activeEl.type);
-      const isTextArea = activeEl.tagName === 'TEXTAREA';
-      if (isTextLike || isTextArea) {
-        try {
-          if (key === 'ArrowLeft' && activeEl.selectionStart > 0) return;
-          if (key === 'ArrowRight' && activeEl.selectionStart < activeEl.value.length) return;
-        } catch(e){}
-      }
-
-      // Date inputs: allow day/month/year navigation
-      if (activeEl.tagName === 'INPUT' && activeEl.type === 'date') {
-        if (key === 'ArrowLeft' || key === 'ArrowRight') return;
-      }
-
-      // Navigate focusable elements
-      event.preventDefault();
-      const focusables = getFocusableElements(currentStep);
-      if (focusables.length === 0) return;
-      const idx = focusables.indexOf(activeEl);
-      let nextIdx = idx;
-      if (key === 'ArrowRight' || key === 'ArrowDown') nextIdx = (idx + 1) % focusables.length;
-      else nextIdx = (idx - 1 + focusables.length) % focusables.length;
-      if (focusables[nextIdx]) focusables[nextIdx].focus();
-    }
-
-    // --- ENTER KEY HANDLER ---
-    if (key === 'Enter') {
-      event.preventDefault();
-
-      // RADIO BUTTONS
-      if (activeEl.type === 'radio') {
-        activeEl.checked = true;
-        activeEl.dispatchEvent(new Event('change',{bubbles:true}));
-        return;
-      }
-
-      // BUTTONS
-      if (activeEl.tagName === 'BUTTON') {
-        activeEl.click();
-        return;
-      }
-
-      // SELECT2 / TomSelect
-      if (activeEl.classList.contains('select2-selection')) { $(activeEl).trigger('click'); return; }
-      if (activeEl.closest('.ts-control')) { activeEl.click(); return; }
-
-      // NATIVE SELECT: Last Grade or Program Special dropdown
-      const gradeMatch = activeEl.tagName==='SELECT' && activeEl.id.match(/^s_\d+_lastgrade$/);
-      const programMatch = activeEl.tagName==='SELECT' && activeEl.id.match(/^s_\d+_prog_dropdown$/);
-      if (gradeMatch || programMatch) {
-        activeEl.focus();
-        activeEl.click(); // open dropdown in most browsers
-        return;
-      }
-
-      // Fallback: native select
-      if (activeEl.tagName==='SELECT') { activeEl.click(); return; }
-    }
-
-    // --- ARROW UP/DOWN inside Last Grade or Program Special dropdowns ---
-    const isGradeDropdown = activeEl.tagName==='SELECT' && activeEl.id.match(/^s_\d+_lastgrade$/);
-    const isSpecialDropdown = activeEl.tagName==='SELECT' && activeEl.id.match(/^s_\d+_prog_dropdown$/);
-    if ((isGradeDropdown || isSpecialDropdown) && (key==='ArrowDown' || key==='ArrowUp')) {
-      event.preventDefault();
-      const options = Array.from(activeEl.options);
-      let idx = activeEl.selectedIndex;
-      if (key==='ArrowDown') idx = (idx+1) % options.length;
-      if (key==='ArrowUp') idx = (idx-1+options.length) % options.length;
-      activeEl.selectedIndex = idx;
-      activeEl.dispatchEvent(new Event('change',{bubbles:true}));
-    }
-
-  });
-
-});
-</script>
-
 
 
 <!-- PAGE 6 Schooling profile & notes -->
@@ -2294,37 +2124,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (key === 'Enter') {
             event.preventDefault(); // Stop form submit
 
-// 1. Radio Buttons (Toggle Select / Unselect)
-if (activeEl.type === 'radio') {
-    // If already checked → unselect
-    if (activeEl.checked && activeEl.wasChecked) {
-        activeEl.checked = false;
-        activeEl.wasChecked = false;
-
-        // If it was "Other", hide the text input
-        if (activeEl.value === "Other") {
-            const target = activeEl.getAttribute("onchange")?.match(/'(.*?)'/)?.[1];
-            if (target) {
-                const input = document.getElementById(target);
-                input.classList.add("hidden");
-                input.value = "";
+            // 1. Radio Buttons (Select)
+            if (activeEl.type === 'radio') {
+                activeEl.checked = true;
+                activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+                return;
             }
-        }
-
-        return; // Done
-    }
-
-    // Otherwise: select it normally
-    document
-        .querySelectorAll(`input[name="${activeEl.name}"]`)
-        .forEach(r => (r.wasChecked = false));
-
-    activeEl.wasChecked = true;
-    activeEl.checked = true;
-    activeEl.dispatchEvent(new Event('change', { bubbles: true }));
-    return;
-}
-
 
             // 2. Select2 (Open)
             if (activeEl.classList.contains('select2-selection')) {

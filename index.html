@@ -29,9 +29,15 @@
       /* Only affects Page 4 spacing */
     }
 
+
     .page4 {
-  justify-content: flex-start; /* stack content from top */
+  justify-content: flex-start; /* stacks content from top */
 }
+
+.nav-buttons-wrapper {
+  margin-top: auto; /* keeps buttons at the bottom */
+}
+
     
     .nav-buttons {
       display: flex;
@@ -575,12 +581,14 @@
     </div>
   </div>
 
-  <!-- Navigation -->
+
+<!-- Navigation -->
+<div class="nav-buttons-wrapper">
   <div class="nav-buttons mt-4">
     <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
     <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
   </div>
-</section>
+</div>
 
 <!-- Tom Select (searchable dropdown) -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">

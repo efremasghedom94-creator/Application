@@ -475,6 +475,38 @@
     }
   }
 </script>
+<script>
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+  radio.addEventListener("click", function (e) {
+    // If already checked → uncheck it
+    if (this.wasChecked) {
+      this.checked = false;
+      this.wasChecked = false;
+
+      // Hide any connected "Other" field
+      if (this.value === "Other") {
+        const target = this.getAttribute("onchange")
+          ?.match(/'(.*?)'/)?.[1];
+        if (target) {
+          const input = document.getElementById(target);
+          input.classList.add("hidden");
+          input.value = "";
+        }
+      }
+
+      // Stop onchange from firing
+      e.stopImmediatePropagation();
+      return;
+    }
+
+    // Mark as checked for next click
+    document
+      .querySelectorAll(`input[name="${this.name}"]`)
+      .forEach(r => (r.wasChecked = false));
+    this.wasChecked = true;
+  });
+});
+</script>
 
       
       <!-- PAGE 3 Parents -->

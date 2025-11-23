@@ -838,12 +838,134 @@
 </script>
 
 <script>
-document.addEventListener('keydown', function(event) {
-    if(event.key === 'Enter' && event.target.tagName !== 'TEXTAREA' && event.target.tagName !== 'BUTTON'){
-        event.preventDefault(); 
+/**
+ * KEYBOARD NAVIGATION SCRIPT
+ * - Arrows: Loop through fields.
+ * - Shift+Arrows: Page Navigation.
+ * - Enter: Selects/Opens Dropdowns.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. Find all focusable elements
+    function getFocusableElements(container) {
+        if (!container) return [];
+        const selector = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]';
+        let elements = Array.from(container.querySelectorAll(selector));
+        const select2Triggers = Array.from(container.querySelectorAll('.select2-selection'));
+        const tomSelectInputs = Array.from(container.querySelectorAll('.ts-control input'));
+        const allCandidates = [...elements, ...select2Triggers, ...tomSelectInputs];
+
+        return allCandidates.filter(el => {
+            if (el.closest('.nav-buttons')) return false;
+            if (el.offsetParent === null) return false;
+            if (el.tagName === 'SELECT' && (el.classList.contains('select2-hidden-accessible') || el.style.display === 'none')) return false;
+            if (el.closest('.hidden')) return false;
+            return true;
+        }).sort((a, b) => {
+            return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+        });
     }
-    if(event.shiftKey && event.key === 'ArrowRight') goTo(currentStep + 1);
-    if(event.shiftKey && event.key === 'ArrowLeft') goTo(currentStep - 1);
+
+    // 2. Main Key Handler
+    document.addEventListener('keydown', function(event) {
+        const currentStep = document.querySelector('.page:not(.hidden)');
+        if (!currentStep) return;
+
+        const activeEl = document.activeElement;
+        const key = event.key;
+        const isShift = event.shiftKey;
+
+        // A. PAGE NAVIGATION (Shift + Left/Right)
+        if (isShift && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+            event.preventDefault();
+            const currentStepNum = parseInt(currentStep.dataset.step, 10);
+            let nextStepNum = key === 'ArrowRight' ? currentStepNum + 1 : currentStepNum - 1;
+            if (typeof goTo === 'function' && nextStepNum >= 1 && nextStepNum <= 6) {
+                goTo(nextStepNum);
+                setTimeout(() => {
+                    const newPage = document.querySelector(`.page[data-step="${nextStepNum}"]`);
+                    const focusables = getFocusableElements(newPage);
+                    if (focusables[0]) focusables[0].focus();
+                }, 50);
+            }
+            return;
+        }
+
+        // B. FIELD NAVIGATION (Arrows)
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+            // Check dropdowns first
+            const isSelect2Open = document.querySelector('.select2-container--open');
+            const tsWrapper = activeEl.closest('.ts-wrapper');
+            const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('input-active') && activeEl.closest('.ts-control');
+
+            if (isSelect2Open || isTomSelectOpen) return; // Let library handle it
+
+            // Text/Date Input boundaries
+            const isTextLike = activeEl.tagName === 'INPUT' && ['text', 'password', 'email', 'tel', 'number', 'search', 'url'].includes(activeEl.type);
+            const isTextArea = activeEl.tagName === 'TEXTAREA';
+            
+            if (isTextLike || isTextArea) {
+                 try {
+                    if (key === 'ArrowLeft' && activeEl.selectionStart > 0) return;
+                    if (key === 'ArrowRight' && activeEl.selectionStart < activeEl.value.length) return;
+                } catch (e) {}
+            }
+            if (activeEl.tagName === 'INPUT' && activeEl.type === 'date') {
+                 if (key === 'ArrowLeft' || key === 'ArrowRight') return; 
+            }
+
+            // Loop Navigation
+            event.preventDefault(); 
+            const focusables = getFocusableElements(currentStep);
+            if (focusables.length === 0) return;
+
+            const idx = focusables.indexOf(activeEl);
+            let nextIdx = idx;
+
+            if (key === 'ArrowRight' || key === 'ArrowDown') {
+                nextIdx = (idx + 1) % focusables.length;
+            } else {
+                nextIdx = (idx - 1 + focusables.length) % focusables.length;
+            }
+
+            if (focusables[nextIdx]) focusables[nextIdx].focus();
+        }
+
+        // C. SELECTION (Enter)
+        if (key === 'Enter') {
+            if (activeEl.tagName === "SELECT") return; 
+            if (activeEl.tagName === 'TEXTAREA') return; // Allow new lines
+
+            event.preventDefault(); 
+
+            // Radio Toggle
+            if (activeEl.type === 'radio') {
+                if (activeEl.checked && activeEl.wasChecked) {
+                    activeEl.checked = false;
+                    activeEl.wasChecked = false;
+                    if (activeEl.value === "Other") {
+                        const target = activeEl.getAttribute("onchange")?.match(/'(.*?)'/)?.[1];
+                        if (target) {
+                            const input = document.getElementById(target);
+                            input.classList.add("hidden");
+                            input.value = "";
+                        }
+                    }
+                    return;
+                }
+                document.querySelectorAll(`input[name="${activeEl.name}"]`).forEach(r => (r.wasChecked = false));
+                activeEl.wasChecked = true;
+                activeEl.checked = true;
+                activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+                return;
+            }
+
+            // Trigger Buttons/Dropdowns
+            if (activeEl.classList.contains('select2-selection')) { $(activeEl).trigger('click'); return; }
+            if (activeEl.closest('.ts-control')) { activeEl.click(); return; }
+            if (activeEl.tagName === 'BUTTON') { activeEl.click(); }
+        }
+    });
 });
 </script>
 

@@ -17,8 +17,11 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
   <style>
+    /* GLOBAL BOX SIZING FIX (Prevents overflow) */
+    *, *::before, *::after { box-sizing: border-box; }
+
     /* BASIC LAYOUT */
-    body { margin: 0; border: 3px solid #C7631C; box-sizing: border-box; min-height: 100vh; background-color: white; }
+    body { margin: 0; border: 3px solid #C7631C; min-height: 100vh; background-color: white; }
     .wizard { background-color: white; border-radius: 0.5rem; padding: 2rem; margin: 2rem auto; max-width: 1100px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     .page { position: relative; min-height: 70vh; background-color: white; padding: 1.5rem; border-radius: 0.5rem; display: flex; flex-direction: column; justify-content: space-between; }
     .nav-buttons { display: flex; justify-content: space-between; margin-top: auto; padding-top: 1rem; }
@@ -35,9 +38,9 @@
     table.yellow-table {
         width: 100%;
         border-collapse: collapse; 
-        border: 2px solid black; /* Strong outer border */
+        border: 2px solid black; 
         font-size: 0.8rem;
-        table-layout: fixed; /* Prevents cells from expanding uncontrollably */
+        table-layout: fixed; /* CRITICAL for overflow prevention */
     }
 
     /* 2. Standard Cells */
@@ -50,23 +53,33 @@
         overflow-wrap: anywhere; 
     }
 
-    /* 3. Nested Tables (The fix for missing edges) */
+    /* 3. Nested Tables */
     table.nested-table {
         width: 100%;
         border-collapse: collapse;
-        margin: -1px; /* Overlap borders to prevent double lines */
+        margin: -1px; 
         width: calc(100% + 2px);
         table-layout: fixed;
     }
 
-    /* Ensure cells inside nested tables HAVE borders */
+    /* Default nested cells: no top/bottom border to fit snug */
     table.nested-table td {
         border: 1px solid black !important;
-        border-top: none !important; /* Let parent handle top/bottom to fit snug */
+        border-top: none !important;
         border-bottom: none !important;
     }
     
-    /* Remove side borders for the first and last cells of nested tables so they flush with parent */
+    /* 4. STUDENT ROW SPECIFIC FIXES (The separator lines) */
+    /* We Override the 'no bottom border' rule for student rows */
+    tr.student-row td {
+        border-bottom: 1px solid black !important; 
+    }
+    /* Optional: Remove border from the very last student to match parent bottom */
+    tr.student-row:last-child td {
+        border-bottom: none !important;
+    }
+
+    /* Remove side borders for nested tables */
     table.nested-table td:first-child { border-left: none !important; }
     table.nested-table td:last-child { border-right: none !important; }
 
@@ -75,7 +88,14 @@
 
     /* Text Formatting */
     .font-semibold { font-weight: 700; margin-bottom: 2px; font-size: 0.75rem; text-transform: uppercase; }
-    .cell-content { width: 100%; min-height: 18px; }
+    
+    /* Content Wrapper to catch overflow */
+    .cell-content { 
+        width: 100%; 
+        min-height: 18px; 
+        word-break: break-word; 
+        overflow-wrap: anywhere;
+    }
 
     /* PDF Print Specifics */
     #finalArea.pdf-scale { width: 100%; font-size: 10px !important; }
@@ -126,6 +146,7 @@
           <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
         </div>
       </section>
+
 
 
 
@@ -258,8 +279,7 @@
 
 
 
-
-<script>
+  <script>
   // ============================================
   // 1. GLOBAL VARIABLES & UTILS
   // ============================================
@@ -407,7 +427,6 @@
       $s.append($('<option>').val(c).text(c));
     });
 
-    // Destroy existing to prevent duplicates if called twice
     if($s.data('select2')) { $s.select2('destroy'); }
     
     $s.select2({
@@ -555,7 +574,7 @@
   addStudent();
 
   // ============================================
-  // 4. GENERATE FINAL FORM (STRICT LAYOUT)
+  // 4. GENERATE FINAL FORM (COMPLETE)
   // ============================================
   function generateFinal(){
     const final = document.getElementById('finalArea');
@@ -587,11 +606,13 @@
     `;
     tbl.appendChild(tr1);
 
-    // --- ROW 2: Status ---
+    // --- ROW 2: Status & Immigration (WITH OTHER TEXT SUPPORT) ---
     const sStatus = getRadioValue('studentStatus');
-    const sStatusTxt = sStatus === 'Other' ? document.getElementById('studentStatusOther').value : sStatus;
+    const sStatusTxt = sStatus === 'Other' ? (document.getElementById('studentStatusOther').value || 'Other') : sStatus;
+    
     const imm = getRadioValue('immDoc');
-    const immTxt = imm === 'Other' ? document.getElementById('immDocOther').value : imm;
+    const immTxt = imm === 'Other' ? (document.getElementById('immDocOther').value || 'Other') : imm;
+    
     const pAttend = getRadioValue('prevAttend');
     const pAttendTxt = pAttend === 'Yes' ? (checkboxMark(true) + ' Yes') : (pAttend === 'No' ? checkboxMark(true) + ' No' : '');
 
@@ -636,14 +657,13 @@
     `;
     tbl.appendChild(tr4);
 
-    // --- ROW 5: INFO ---
+    // --- ROW 5: INFO & HOME LANG FIX ---
     let homeLangs = '';
     const hlSelect = document.getElementById('homeLang');
     if (hlSelect.tomselect) {
         // TomSelect active
-        homeLangs = Array.isArray(hlSelect.tomselect.getValue()) 
-            ? hlSelect.tomselect.getValue().join(', ') 
-            : hlSelect.tomselect.getValue();
+        const val = hlSelect.tomselect.getValue();
+        homeLangs = Array.isArray(val) ? val.join(', ') : val;
     } else {
         // Standard Select fallback
         homeLangs = Array.from(hlSelect.selectedOptions).map(o=>o.value).join(', ');
@@ -667,8 +687,8 @@
     `;
     tbl.appendChild(tr5);
 
-    // --- ROW 6: STUDENTS (BALANCED WIDTHS) ---
-    // Defined Widths: Surname 18%, Given 18%, Gender 8%, DOB 12%, Country 14%, Grade 10%, Year 10%, Prog 10%
+    // --- ROW 6: STUDENTS (WITH SEPARATOR LINES) ---
+    // Widths: Surname 18%, Given 18%, Gender 8%, DOB 12%, Country 14%, Grade 10%, Year 10%, Prog 10%
     let stRows = '';
     
     for(let i=1; i<=studentCount; i++){
@@ -698,7 +718,8 @@
             let grd = document.getElementById(`s_${i}_lastgrade`).value;
             if(grd === 'Other') grd = document.getElementById(`s_${i}_lastgrade_spec`).value;
 
-            stRows += `<tr>
+            // Apply 'student-row' class for black line separation
+            stRows += `<tr class="student-row">
                 <td class="cell-content">${escapeHtml(sn)}</td>
                 <td class="cell-content">${escapeHtml(gn)}</td>
                 <td class="text-center">${checkboxMark(gender==='F')} F ${checkboxMark(gender==='M')} M</td>
@@ -730,23 +751,23 @@
     `;
     tbl.appendChild(tr6);
 
-    // --- ROW 7: LIMITED PROFILE ---
+    // --- ROW 7: LIMITED PROFILE (Overflow Fix) ---
     const lim = getRadioValue('limitedProfile');
     const limDet = document.getElementById('limitedProfileDetails').value;
     const tr7 = document.createElement('tr');
     tr7.innerHTML = `<td colspan="5">
         <div class="font-semibold">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</div>
         <div>${checkboxMark(lim==='Yes')} Yes  ${checkboxMark(lim==='No')} No</div>
-        ${lim==='Yes' ? `<div class="cell-content" style="margin-left:20px;">${escapeHtml(limDet)}</div>` : ''}
+        ${lim==='Yes' ? `<div class="cell-content" style="padding-left:20px;">${escapeHtml(limDet)}</div>` : ''}
     </td>`;
     tbl.appendChild(tr7);
 
-    // --- ROW 8: NOTES ---
+    // --- ROW 8: NOTES (Overflow Fix) ---
     const notes = document.getElementById('notes').value;
     const tr8 = document.createElement('tr');
     tr8.innerHTML = `<td colspan="5">
         <div class="font-semibold">NOTES</div>
-        <div class="cell-content" style="margin-left:20px;">${escapeHtml(notes)}</div>
+        <div class="cell-content" style="padding-left:20px;">${escapeHtml(notes)}</div>
     </td>`;
     tbl.appendChild(tr8);
 

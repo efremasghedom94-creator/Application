@@ -966,6 +966,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeEl.closest('.ts-control')) { activeEl.click(); return; }
             if (activeEl.tagName === 'BUTTON') { activeEl.click(); }
         }
+      // --- D. GENERATE FORM SHORTCUT (Spacebar) ---
+        if (key === ' ' && currentStep.dataset.step === '6') {
+            // Do not execute if user is typing in a field
+            const isTextType = activeEl.tagName === 'INPUT' && activeEl.type !== 'radio' && activeEl.type !== 'checkbox';
+            if (isTextType || activeEl.tagName === 'TEXTAREA') {
+                return; 
+            }
+
+            // Trigger the "Generate Yellow Form" button
+            const generateBtn = document.querySelector('.page[data-step="6"] button:last-child');
+            if (generateBtn && generateBtn.textContent.includes('Generate Yellow Form')) {
+                event.preventDefault();
+                generateBtn.click();
+            }
+        }
     });
 });
 </script>

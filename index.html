@@ -1863,11 +1863,24 @@ tbl.appendChild(trNotes);
       document.getElementById('wizardRoot').classList.add('hidden')
       document.getElementById('finalWrap').classList.remove('hidden')
 
-      // pdf button logic
-      document.getElementById('pdfBtn').onclick = ()=>{
-        const opt = { margin:0.2, filename:'one-world-one-centre-intake.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'} }
-        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
-      }
+document.getElementById('pdfBtn').onclick = () => {
+  const element = document.getElementById('finalArea');
+
+  // Use html2pdf options that shrink PDF without changing on-screen form
+  const opt = {
+    margin: 5,                     // small margin around PDF page
+    filename: 'one-world-one-centre-intake.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: {
+      scale: 1.5,                  // shrinks table for PDF
+      useCORS: true
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save();
+};
+
 
       // edit/back button
       document.getElementById('editBtn').onclick = ()=>{

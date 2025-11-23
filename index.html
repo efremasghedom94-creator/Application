@@ -2128,22 +2128,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (key === 'ArrowLeft' || key === 'ArrowRight') return; 
                 // Allow Up/Down to navigate OUT of the cell (Next/Prev field)
             }
-            
-            // --- FIX: Allow native arrow key behavior for radios and selects ---
-            // If the element is a radio button or a native select element,
-            // we skip the custom field navigation entirely.
-            // This allows the browser to handle:
-            // - Radio buttons: Moving focus/selection within the group (Arrow Up/Down/Left/Right).
-            // - Select elements: Changing the selected option (Arrow Up/Down).
-            if (activeEl.type === 'radio' || activeEl.tagName === 'SELECT') {
-                // DO NOT call event.preventDefault() here.
-                return; 
-            }
-            // --- END FIX ---
-
 
             // 4. Calculate Next Field (Looping)
-            event.preventDefault(); // Stop scrolling (only runs for non-radio/select elements now)
+            event.preventDefault(); // Stop scrolling
             
             const focusables = getFocusableElements(currentStep);
             if (focusables.length === 0) return;
@@ -2166,37 +2153,60 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-       // --- C. SELECTION / INTERACTION (Enter) ---
-       // This block is correct for triggering the conditional display of the "Special" program field 
-       // and opening the native "LAST GRADE COMPLETED" select dropdown.
+        // --- C. SELECTION / INTERACTION (Enter) ---
         if (key === 'Enter') {
             event.preventDefault(); // Stop form submit
 
-            // 1. Radio Buttons (Select and trigger conditional visibility)
-            if (activeEl.type === 'radio') {
-                activeEl.checked = true;
-                activeEl.dispatchEvent(new Event('change', { bubbles: true })); 
-                return;
-            }
+           // 1. Radio Buttons (Toggle Select / Unselect)
+if (activeEl.type === 'radio') {
+    // If already checked → unselect
+    if (activeEl.checked && activeEl.wasChecked) {
+        activeEl.checked = false;
+        activeEl.wasChecked = false;
 
-            // 2. Native Select (Open - e.g., "LAST GRADE COMPLETED")
-            if (activeEl.tagName === 'SELECT') {
-                activeEl.click(); 
-                return;
+        // If it was "Other", hide the text input
+        if (activeEl.value === "Other") {
+            const target = activeEl.getAttribute("onchange")?.match(/'(.*?)'/)?.[1];
+            if (target) {
+                const input = document.getElementById(target);
+                input.classList.add("hidden");
+                input.value = "";
             }
+        }
 
-            // 3. Select2 (Open)
+        return; // Done
+    }
+
+    // Otherwise: select it normally
+    document
+        .querySelectorAll(`input[name="${activeEl.name}"]`)
+        .forEach(r => (r.wasChecked = false));
+
+    activeEl.wasChecked = true;
+    activeEl.checked = true;
+    activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+    return;
+}
+
+
+            // 2. Select2 (Open)
             if (activeEl.classList.contains('select2-selection')) {
                 $(activeEl).trigger('click');
                 return;
             }
 
-            // 4. TomSelect (Open)
+            // 3. TomSelect (Open)
             if (activeEl.closest('.ts-control')) {
                 activeEl.click();
                 return;
             }
             
+            // 4. Native Select (Open)
+            if (activeEl.tagName === 'SELECT') {
+                activeEl.click(); // Works in most browsers to open dropdown
+                return;
+            }
+
             // 5. Buttons (Click - e.g. Add Student)
             if (activeEl.tagName === 'BUTTON') {
                 activeEl.click();

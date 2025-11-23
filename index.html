@@ -78,88 +78,45 @@
     table.yellow-table td .limited-details { max-width: none !important; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: anywhere !important; }
   </style>
 
-
-
-
-  
   <!-- Print-specific styling -->
   <style>
-@media print {
-  body {
-    margin: 0;
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
+    @media print {
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background: white;
+      }
 
-  .wizard { display: none; } /* hide wizard interface */
+      .wizard { display: none; }
 
-  #finalArea {
-    width: 148mm;  /* A5 width (half A4) */
-    height: auto;  /* auto height so content expands naturally */
-    margin: 0;
-    padding: 10mm;
-    font-size: 0.8em; /* reduce font size to fit */
-    box-sizing: border-box;
-    page-break-after: always;
-  }
+      #finalArea {
+        width: 148mm;  /* half A4 width (A5) */
+        height: 210mm; /* half A4 height */
+        margin: 0 auto;
+        padding: 10mm;
+        transform: scale(0.7);
+        transform-origin: top left;
+        font-size: 0.8em;
+        page-break-after: always;
+      }
 
-  table.yellow-table, table.yellow-table td, table.yellow-table th {
-    font-size: 0.75em; /* slightly smaller font for printing */
-    border: 1px solid #000 !important;
-    border-collapse: collapse;
-  }
+      table.yellow-table td, table.yellow-table th {
+        padding: 4px !important;
+        font-size: 0.75em;
+      }
 
-  table.yellow-table td, table.yellow-table th {
-    padding: 4px !important;
-    vertical-align: top !important;
-    word-wrap: break-word !important;
-  }
+      table { page-break-inside: avoid; }
 
-  table { page-break-inside: avoid; }
+      #printBtn, #pdfBtn, #editBtn, #newFormBtn, #shareBtn { display: none !important; }
 
-  /* hide buttons when printing */
-  #printBtn, #pdfBtn, #editBtn, #newFormBtn, #shareBtn {
-    display: none !important;
-  }
-
-  @page {
-    size: A5 portrait;
-    margin: 0;
-  }
-}
-
-    /* Force font, padding, and scaling for PDF */
-#finalArea, #finalArea * {
-  font-family: Arial, sans-serif !important;
-  font-size: 0.85em !important; /* smaller font to fit */
-}
-
-table.yellow-table {
-  table-layout: fixed !important;  /* keep column widths stable */
-  border-collapse: collapse !important;
-  width: 100% !important;          /* full width of container */
-}
-
-table.yellow-table td, table.yellow-table th {
-  padding: 4px !important;         /* reduce padding for smaller size */
-  vertical-align: top !important;
-}
-
-/* Optional: shrink nested tables proportionally */
-#finalArea table.yellow-table table {
-  width: 100% !important;
-  table-layout: fixed !important;
-}
-
-</style>
-
-
-
-
-
-  
+      @page {
+        size: A5 portrait;
+        margin: 0;
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100 text-gray-800">
@@ -1906,23 +1863,11 @@ tbl.appendChild(trNotes);
       document.getElementById('wizardRoot').classList.add('hidden')
       document.getElementById('finalWrap').classList.remove('hidden')
 
-document.getElementById('pdfBtn').onclick = () => {
-  const element = document.getElementById('finalArea');
-  
-  const opt = {
-    margin: 5,                     // small margin around the page
-    filename: 'one-world-one-centre-intake.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: {
-      scale: 1.5,                  // scale down to shrink table, adjust if needed
-      useCORS: true,
-    },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  
-  html2pdf().set(opt).from(element).save();
-};
-
+      // pdf button logic
+      document.getElementById('pdfBtn').onclick = ()=>{
+        const opt = { margin:0.2, filename:'one-world-one-centre-intake.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'} }
+        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
+      }
 
       // edit/back button
       document.getElementById('editBtn').onclick = ()=>{

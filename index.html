@@ -30,12 +30,16 @@
     }
 
 
-    .page4 {
-  justify-content: flex-start; /* stacks content from top */
+
+    /* Only affects Page 4 spacing */
+.page4 {
+  justify-content: flex-start; /* stack content from top */
 }
 
-.nav-buttons-wrapper {
-  margin-top: auto; /* keeps buttons at the bottom */
+.page4 .nav-buttons {
+  margin-top: 1rem; /* normal spacing from content */
+  display: flex;
+  justify-content: space-between; /* keep buttons on opposite sides */
 }
 
     
@@ -519,7 +523,7 @@
       </section>
 
 <!-- PAGE 4 Address & family -->
-<section class="page hidden page4" data-step="4">
+<section class="page page4 hidden" data-step="4">
   <h2 class="font-medium mb-3">Page 4</h2>
   <div class="grid grid-cols-12 gap-3">
     <!-- Apartment -->
@@ -582,13 +586,12 @@
   </div>
 
 
-<!-- Navigation -->
-<div class="nav-buttons-wrapper">
+  <!-- Navigation -->
   <div class="nav-buttons mt-4">
     <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
     <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
   </div>
-</div>
+</section>
 
 <!-- Tom Select (searchable dropdown) -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">

@@ -3,10 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>One World One Centre...</title>
+  <title>One World One Centre Student Intake Form</title>
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- html2pdf -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
+  <!-- jQuery + Select2 (for searchable dropdowns) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <!-- General styles -->
   <style>
     body {
       margin: 0;
@@ -14,6 +24,15 @@
       box-sizing: border-box;
       min-height: 100vh;
       background-color: white;
+    }
+
+    .wizard {
+      background-color: white;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      margin: 2rem auto;
+      max-width: 1100px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     .page {
@@ -35,144 +54,17 @@
       padding-top: 1rem;
     }
 
-    .wizard {
-      background-color: white;
-      border-radius: 0.5rem;
-      padding: 2rem;
-      margin: 2rem auto;
-      max-width: 1100px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    select {
+      transform-origin: top center !important;
     }
 
-    @media print {
-      body { margin: 0 }
-      .wizard { display: none }
-      .final-wrap { display: block }
-    }
-  </style>
+    .field-gap { gap:12px; }
+    .disabled-input { background:#f3f4f6; color:#6b7280; }
+    .yellow-bg { background:#FFF9C4; }
+    .checkbox-box { display:inline-block; width:20px; height:20px; border:1px solid #111; text-align:center; line-height:18px; font-weight:700; margin-right:6px; }
+    .muted { color:#6b7280; }
 
-<style>
-  /* Wrapping fix for dynamic cells */
-  table.yellow-table td div {
-    white-space: normal !important;
-    word-wrap: break-word !important;
-    overflow-wrap: anywhere !important;
-    max-width: 220px;
-  }
-
-  /* Exclude this block so it keeps its original inline layout */
-  .no-wrap-block div {
-    white-space: nowrap !important;
-    word-wrap: normal !important;
-    overflow-wrap: normal !important;
-  }
-
-  /* Allow full-width wrapping for the Limited Formal Schooling details */
-  table.yellow-table td .limited-details {
-    max-width: none !important;
-    white-space: normal !important;
-    word-wrap: break-word !important;
-    overflow-wrap: anywhere !important;
-  }
-
-  table.yellow-table td {
-    vertical-align: top !important;
-  }
-</style>
-
-
-
-
-
-  
-  <style>
-  select {
-    transform-origin: top center !important;
-  }
-</style>
-
-</head>
-
-
-
-
-<style>
-  /* Make the yellow form exactly half of A4 size when printed */
-  @media print {
-    #finalArea {
-      width: 148mm;   /* A5 width */
-      height: 210mm;  /* A5 height (half of A4) */
-      margin: 0 auto;
-      padding: 10mm;
-      page-break-after: always;
-    }
-
-    /* Center the yellow form on the printed page */
-    body {
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      background: white;
-    }
-
-    /* Hide buttons when printing */
-    #printBtn, #pdfBtn, #editBtn {
-      display: none !important;
-    }
-
-    /* Force print to A5 page size */
-    @page {
-      size: A5 portrait;
-      margin: 0;
-    }
-  }
-</style>
-
-
-  
-
-
-
-  <style>
-  body {
-    margin: 0;
-    border: 3px solid #C7631C; /* thin brown border all around */
-    box-sizing: border-box;
-    min-height: 100vh;
-    background-color: white;
-  }
-
-  /* Keep your form content centered */
-  .wizard {
-    background-color: white;
-    border-radius: 0.5rem;
-    padding: 2rem;
-    margin: 2rem auto;
-    max-width: 1100px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-</style>
-
-  
-
-
-
-  <!-- jQuery + Select2 (for searchable country dropdown) -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-  <style> 
-    /* small helpers */
-    .field-gap{gap:12px}
-    .disabled-input{background:#f3f4f6;color:#6b7280}
-    /* final yellow sheet styling */
-    .yellow-bg{background:#FFF9C4}
-    .checkbox-box{display:inline-block;width:20px;height:20px;border:1px solid #111;text-align:center;line-height:18px;font-weight:700;margin-right:6px}
-    .muted{color:#6b7280}
-
-    /* ensure black table lines and a slightly smaller font inside the final yellow form */
+    /* Yellow table styling */
     table.yellow-table, table.yellow-table td, table.yellow-table th {
       border: 1px solid #000 !important;
       border-collapse: collapse;
@@ -180,10 +72,49 @@
     }
     table.yellow-table td, table.yellow-table th { padding: 6px; vertical-align: top; }
 
-    @media print{
-      body{margin:0}
-      .wizard{display:none}
-      .final-wrap{display:block}
+    /* Wrapping fixes */
+    table.yellow-table td div { white-space: normal !important; word-wrap: break-word !important; overflow-wrap: anywhere !important; max-width: 220px; }
+    .no-wrap-block div { white-space: nowrap !important; word-wrap: normal !important; overflow-wrap: normal !important; }
+    table.yellow-table td .limited-details { max-width: none !important; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: anywhere !important; }
+  </style>
+
+  <!-- Print-specific styling -->
+  <style>
+    @media print {
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background: white;
+      }
+
+      .wizard { display: none; }
+
+      #finalArea {
+        width: 148mm;  /* half A4 width (A5) */
+        height: 210mm; /* half A4 height */
+        margin: 0 auto;
+        padding: 10mm;
+        transform: scale(0.7);
+        transform-origin: top left;
+        font-size: 0.8em;
+        page-break-after: always;
+      }
+
+      table.yellow-table td, table.yellow-table th {
+        padding: 4px !important;
+        font-size: 0.75em;
+      }
+
+      table { page-break-inside: avoid; }
+
+      #printBtn, #pdfBtn, #editBtn, #newFormBtn, #shareBtn { display: none !important; }
+
+      @page {
+        size: A5 portrait;
+        margin: 0;
+      }
     }
   </style>
 </head>
@@ -1551,6 +1482,14 @@ function toggleOtherProg(id){
 
 
 
+
+
+
+
+
+
+
+    
     
     function generateFinal(){
       const final = document.getElementById('finalArea')

@@ -79,84 +79,69 @@
   </style>
 
   <!-- Print-specific styling -->
-  <style>
-    @media print {
-      body {
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        background: white;
-      }
-
-      .wizard { display: none; }
-
-      #finalArea {
-        width: 148mm;  /* half A4 width (A5) */
-        height: 210mm; /* half A4 height */
-        margin: 0 auto;
-        padding: 10mm;
-        transform: scale(0.7);
-        transform-origin: top left;
-        font-size: 0.8em;
-        page-break-after: always;
-      }
-
-      table.yellow-table td, table.yellow-table th {
-        padding: 4px !important;
-        font-size: 0.75em;
-      }
-
-      table { page-break-inside: avoid; }
-
-      #printBtn, #pdfBtn, #editBtn, #newFormBtn, #shareBtn { display: none !important; }
-
-      @page {
-        size: A5 portrait;
-        margin: 0;
-      }
-    }
-  </style>
-
-
+ /* Update your existing print-specific CSS block: */
 <style>
-    @media print {
-      /* Reduce the base font size for the entire final area to make content fit */
-      #finalArea {
-        font-size: 8pt !important;
-        padding: 0.5rem !important;
-      }
+  @media print {
+    /* Set container properties */
+    #finalArea {
+      font-size: 7.5pt !important; /* Base font size reduction */
+      padding: 0 !important; /* Remove container padding */
+      margin: 0 !important; /* Remove container margin */
+      width: 100% !important;
+      height: 100% !important;
+      transform: none !important; /* Essential: prevent scaling */
+    }
 
-      /* Reduce the size of the main title */
-      #finalArea h1 {
-        font-size: 11pt !important;
-        margin-bottom: 0.5rem !important;
-      }
+    /* Reduce the size of the main title */
+    #finalArea h1 {
+      font-size: 10pt !important; /* Title font size */
+      margin-top: 0 !important;
+      margin-bottom: 0.3rem !important; /* Tighten up space below title */
+      padding: 2px !important;
+    }
 
-      /* Reduce padding and font-size within all table cells */
-      .yellow-table td, .yellow-table th, #finalArea .p-2 {
-        padding: 4px !important; /* Smaller padding for tighter fit */
-        font-size: 8pt !important;
-      }
+    /* Aggressive reduction of padding and font size for table cells */
+    .yellow-table td, .yellow-table th, #finalArea .p-2 {
+      padding: 2px 4px !important; /* Very small top/bottom padding */
+      font-size: 7.5pt !important;
+      line-height: 1.2 !important; /* Tighten line height */
+    }
+    
+    /* Ensure the table borders are thin */
+    table.yellow-table, table.yellow-table td, table.yellow-table th {
+        border-width: 1px !important; 
+    }
 
-      /* Reduce the margin below bold labels */
-      .yellow-table .font-semibold {
-        font-size: 8pt !important;
-        margin-bottom: 2px !important;
-      }
+    /* Reduce space below the labels (font-semibold) */
+    .yellow-table .font-semibold {
+      font-size: 7.5pt !important;
+      margin-bottom: 1px !important; /* Minimum margin below the label */
+    }
+    
+    /* Target the text below the label (data fields) */
+    .yellow-table td > div:not(.font-semibold) {
+      font-size: 7.5pt !important;
+    }
 
-      /* Ensure data text is consistently small */
-      .yellow-table td > div:not(.font-semibold) {
-        font-size: 8pt !important;
-      }
-      
-      /* Optional: Override any conflicting A4 settings you might have */
-      @page {
-        size: A5 portrait;
-        margin: 0;
-      }
-    }
-  </style>
+    /* Target the full-width independent rows (Limited Schooling & Notes) */
+    #finalArea .limited-details,
+    #finalArea > td > div[style*="margin-top:6px;"] {
+      margin-top: 1px !important;
+      margin-bottom: 1px !important;
+      line-height: 1.2 !important;
+      margin-left: 5px !important;
+    }
+
+    /* Set A5 page size explicitly */
+    @page {
+      size: A5 portrait;
+      margin: 0;
+    }
+  }
+</style>
+
+
+
   
   
 </head>
@@ -1906,15 +1891,15 @@ tbl.appendChild(trNotes);
       document.getElementById('finalWrap').classList.remove('hidden')
 
       // pdf button logic
-     // pdf button logic
+// pdf button logic
 document.getElementById('pdfBtn').onclick = ()=>{
-  // Setting format to 'a5' explicitly tells jsPDF to use A5 dimensions (148mm x 210mm)
+  // Setting format to 'a5' for half A4 size (148mm x 210mm)
   const opt = { 
-    margin:0.1, // Reduced margin (0.1 inches is about 2.5mm) to save space
+    margin:0.0, // <-- Set margin to zero for maximum space
     filename:'one-world-one-centre-intake.pdf', 
     image:{type:'jpeg',quality:0.98}, 
     html2canvas:{scale:2}, 
-    // Set format to 'a5' for half A4 size
+    // Use the A5 format
     jsPDF:{unit:'in',format:'a5',orientation:'portrait'} 
   }
   html2pdf().set(opt).from(document.getElementById('finalArea')).save()

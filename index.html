@@ -117,6 +117,50 @@
       }
     }
   </style>
+
+
+  <style>
+    @media print {
+      /* Reduce the base font size for the entire final area */
+      #finalArea {
+        font-size: 8pt !important;
+        padding: 0.5rem !important;
+      }
+
+      /* Reduce the size of the main title */
+      #finalArea h1 {
+        font-size: 11pt !important;
+        margin-bottom: 0.5rem !important;
+      }
+
+      /* Reduce padding and font-size within table cells */
+      .yellow-table td, .yellow-table th {
+        padding: 4px !important; /* Smaller padding */
+        font-size: 8pt !important;
+      }
+
+      /* Make the cell labels slightly smaller, but still bold */
+      .yellow-table .font-semibold {
+        font-size: 8pt !important;
+        margin-bottom: 2px !important;
+      }
+
+      /* Ensure the data text is small */
+      .yellow-table td > div:not(.font-semibold) {
+        font-size: 8pt !important;
+      }
+      
+      /* Override your existing print transform/dimensions (if they conflict) */
+      #finalArea {
+        width: auto !important;
+        height: auto !important;
+        transform: none !important;
+        margin: 0 !important;
+      }
+    }
+  </style>
+  
+  
 </head>
 
 <body class="bg-gray-100 text-gray-800">
@@ -1864,10 +1908,19 @@ tbl.appendChild(trNotes);
       document.getElementById('finalWrap').classList.remove('hidden')
 
       // pdf button logic
-      document.getElementById('pdfBtn').onclick = ()=>{
-        const opt = { margin:0.2, filename:'one-world-one-centre-intake.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'} }
-        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
-      }
+     // pdf button logic
+      document.getElementById('pdfBtn').onclick = ()=>{
+        // Setting format to 'a5' explicitly tells jsPDF to use A5 dimensions (148mm x 210mm)
+        const opt = { 
+          margin:0.1, // Reduced margin (0.1 inches is about 2.5mm)
+          filename:'one-world-one-centre-intake.pdf', 
+          image:{type:'jpeg',quality:0.98}, 
+          html2canvas:{scale:2}, 
+          // *** MODIFICATION HERE: Set format to 'a5' ***
+          jsPDF:{unit:'in',format:'a5',orientation:'portrait'} 
+        }
+        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
+      }
 
       // edit/back button
       document.getElementById('editBtn').onclick = ()=>{

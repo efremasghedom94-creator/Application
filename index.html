@@ -129,8 +129,37 @@
     margin: 0;
   }
 }
+
+    /* Force font, padding, and scaling for PDF */
+#finalArea, #finalArea * {
+  font-family: Arial, sans-serif !important;
+  font-size: 0.85em !important; /* smaller font to fit */
+}
+
+table.yellow-table {
+  table-layout: fixed !important;  /* keep column widths stable */
+  border-collapse: collapse !important;
+  width: 100% !important;          /* full width of container */
+}
+
+table.yellow-table td, table.yellow-table th {
+  padding: 4px !important;         /* reduce padding for smaller size */
+  vertical-align: top !important;
+}
+
+/* Optional: shrink nested tables proportionally */
+#finalArea table.yellow-table table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
 </style>
 
+
+
+
+
+  
 </head>
 
 <body class="bg-gray-100 text-gray-800">

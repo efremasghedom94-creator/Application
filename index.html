@@ -31,13 +31,19 @@
 
 
 
-/* Page 4: stack content from top */
-.page4-content {
+/* Only Page 4: stack content from top, keep buttons at bottom */
+.page4 {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 1rem; /* optional spacing between sections */
+  justify-content: flex-start; /* stack from top */
 }
+
+.page4 .nav-buttons {
+  margin-top: 1rem; /* spacing from content */
+  display: flex;
+  justify-content: space-between; /* keep buttons on opposite sides */
+}
+
 
 
 

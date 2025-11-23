@@ -31,16 +31,13 @@
 
 
 
-    /* Only affects Page 4 spacing */
-.page4 {
+/* Only affects Page 4 spacing */
+.page4 .page4-content {
+  display: flex;
+  flex-direction: column;
   justify-content: flex-start; /* stack content from top */
 }
 
-.page4 .nav-buttons {
-  margin-top: 1rem; /* normal spacing from content */
-  display: flex;
-  justify-content: space-between; /* keep buttons on opposite sides */
-}
 
     
     .nav-buttons {
@@ -524,8 +521,9 @@
 
 <!-- PAGE 4 Address & family -->
 <section class="page page4 hidden" data-step="4">
-  <h2 class="font-medium mb-3">Page 4</h2>
-  <div class="grid grid-cols-12 gap-3">
+  <div class="page4-content"> <!-- <-- NEW WRAPPER -->
+    <h2 class="font-medium mb-3">Page 4</h2>
+    <div class="grid grid-cols-12 gap-3"> 
     <!-- Apartment -->
     <div class="col-span-2">
       <label class="block text-sm">APARTMENT #</label>
@@ -587,7 +585,7 @@
 
 
   <!-- Navigation -->
-  <div class="nav-buttons mt-4">
+ <div class="nav-buttons mt-4">
     <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
     <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
   </div>

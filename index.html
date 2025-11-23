@@ -26,28 +26,8 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      /* Only affects Page 4 spacing */
     }
 
-
-
-/* Only Page 4: stack content from top, keep buttons at bottom */
-.page4 {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* stack from top */
-}
-
-.page4 .nav-buttons {
-  margin-top: 1rem; /* spacing from content */
-  display: flex;
-  justify-content: space-between; /* keep buttons on opposite sides */
-}
-
-
-
-
-    
     .nav-buttons {
       display: flex;
       justify-content: space-between;
@@ -528,11 +508,10 @@
       </section>
 
 <!-- PAGE 4 Address & family -->
-<section class="page page4 hidden" data-step="4">
+<section class="page hidden" data-step="4">
   <h2 class="font-medium mb-3">Page 4</h2>
 
-  <!-- Wrap content only, exclude buttons -->
-  <div class="page4-content grid grid-cols-12 gap-3">
+  <div class="grid grid-cols-12 gap-3">
     <!-- Apartment -->
     <div class="col-span-2">
       <label class="block text-sm">APARTMENT #</label>
@@ -570,10 +549,11 @@
       />
     </div>
 
-    <!-- Home Language Dropdown -->
+    <!-- Home Language Dropdown (multi + custom) -->
     <div class="col-span-6 mt-2 ml-4">
       <label class="block text-sm">HOME LANGUAGE(S)</label>
       <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
+
     </div>
 
     <!-- Catholic Section -->
@@ -591,7 +571,7 @@
     </div>
   </div>
 
-  <!-- Navigation buttons stay outside the content wrapper -->
+  <!-- Navigation -->
   <div class="nav-buttons mt-4">
     <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
     <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>

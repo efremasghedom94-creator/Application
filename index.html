@@ -1867,20 +1867,25 @@ tbl.appendChild(trNotes);
 document.getElementById('pdfBtn').onclick = () => {
   const element = document.getElementById('finalArea');
 
-  // Use html2pdf options that shrink PDF without changing on-screen form
   const opt = {
-    margin: 5,                     // small margin around PDF page
+    margin: 5,
     filename: 'one-world-one-centre-intake.pdf',
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {
-      scale: 1.5,                  // shrinks table for PDF
-      useCORS: true
+      scale: 2,          // increase scale for better quality
+      useCORS: true,
+      letterRendering: true
     },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    jsPDF: {
+      unit: 'mm',
+      format: [148, 210], // A5 portrait
+      orientation: 'portrait'
+    }
   };
 
   html2pdf().set(opt).from(element).save();
 };
+
 
 
       // edit/back button

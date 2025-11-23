@@ -1403,8 +1403,7 @@ function addStudent(prefill){
         <label class="text-sm">LAST GRADE COMPLETED</label>
 <select
   id="s_${id}_lastgrade"
-  class="w-full border rounded p-2 mt-1 relative z-50"
-  style="position: relative; z-index: 9999; overflow: visible;"
+  class="lastgrade-select w-full border rounded p-2 mt-1"
   onchange="toggleOtherGrade(${id})"
 >
   <option value="" disabled selected hidden>Select grade</option>
@@ -1413,6 +1412,7 @@ function addStudent(prefill){
   ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
   <option value="Other">Other</option>
 </select>
+
 
         <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
       </div>
@@ -1469,6 +1469,19 @@ function addStudent(prefill){
   `
 
   container.appendChild(wrap)
+// Initialize Select2 for LAST GRADE COMPLETED
+$('#s_' + id + '_lastgrade').select2({
+    dropdownParent: $('#studentsContainer'),
+    width: "100%",
+    dropdownCssClass: "grade-dropdown-force-down",
+});
+
+  /* Force Select2 dropdown to always open DOWN */
+.grade-dropdown-force-down {
+    top: 100% !important;
+    bottom: auto !important;
+    margin-top: 4px !important;
+}
 
   // Populate the country select (if countries are loaded already, populate immediately;
   // otherwise wait for the loadCountriesPromise to resolve)

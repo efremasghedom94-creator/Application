@@ -2210,10 +2210,11 @@ if (activeEl.type === 'radio') {
 
 
             // 2. Select2 (Open)
-            if (activeEl.classList.contains('select2-selection')) {
-                $(activeEl).trigger('click');
-                return;
-            }
+if (activeEl.classList.contains('select2-selection')) {
+    $(activeEl).trigger('mousedown');
+    return;
+}
+
 
             // 3. TomSelect (Open)
             if (activeEl.closest('.ts-control')) {

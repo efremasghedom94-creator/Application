@@ -2129,7 +2129,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Allow Up/Down to navigate OUT of the cell (Next/Prev field)
             }
 
-            // 4. Calculate Next Field (Looping)
+            // --- FIX 1: RADIO GROUP NAVIGATION (Program Special) ---
+            if (activeEl.type === 'radio') {
+                event.preventDefault(); // Stop default scroll/behavior
+
+                // Get all radio buttons in the current group
+                const radioGroup = document.querySelectorAll(`input[type="radio"][name="${activeEl.name}"]:not([disabled])`);
+                const currentIdx = Array.from(radioGroup).indexOf(activeEl);
+                let nextIdx = currentIdx;
+                
+                // Calculate next index (loops around)
+                if (key === 'ArrowRight' || key === 'ArrowDown') {
+                    nextIdx = (currentIdx + 1) % radioGroup.length;
+                } else if (key === 'ArrowLeft' || key === 'ArrowUp') {
+                    nextIdx = (currentIdx - 1 + radioGroup.length) % radioGroup.length;
+                }
+
+                if (radioGroup[nextIdx]) {
+                    // Move focus
+                    radioGroup[nextIdx].focus();
+                    
+                    // Standard browser behavior: Arrow keys also select the option
+                    radioGroup[nextIdx].checked = true;
+                    
+                    // Crucial: Fire the change event to show/hide conditional fields (like the "Special" dropdown)
+                    radioGroup[nextIdx].dispatchEvent(new Event('change', { bubbles: true }));
+
+                    return; // EXIT here to prevent general field navigation
+                }
+            }
+
+
+            // 4. Calculate Next Field (Looping) - (Original Step 4/5)
             event.preventDefault(); // Stop scrolling
             
             const focusables = getFocusableElements(currentStep);
@@ -2153,43 +2184,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-   // --- C. SELECTION / INTERACTION (Enter) ---
-if (key === 'Enter') {
-    event.preventDefault(); // Stop form submit
+       // --- C. SELECTION / INTERACTION (Enter) ---
+       // This block is already correct and remains as is.
+       if (key === 'Enter') {
+            event.preventDefault(); // Stop form submit
 
-    // 1. Radio Buttons (Select and trigger conditional visibility)
-    // FIX: Simplified to ensure 'checked' state and 'change' event are fired, 
-    // which is needed for conditional display (e.g., showing 'Special' dropdown).
-    if (activeEl.type === 'radio') {
-        activeEl.checked = true;
-        activeEl.dispatchEvent(new Event('change', { bubbles: true })); 
-        return;
-    }
+            // 1. Radio Buttons (Select and trigger conditional visibility)
+            // Works alongside the new Arrow Key logic above.
+            if (activeEl.type === 'radio') {
+                activeEl.checked = true;
+                activeEl.dispatchEvent(new Event('change', { bubbles: true })); 
+                return;
+            }
 
-    // 2. Native Select (Open - e.g., "LAST GRADE COMPLETED")
-    // FIX: Explicitly calls click() to reliably open the dropdown menu.
-    if (activeEl.tagName === 'SELECT') {
-        activeEl.click(); 
-        return;
-    }
+            // 2. Native Select (Open - e.g., "LAST GRADE COMPLETED")
+            // This is the correct way to open native selects.
+            if (activeEl.tagName === 'SELECT') {
+                activeEl.click(); 
+                return;
+            }
 
-    // 3. Select2 (Open)
-    if (activeEl.classList.contains('select2-selection')) {
-        $(activeEl).trigger('click');
-        return;
-    }
+            // 3. Select2 (Open)
+            if (activeEl.classList.contains('select2-selection')) {
+                $(activeEl).trigger('click');
+                return;
+            }
 
-    // 4. TomSelect (Open)
-    if (activeEl.closest('.ts-control')) {
-        activeEl.click();
-        return;
-    }
-    
-    // 5. Buttons (Click - e.g. Add Student)
-    if (activeEl.tagName === 'BUTTON') {
-        activeEl.click();
-    }
-}
+            // 4. TomSelect (Open)
+            if (activeEl.closest('.ts-control')) {
+                activeEl.click();
+                return;
+            }
+            
+            // 5. Buttons (Click - e.g. Add Student)
+            if (activeEl.tagName === 'BUTTON') {
+                activeEl.click();
+            }
+        }
     });
 });
 </script>

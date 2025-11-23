@@ -119,9 +119,9 @@
   </style>
 
 
-  <style>
+<style>
     @media print {
-      /* Reduce the base font size for the entire final area */
+      /* Reduce the base font size for the entire final area to make content fit */
       #finalArea {
         font-size: 8pt !important;
         padding: 0.5rem !important;
@@ -133,29 +133,27 @@
         margin-bottom: 0.5rem !important;
       }
 
-      /* Reduce padding and font-size within table cells */
-      .yellow-table td, .yellow-table th {
-        padding: 4px !important; /* Smaller padding */
+      /* Reduce padding and font-size within all table cells */
+      .yellow-table td, .yellow-table th, #finalArea .p-2 {
+        padding: 4px !important; /* Smaller padding for tighter fit */
         font-size: 8pt !important;
       }
 
-      /* Make the cell labels slightly smaller, but still bold */
+      /* Reduce the margin below bold labels */
       .yellow-table .font-semibold {
         font-size: 8pt !important;
         margin-bottom: 2px !important;
       }
 
-      /* Ensure the data text is small */
+      /* Ensure data text is consistently small */
       .yellow-table td > div:not(.font-semibold) {
         font-size: 8pt !important;
       }
-      
-      /* Override your existing print transform/dimensions (if they conflict) */
-      #finalArea {
-        width: auto !important;
-        height: auto !important;
-        transform: none !important;
-        margin: 0 !important;
+      
+      /* Optional: Override any conflicting A4 settings you might have */
+      @page {
+        size: A5 portrait;
+        margin: 0;
       }
     }
   </style>
@@ -1909,18 +1907,18 @@ tbl.appendChild(trNotes);
 
       // pdf button logic
      // pdf button logic
-      document.getElementById('pdfBtn').onclick = ()=>{
-        // Setting format to 'a5' explicitly tells jsPDF to use A5 dimensions (148mm x 210mm)
-        const opt = { 
-          margin:0.1, // Reduced margin (0.1 inches is about 2.5mm)
-          filename:'one-world-one-centre-intake.pdf', 
-          image:{type:'jpeg',quality:0.98}, 
-          html2canvas:{scale:2}, 
-          // *** MODIFICATION HERE: Set format to 'a5' ***
-          jsPDF:{unit:'in',format:'a5',orientation:'portrait'} 
-        }
-        html2pdf().set(opt).from(document.getElementById('finalArea')).save()
-      }
+document.getElementById('pdfBtn').onclick = ()=>{
+  // Setting format to 'a5' explicitly tells jsPDF to use A5 dimensions (148mm x 210mm)
+  const opt = { 
+    margin:0.1, // Reduced margin (0.1 inches is about 2.5mm) to save space
+    filename:'one-world-one-centre-intake.pdf', 
+    image:{type:'jpeg',quality:0.98}, 
+    html2canvas:{scale:2}, 
+    // Set format to 'a5' for half A4 size
+    jsPDF:{unit:'in',format:'a5',orientation:'portrait'} 
+  }
+  html2pdf().set(opt).from(document.getElementById('finalArea')).save()
+}
 
       // edit/back button
       document.getElementById('editBtn').onclick = ()=>{

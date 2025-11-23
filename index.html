@@ -1369,124 +1369,104 @@ function addStudent(prefill){
     
     
     
-  wrap.innerHTML = `
-  <!-- ROW 1: STUDENT NAME -->
-  <div class="grid grid-cols-12 gap-4">
-    <div class="col-span-3">
-      <label class="text-sm">STUDENT'S Surname</label>
-      <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
-    </div>
-
-    <div class="col-span-3">
-      <label class="text-sm">STUDENT'S GIVEN NAME</label>
-      <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
-    </div>
-
-    <div class="col-span-3">
-      <label class="text-sm">DOB</label>
-      <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" />
-    </div>
-
-    <div class="col-span-3">
-      <label class="text-sm">BIRTH COUNTRY</label>
-      <select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1">
-        <option disabled selected>Loading countries...</option>
-      </select>
-    </div>
-  </div>
-
-
-  <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
-  <div class="grid grid-cols-12 gap-4 mt-4">
-
-    <!-- LAST GRADE COMPLETED (Select2 custom) -->
-    <div class="col-span-4 overflow-visible">
-      <label class="text-sm">LAST GRADE COMPLETED</label>
-
-      <select
-        id="s_${id}_lastgrade"
-        class="lastgrade-select w-full border rounded p-2 mt-1 relative z-50"
-        style="position: relative; z-index: 9999; overflow: visible;"
-        onchange="toggleOtherGrade(${id})"
-      >
-        <option value="" disabled selected hidden>Select grade</option>
-        <option value="Pre KG">Pre KG</option>
-        <option value="KG">KG</option>
-        ${Array.from({length:12}, (_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
-        <option value="Other">Other</option>
-      </select>
-
-      <input
-        type="text"
-        id="s_${id}_lastgrade_spec"
-        class="w-full border rounded p-2 mt-1 hidden"
-        placeholder="Specify grade"
-      />
-    </div>
-
-
-    <!-- PROGRAM SECTION -->
-    <div class="col-span-8">
-      <label class="text-sm">PROGRAM</label>
-
-      <div class="mt-1">
-
-        <!-- Step 1: Program Type -->
-        <div class="flex items-center gap-4">
-          <label class="inline-flex items-center">
-            <input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular
-          </label>
-
-          <label class="inline-flex items-center">
-            <input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special
-          </label>
-        </div>
-
-        <!-- Step 2: Special Program Select (Select2 custom) -->
-        <select
-          id="s_${id}_prog_dropdown"
-          class="special-program-select w-full border rounded p-2 mt-2 hidden"
-          onchange="toggleOtherProg(${id})"
-        >
-          <option value="" disabled selected hidden>Select program</option>
-          <option value="French Immersion">French Immersion</option>
-          <option value="Spanish Bilingual">Spanish Bilingual</option>
-          <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
-          <option value="Other">Other</option>
+    <!-- ROW 1: STUDENT NAME -->
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-3">
+        <label class="text-sm">STUDENT'S SURNAME</label>
+        <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
+      </div>
+      <div class="col-span-3">
+        <label class="text-sm">STUDENT'S GIVEN NAME</label>
+        <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
+      </div>
+      <div class="col-span-3">
+        <label class="text-sm">DOB</label>
+        <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" />
+      </div>
+      <div class="col-span-3">
+        <label class="text-sm">BIRTH COUNTRY</label>
+        <!-- replaced text input with searchable select (will be populated dynamically) -->
+        <select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1">
+          <option disabled selected>Loading countries...</option>
         </select>
-
-        <!-- Step 3: Special Program "Other" text box -->
-        <input
-          type="text"
-          id="s_${id}_prog_spec"
-          class="w-full border rounded p-2 mt-2 hidden"
-          placeholder="Specify program"
-        />
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ROW 3: GENDER & SCHOOL YEAR -->
-  <div class="grid grid-cols-12 gap-4 mt-4">
-    <div class="col-span-6">
-      <label class="text-sm">GENDER</label>
-      <div class="mt-1 flex items-center gap-6">
-        <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
-        <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
       </div>
     </div>
 
-    <div class="col-span-6">
-      <label class="text-sm">SCHOOL YEAR</label>
-      <div class="mt-1 flex items-center gap-6">
-        <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
-        <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
+
+
+
+
+    <!-- ROW 2: LAST GRADE COMPLETED & PROGRAM -->
+    <div class="grid grid-cols-12 gap-4 mt-4">
+     <div class="col-span-4 overflow-visible">
+
+        <label class="text-sm">LAST GRADE COMPLETED</label>
+<select
+  id="s_${id}_lastgrade"
+  class="w-full border rounded p-2 mt-1 relative z-50"
+  style="position: relative; z-index: 9999; overflow: visible;"
+  onchange="toggleOtherGrade(${id})"
+>
+  <option value="" disabled selected hidden>Select grade</option>
+  <option value="Pre KG">Pre KG</option>
+  <option value="KG">KG</option>
+  ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+  <option value="Other">Other</option>
+</select>
+
+        <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
+      </div>
+
+      <div class="col-span-8">
+        <label class="text-sm">PROGRAM</label>
+        <div class="mt-1">
+          <!-- Step 1: Regular or Special -->
+          <div class="flex items-center gap-4">
+            <label class="inline-flex items-center">
+              <input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular
+            </label>
+            <label class="inline-flex items-center">
+              <input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special
+            </label>
+          </div>
+
+          <!-- Step 2: Dropdown only if "Special" is chosen -->
+          <select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})">
+            <option value="" disabled selected hidden>Select program</option>
+            <option value="French Immersion">French Immersion</option>
+            <option value="Spanish Bilingual">Spanish Bilingual</option>
+            <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <!-- Step 3: Free text box only if "Other" is chosen -->
+          <input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
+        </div>
       </div>
     </div>
-  </div>
-`;
 
+
+
+
+    <!-- ROW 3: GENDER & SCHOOL YEAR -->
+    <div class="grid grid-cols-12 gap-4 mt-4">
+      <div class="col-span-6">
+        <label class="text-sm">GENDER</label>
+        <div class="mt-1 flex items-center gap-6">
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
+        </div>
+      </div>
+
+      <div class="col-span-6">
+        <label class="text-sm">SCHOOL YEAR</label>
+        <div class="mt-1 flex items-center gap-6">
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
+          <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
+        </div>
+      </div>
+    </div>
+  `
 
   container.appendChild(wrap)
 
@@ -1569,23 +1549,6 @@ function toggleOtherProg(id){
 
 
 
-// -------------------------------
-// INITIALIZE SELECT2 DROPDOWNS
-// -------------------------------
-
-// LAST GRADE COMPLETED (custom)
-$('#s_' + id + '_lastgrade').select2({
-    dropdownParent: $('#studentsContainer'),
-    width: "100%",
-    dropdownCssClass: "force-open-down",
-});
-
-// SPECIAL PROGRAM (custom)
-$('#s_' + id + '_prog_dropdown').select2({
-    dropdownParent: $('#studentsContainer'),
-    width: "100%",
-    dropdownCssClass: "force-open-down",
-});
 
 
     

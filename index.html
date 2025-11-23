@@ -878,6 +878,39 @@
     }
   }
 </script>
+  <script>
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+  radio.addEventListener("click", function (e) {
+    // If already checked → uncheck it
+    if (this.wasChecked) {
+      this.checked = false;
+      this.wasChecked = false;
+
+      // Hide any connected "Other" field
+      if (this.value === "Other") {
+        const target = this.getAttribute("onchange")
+          ?.match(/'(.*?)'/)?.[1];
+        if (target) {
+          const input = document.getElementById(target);
+          input.classList.add("hidden");
+          input.value = "";
+        }
+      }
+
+      // Stop onchange from firing
+      e.stopImmediatePropagation();
+      return;
+    }
+
+    // Mark as checked for next click
+    document
+      .querySelectorAll(`input[name="${this.name}"]`)
+      .forEach(r => (r.wasChecked = false));
+    this.wasChecked = true;
+  });
+});
+</script>
+
 
       
       <!-- PAGE 3 Parents -->
@@ -2124,12 +2157,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (key === 'Enter') {
             event.preventDefault(); // Stop form submit
 
-            // 1. Radio Buttons (Select)
-            if (activeEl.type === 'radio') {
-                activeEl.checked = true;
-                activeEl.dispatchEvent(new Event('change', { bubbles: true }));
-                return;
+           // 1. Radio Buttons (Toggle Select / Unselect)
+if (activeEl.type === 'radio') {
+    // If already checked → unselect
+    if (activeEl.checked && activeEl.wasChecked) {
+        activeEl.checked = false;
+        activeEl.wasChecked = false;
+
+        // If it was "Other", hide the text input
+        if (activeEl.value === "Other") {
+            const target = activeEl.getAttribute("onchange")?.match(/'(.*?)'/)?.[1];
+            if (target) {
+                const input = document.getElementById(target);
+                input.classList.add("hidden");
+                input.value = "";
             }
+        }
+
+        return; // Done
+    }
+
+    // Otherwise: select it normally
+    document
+        .querySelectorAll(`input[name="${activeEl.name}"]`)
+        .forEach(r => (r.wasChecked = false));
+
+    activeEl.wasChecked = true;
+    activeEl.checked = true;
+    activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+    return;
+}
+
 
             // 2. Select2 (Open)
             if (activeEl.classList.contains('select2-selection')) {

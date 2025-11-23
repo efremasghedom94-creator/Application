@@ -28,10 +28,26 @@
     .checkbox-box { display:inline-block; width:20px; height:20px; border:1px solid #111; text-align:center; line-height:18px; font-weight:700; margin-right:6px; }
     .muted { color:#6b7280; }
 
-    /* Yellow table styling */
-    table.yellow-table, table.yellow-table td, table.yellow-table th { border: 1px solid #000 !important; border-collapse: collapse; font-size: 0.85rem; }
-    table.yellow-table td, table.yellow-table th { padding: 6px; vertical-align: top; }
-    table.yellow-table td div { white-space: normal !important; word-wrap: break-word !important; overflow-wrap: anywhere !important; max-width: 220px; }
+    /* Yellow table styling - FIXED WRAPPING */
+    table.yellow-table, table.yellow-table td, table.yellow-table th { 
+        border: 1px solid #000 !important; 
+        border-collapse: collapse; 
+        font-size: 0.85rem; 
+    }
+    table.yellow-table td, table.yellow-table th { 
+        padding: 6px; 
+        vertical-align: top; 
+    }
+    
+    /* This rule ensures text fills the cell but breaks if it's a long continuous string */
+    table.yellow-table td div { 
+        white-space: normal !important; 
+        word-wrap: break-word !important; 
+        overflow-wrap: anywhere !important; 
+        width: 100% !important; /* Forces full width */
+        max-width: none !important; /* Removes the 220px restriction */
+    }
+    
     .no-wrap-block div { white-space: nowrap !important; word-wrap: normal !important; overflow-wrap: normal !important; }
 
     /* PDF Print Specifics */
@@ -104,6 +120,10 @@
           <button type="button" class="px-4 py-2 bg-green-700 text-white rounded nav-control" onclick="goTo(2)">Next</button>
         </div>
       </section>
+
+
+
+
 
 
       <section class="page hidden" data-step="2">
@@ -279,7 +299,7 @@
 ---
 
 ### **Portion 3: JavaScript Logic**
-*Contains: All scripts (Navigation, Validation, Dynamic Fields, Generation, Keyboard Control).*
+**Fix Applied:** In `generateFinal()`, specifically for the NOTES and Limited Profile sections, I've ensured the text utilizes `overflow-wrap: anywhere` so that long, continuous strings (like "eeeeee") wrap correctly at the border instead of overflowing.
 
 ```html
 <script>

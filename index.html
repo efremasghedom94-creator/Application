@@ -2128,40 +2128,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (key === 'ArrowLeft' || key === 'ArrowRight') return; 
                 // Allow Up/Down to navigate OUT of the cell (Next/Prev field)
             }
-
-            // --- FIX 1: RADIO GROUP NAVIGATION (Program Special) ---
-            if (activeEl.type === 'radio') {
-                event.preventDefault(); // Stop default scroll/behavior
-
-                // Get all radio buttons in the current group
-                const radioGroup = document.querySelectorAll(`input[type="radio"][name="${activeEl.name}"]:not([disabled])`);
-                const currentIdx = Array.from(radioGroup).indexOf(activeEl);
-                let nextIdx = currentIdx;
-                
-                // Calculate next index (loops around)
-                if (key === 'ArrowRight' || key === 'ArrowDown') {
-                    nextIdx = (currentIdx + 1) % radioGroup.length;
-                } else if (key === 'ArrowLeft' || key === 'ArrowUp') {
-                    nextIdx = (currentIdx - 1 + radioGroup.length) % radioGroup.length;
-                }
-
-                if (radioGroup[nextIdx]) {
-                    // Move focus
-                    radioGroup[nextIdx].focus();
-                    
-                    // Standard browser behavior: Arrow keys also select the option
-                    radioGroup[nextIdx].checked = true;
-                    
-                    // Crucial: Fire the change event to show/hide conditional fields (like the "Special" dropdown)
-                    radioGroup[nextIdx].dispatchEvent(new Event('change', { bubbles: true }));
-
-                    return; // EXIT here to prevent general field navigation
-                }
+            
+            // --- FIX: Allow native arrow key behavior for radios and selects ---
+            // If the element is a radio button or a native select element,
+            // we skip the custom field navigation entirely.
+            // This allows the browser to handle:
+            // - Radio buttons: Moving focus/selection within the group (Arrow Up/Down/Left/Right).
+            // - Select elements: Changing the selected option (Arrow Up/Down).
+            if (activeEl.type === 'radio' || activeEl.tagName === 'SELECT') {
+                // DO NOT call event.preventDefault() here.
+                return; 
             }
+            // --- END FIX ---
 
 
-            // 4. Calculate Next Field (Looping) - (Original Step 4/5)
-            event.preventDefault(); // Stop scrolling
+            // 4. Calculate Next Field (Looping)
+            event.preventDefault(); // Stop scrolling (only runs for non-radio/select elements now)
             
             const focusables = getFocusableElements(currentStep);
             if (focusables.length === 0) return;
@@ -2185,12 +2167,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
        // --- C. SELECTION / INTERACTION (Enter) ---
-       // This block is already correct and remains as is.
-       if (key === 'Enter') {
+       // This block is correct for triggering the conditional display of the "Special" program field 
+       // and opening the native "LAST GRADE COMPLETED" select dropdown.
+        if (key === 'Enter') {
             event.preventDefault(); // Stop form submit
 
             // 1. Radio Buttons (Select and trigger conditional visibility)
-            // Works alongside the new Arrow Key logic above.
             if (activeEl.type === 'radio') {
                 activeEl.checked = true;
                 activeEl.dispatchEvent(new Event('change', { bubbles: true })); 
@@ -2198,7 +2180,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 2. Native Select (Open - e.g., "LAST GRADE COMPLETED")
-            // This is the correct way to open native selects.
             if (activeEl.tagName === 'SELECT') {
                 activeEl.click(); 
                 return;

@@ -847,7 +847,15 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  document.getElementById('pdfBtn').onclick = () => {
+// --- NEW CODE: Allows Portrait or Landscape Selection ---
+document.getElementById('pdfBtn').onclick = () => {
+    // 1. Prompt user for orientation (OK=Landscape, Cancel=Portrait)
+    const isLandscape = confirm(
+        "Click OK for **Landscape** orientation (Wider page).\n" + 
+        "Click CANCEL for **Portrait** orientation (Taller page)."
+    );
+    const orientation = isLandscape ? 'landscape' : 'portrait';
+
     const final = document.getElementById('finalArea');
     final.classList.add('pdf-scale');
     
@@ -856,13 +864,15 @@
         filename: 'intake-form.pdf', 
         image: { type: 'jpeg', quality: 0.98 }, 
         html2canvas: { scale: 2, useCORS: true }, 
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } 
+        // 2. Use the chosen orientation
+        jsPDF: { unit: 'in', format: 'a4', orientation: orientation } 
     };
     
     html2pdf().set(opt).from(final).save().then(() => {
         final.classList.remove('pdf-scale');
     });
-  };
+};
+// --------------------------------------------------------
 
   document.getElementById('newFormBtn').onclick = () => {
     if(!confirm("Start new form? Data will be lost.")) return;

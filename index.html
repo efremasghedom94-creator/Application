@@ -30,7 +30,7 @@
     .wizard { 
         background-color: white; 
         border-radius: 0.5rem; 
-        padding: 2rem; /* Original Padding */
+        padding: 2rem; 
         margin: 2rem auto; 
         max-width: 1100px; 
         box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
@@ -39,22 +39,30 @@
     /* Responsive Adjustment: Reduce external padding on mobile */
     @media (max-width: 767px) {
         .wizard { 
-            padding: 1rem; /* Smaller internal padding on small screens */
+            padding: 1rem; 
             margin: 1rem auto;
         }
     }
 
     .page { 
         position: relative; 
-        min-height: 60vh; 
+        /* Removed min-height: 60vh; */
         background-color: white; 
         padding: 0.5rem; 
         border-radius: 0.5rem; 
         display: flex; 
         flex-direction: column; 
-        justify-content: space-between; 
+        /* min-height is now handled by the JS/wrapper for consistency */
     }
     
+    /* --- NEW: Wrapper for consistent height --- */
+    .page-content-wrapper {
+        transition: height 0.3s ease-out; /* Smooth transition for resizing */
+        overflow: hidden; /* Prevent content from pushing the bottom */
+        flex-grow: 1; /* Allow content to take up space */
+    }
+    /* ------------------------------------------- */
+
     .nav-buttons { 
         display: flex; 
         justify-content: space-between; 
@@ -67,7 +75,7 @@
     .disabled-input { background:#f3f4f6; color:#6b7280; pointer-events: none; }
     
     /* YELLOW TABLE STYLING */
-    table.yellow-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 0.8rem; table-layout: fixed; min-width: 700px; /* Ensure table doesn't crush on mobile */ }
+    table.yellow-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 0.8rem; table-layout: fixed; min-width: 700px; }
     table.yellow-table td, table.yellow-table th { border: 1px solid black; padding: 4px 6px; vertical-align: top; word-wrap: break-word; overflow-wrap: anywhere; }
     
     /* Nested Tables */
@@ -92,7 +100,7 @@
     .select2-container .select2-selection--single { height: 42px; border: 1px solid #d1d5db; padding: 6px; }
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; top: 0; }
     
-    /* Mobile Scroll for Table - Added */
+    /* Mobile Scroll for Table */
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -113,51 +121,53 @@
 
       <section class="page" data-step="1">
         <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 1: Contact Info</h2>
-        <div class="grid grid-cols-12 gap-3">
-          <div class="col-span-12 md:col-span-2">
-            <label class="block text-sm font-bold">DATE</label>
-            <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-sm font-bold">TAKEN BY</label>
-            <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-sm font-bold">CONTACT NAME / SURNAME</label>
-            <input id="contactName" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-sm font-bold">CONTACT PHONE #</label>
-            <input id="contactPhone" type="tel" maxlength="14" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
-          </div>
-          
-          <div class="col-span-12 md:col-span-6 mt-4">
-            <label class="block text-sm font-bold mb-1">CONTACT RELATIONSHIP</label>
-            <select id="contactRel" class="border rounded p-3 w-full" onchange="toggleOtherRelation(this)">
-              <option value="" disabled selected hidden>-- Select --</option>
-              <option value="Mother">Mother</option>
-              <option value="Father">Father</option>
-              <option value="Sister">Sister</option>
-              <option value="Brother">Brother</option>
-              <option value="Step-Mother">Step-Mother</option>
-              <option value="Step-Father">Step-Father</option>
-              <option value="Half-Sister">Half-Sister</option>
-              <option value="Half-Brother">Half-Brother</option>
-              <option value="Uncle">Uncle</option>
-              <option value="Aunt">Aunt</option>
-              <option value="Cousin">Cousin</option>
-              <option value="Grandmother">Grandmother</option>
-              <option value="Grandfather">Grandfather</option>
-              <option value="Guardian">Guardian</option>
-              <option value="Sponsor">Sponsor</option>
-              <option value="Family Friend">Family Friend</option>
-              <option value="Neighbor">Neighbor</option>
-              <option value="Community Worker">Community Worker</option>
-              <option value="Social Worker">Social Worker</option>
-              <option value="Other">Other</option>
-            </select>
-            <input type="text" id="otherRelation" class="border rounded p-2 w-full mt-2 hidden" placeholder="Specify" />
-          </div>
+        <div class="page-content-wrapper">
+            <div class="grid grid-cols-12 gap-3">
+              <div class="col-span-12 md:col-span-2">
+                <label class="block text-sm font-bold">DATE</label>
+                <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-12 md:col-span-3">
+                <label class="block text-sm font-bold">TAKEN BY</label>
+                <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-12 md:col-span-4">
+                <label class="block text-sm font-bold">CONTACT NAME / SURNAME</label>
+                <input id="contactName" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-12 md:col-span-3">
+                <label class="block text-sm font-bold">CONTACT PHONE #</label>
+                <input id="contactPhone" type="tel" maxlength="14" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
+              </div>
+              
+              <div class="col-span-12 md:col-span-6 mt-4">
+                <label class="block text-sm font-bold mb-1">CONTACT RELATIONSHIP</label>
+                <select id="contactRel" class="border rounded p-3 w-full" onchange="toggleOtherRelation(this)">
+                  <option value="" disabled selected hidden>-- Select --</option>
+                  <option value="Mother">Mother</option>
+                  <option value="Father">Father</option>
+                  <option value="Sister">Sister</option>
+                  <option value="Brother">Brother</option>
+                  <option value="Step-Mother">Step-Mother</option>
+                  <option value="Step-Father">Step-Father</option>
+                  <option value="Half-Sister">Half-Sister</option>
+                  <option value="Half-Brother">Half-Brother</option>
+                  <option value="Uncle">Uncle</option>
+                  <option value="Aunt">Aunt</option>
+                  <option value="Cousin">Cousin</option>
+                  <option value="Grandmother">Grandmother</option>
+                  <option value="Grandfather">Grandfather</option>
+                  <option value="Guardian">Guardian</option>
+                  <option value="Sponsor">Sponsor</option>
+                  <option value="Family Friend">Family Friend</option>
+                  <option value="Neighbor">Neighbor</option>
+                  <option value="Community Worker">Community Worker</option>
+                  <option value="Social Worker">Social Worker</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input type="text" id="otherRelation" class="border rounded p-2 w-full mt-2 hidden" placeholder="Specify" />
+              </div>
+            </div>
         </div>
         <div class="nav-buttons justify-end">
           <button type="button" class="w-full md:w-auto px-6 py-3 bg-green-700 text-white rounded font-bold shadow hover:bg-green-800 transition" onclick="goTo(2)">Next</button>
@@ -166,47 +176,49 @@
 
       <section class="page hidden" data-step="2">
         <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 2: Status & History</h2>
-        <div class="grid grid-cols-12 gap-3 mb-3">
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold">STUDENT'S STATUS</label>
-            <div class="mt-1 flex flex-wrap gap-3 p-2 bg-gray-50 rounded border">
-              <label class="flex items-center"><input type="radio" name="studentStatus" value="PR" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> PR</label>
-              <label class="flex items-center"><input type="radio" name="studentStatus" value="RC" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> RC</label>
-              <label class="flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> WP</label>
-              <label class="flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> Other</label>
-            </div>
-            <input id="studentStatusOther" type="text" class="hidden w-full border rounded p-2 mt-2" placeholder="Specify" />
-          </div>
-          
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold">IMMIGRATION DOC (PARENT)</label>
-            <div class="mt-1 flex flex-wrap gap-3 p-2 bg-gray-50 rounded border">
-              <label class="flex items-center"><input type="radio" name="immDoc" value="PR" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> PR</label>
-              <label class="flex items-center"><input type="radio" name="immDoc" value="RC" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> RC</label>
-              <label class="flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> WP</label>
-              <label class="flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> Other</label>
-            </div>
-            <input id="immDocOther" type="text" class="hidden w-full border rounded p-2 mt-2" placeholder="Specify" />
-          </div>
-          
-          <div class="col-span-12 md:col-span-6 mt-2">
-            <label class="block text-sm font-bold">EXPIRY DATE</label>
-            <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
-          </div>
-          
-          <div class="col-span-12 md:col-span-6 mt-2">
-            <label class="block text-sm font-bold">DATE LANDED</label>
-            <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
-          </div>
+        <div class="page-content-wrapper">
+            <div class="grid grid-cols-12 gap-3 mb-3">
+              <div class="col-span-12 md:col-span-6">
+                <label class="block text-sm font-bold">STUDENT'S STATUS</label>
+                <div class="mt-1 flex flex-wrap gap-3 p-2 bg-gray-50 rounded border">
+                  <label class="flex items-center"><input type="radio" name="studentStatus" value="PR" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> PR</label>
+                  <label class="flex items-center"><input type="radio" name="studentStatus" value="RC" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> RC</label>
+                  <label class="flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> WP</label>
+                  <label class="flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> Other</label>
+                </div>
+                <input id="studentStatusOther" type="text" class="hidden w-full border rounded p-2 mt-2" placeholder="Specify" />
+              </div>
+              
+              <div class="col-span-12 md:col-span-6">
+                <label class="block text-sm font-bold">IMMIGRATION DOC (PARENT)</label>
+                <div class="mt-1 flex flex-wrap gap-3 p-2 bg-gray-50 rounded border">
+                  <label class="flex items-center"><input type="radio" name="immDoc" value="PR" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> PR</label>
+                  <label class="flex items-center"><input type="radio" name="immDoc" value="RC" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> RC</label>
+                  <label class="flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> WP</label>
+                  <label class="flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> Other</label>
+                </div>
+                <input id="immDocOther" type="text" class="hidden w-full border rounded p-2 mt-2" placeholder="Specify" />
+              </div>
+              
+              <div class="col-span-12 md:col-span-6 mt-2">
+                <label class="block text-sm font-bold">EXPIRY DATE</label>
+                <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
+              </div>
+              
+              <div class="col-span-12 md:col-span-6 mt-2">
+                <label class="block text-sm font-bold">DATE LANDED</label>
+                <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
+              </div>
 
-          <div class="col-span-12 mt-4 border-t pt-4">
-            <label class="block text-sm font-bold">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
-            <div class="mt-2 flex gap-6">
-              <label class="flex items-center"><input type="radio" name="prevAttend" value="No" class="mr-2 transform scale-125" onchange="toggleAttendance(false)"> No</label>
-              <label class="flex items-center"><input type="radio" name="prevAttend" value="Yes" class="mr-2 transform scale-125" onchange="toggleAttendance(true)"> Yes</label>
+              <div class="col-span-12 mt-4 border-t pt-4">
+                <label class="block text-sm font-bold">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
+                <div class="mt-2 flex gap-6">
+                  <label class="flex items-center"><input type="radio" name="prevAttend" value="No" class="mr-2 transform scale-125" onchange="toggleAttendance(false)"> No</label>
+                  <label class="flex items-center"><input type="radio" name="prevAttend" value="Yes" class="mr-2 transform scale-125" onchange="toggleAttendance(true)"> Yes</label>
+                </div>
+                <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="Details (School Name, Grade)..." disabled />
+              </div>
             </div>
-            <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="Details (School Name, Grade)..." disabled />
-          </div>
         </div>
         
         <div class="nav-buttons">
@@ -217,24 +229,26 @@
 
       <section class="page hidden" data-step="3">
         <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 3: Parents</h2>
-        <div class="grid grid-cols-12 gap-4">
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold">FATHER'S SURNAME</label>
-            <input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold">FATHER'S GIVEN NAME</label>
-            <input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 border-b my-2 md:hidden"></div> 
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold">MOTHER'S SURNAME</label>
-            <input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold">MOTHER'S GIVEN NAME</label>
-            <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
+        <div class="page-content-wrapper">
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-12 md:col-span-6">
+                <label class="block text-sm font-bold">FATHER'S SURNAME</label>
+                <input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-12 md:col-span-6">
+                <label class="block text-sm font-bold">FATHER'S GIVEN NAME</label>
+                <input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-12 border-b my-2 md:hidden"></div> 
+              <div class="col-span-12 md:col-span-6">
+                <label class="block text-sm font-bold">MOTHER'S SURNAME</label>
+                <input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-12 md:col-span-6">
+                <label class="block text-sm font-bold">MOTHER'S GIVEN NAME</label>
+                <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+            </div>
         </div>
         <div class="nav-buttons">
           <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(2)">Back</button>
@@ -244,38 +258,40 @@
 
       <section class="page hidden" data-step="4">
         <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 4: Address & Language</h2>
-        <div class="grid grid-cols-12 gap-3">
-          <div class="col-span-4 md:col-span-2">
-            <label class="block text-sm font-bold">APT #</label>
-            <input id="apt" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-8 md:col-span-7">
-            <label class="block text-sm font-bold">FAMILY ADDRESS</label>
-            <input id="address" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-sm font-bold">POSTAL CODE</label>
-            <input id="postal" type="text" class="w-full border rounded p-2 mt-1" oninput="enforcePostalFormat(this)" />
-          </div>
-          
-          <div class="col-span-12 md:col-span-4 mt-2">
-            <label class="block text-sm font-bold">FAMILY PHONE #</label>
-            <input id="familyPhone" type="tel" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
-          </div>
-          
-          <div class="col-span-12 md:col-span-8 mt-2">
-            <label class="block text-sm font-bold">HOME LANGUAGE(S)</label>
-            <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
-          </div>
-          
-          <div class="col-span-12 mt-4 p-3 bg-blue-50 rounded border border-blue-100">
-            <label class="block text-sm font-bold">CATHOLIC RATEPAYER?</label>
-            <div class="flex gap-6 mt-2">
-                <label class="flex items-center"><input type="radio" name="catholic" value="No" class="mr-2"> No</label>
-                <label class="flex items-center"><input type="radio" name="catholic" value="Yes" class="mr-2"> Yes</label>
+        <div class="page-content-wrapper">
+            <div class="grid grid-cols-12 gap-3">
+              <div class="col-span-4 md:col-span-2">
+                <label class="block text-sm font-bold">APT #</label>
+                <input id="apt" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-8 md:col-span-7">
+                <label class="block text-sm font-bold">FAMILY ADDRESS</label>
+                <input id="address" type="text" class="w-full border rounded p-2 mt-1" />
+              </div>
+              <div class="col-span-12 md:col-span-3">
+                <label class="block text-sm font-bold">POSTAL CODE</label>
+                <input id="postal" type="text" class="w-full border rounded p-2 mt-1" oninput="enforcePostalFormat(this)" />
+              </div>
+              
+              <div class="col-span-12 md:col-span-4 mt-2">
+                <label class="block text-sm font-bold">FAMILY PHONE #</label>
+                <input id="familyPhone" type="tel" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
+              </div>
+              
+              <div class="col-span-12 md:col-span-8 mt-2">
+                <label class="block text-sm font-bold">HOME LANGUAGE(S)</label>
+                <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
+              </div>
+              
+              <div class="col-span-12 mt-4 p-3 bg-blue-50 rounded border border-blue-100">
+                <label class="block text-sm font-bold">CATHOLIC RATEPAYER?</label>
+                <div class="flex gap-6 mt-2">
+                    <label class="flex items-center"><input type="radio" name="catholic" value="No" class="mr-2"> No</label>
+                    <label class="flex items-center"><input type="radio" name="catholic" value="Yes" class="mr-2"> Yes</label>
+                </div>
+                <input id="religionOther" type="text" class="mt-2 w-full border rounded p-2 bg-white" placeholder="If not Catholic, specify..." />
+              </div>
             </div>
-            <input id="religionOther" type="text" class="mt-2 w-full border rounded p-2 bg-white" placeholder="If not Catholic, specify..." />
-          </div>
         </div>
         <div class="nav-buttons mt-4">
           <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(3)">Back</button>
@@ -285,11 +301,13 @@
 
       <section class="page hidden" data-step="5">
         <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 5 — Student Details</h2>
-        <div id="studentsContainer" class="space-y-6"></div>
-        
-        <div class="flex flex-col md:flex-row items-center gap-3 mt-6 border-t pt-4">
-          <button class="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition" onclick="addStudent()" type="button">+ Add Another Student</button>
-          <button class="w-full md:w-auto px-4 py-2 bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200 transition" onclick="removeStudent()" type="button">Remove Last Student</button>
+        <div class="page-content-wrapper flex flex-col">
+            <div id="studentsContainer" class="space-y-6 flex-grow"></div>
+            
+            <div class="flex flex-col md:flex-row items-center gap-3 mt-6 border-t pt-4">
+              <button class="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition" onclick="addStudent()" type="button">+ Add Another Student</button>
+              <button class="w-full md:w-auto px-4 py-2 bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200 transition" onclick="removeStudent()" type="button">Remove Last Student</button>
+            </div>
         </div>
         
         <div class="nav-buttons">
@@ -300,22 +318,24 @@
 
       <section class="page hidden" data-step="6">
         <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 6: Final Notes</h2>
-        <div class="grid grid-cols-12 gap-3">
-            <div class="col-span-12">
-                <label class="block text-sm font-bold">LIMITED FORMAL SCHOOLING?</label>
-                <div class="flex gap-6 mt-2 p-2 bg-gray-50 border rounded">
-                    <label class="flex items-center"><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)" class="mr-2"> No</label>
-                    <label class="flex items-center"><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)" class="mr-2"> Yes</label>
+        <div class="page-content-wrapper">
+            <div class="grid grid-cols-12 gap-3">
+                <div class="col-span-12">
+                    <label class="block text-sm font-bold">LIMITED FORMAL SCHOOLING?</label>
+                    <div class="flex gap-6 mt-2 p-2 bg-gray-50 border rounded">
+                        <label class="flex items-center"><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)" class="mr-2"> No</label>
+                        <label class="flex items-center"><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)" class="mr-2"> Yes</label>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
-            <label class="block text-sm font-bold">Details:</label>
-            <textarea id="limitedProfileDetails" rows="3" class="w-full border rounded p-2 mt-1"></textarea>
-        </div>
-        <div class="col-span-12 mt-4">
-            <label class="block text-sm font-bold">NOTE:</label>
-            <textarea id="notes" rows="4" class="w-full border rounded p-2 mt-1" placeholder="Siblings, special needs, appointment preferences..."></textarea>
+            <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
+                <label class="block text-sm font-bold">Details:</label>
+                <textarea id="limitedProfileDetails" rows="3" class="w-full border rounded p-2 mt-1"></textarea>
+            </div>
+            <div class="col-span-12 mt-4">
+                <label class="block text-sm font-bold">NOTE:</label>
+                <textarea id="notes" rows="4" class="w-full border rounded p-2 mt-1" placeholder="Siblings, special needs, appointment preferences..."></textarea>
+            </div>
         </div>
         <div class="nav-buttons">
           <button class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(5)">Back</button>
@@ -367,6 +387,49 @@
   let countriesLoaded = false;
   const loadCountriesPromise = loadCountries(); 
 
+  // --- NEW: Function to set all page heights to the maximum observed height ---
+  function setPageHeight() {
+    const pageWrappers = document.querySelectorAll('.page-content-wrapper');
+    if (pageWrappers.length === 0) return;
+
+    // Reset heights to calculate natural height
+    pageWrappers.forEach(wrapper => wrapper.style.height = 'auto');
+
+    let maxHeight = 0;
+    // Calculate the maximum height needed
+    pageWrappers.forEach(wrapper => {
+        // Ensure the element is visible for accurate measurement
+        const page = wrapper.closest('.page');
+        const isHidden = page && page.classList.contains('hidden');
+        if (isHidden) page.style.display = 'flex'; // Temporarily make page visible for measurement
+        
+        const height = wrapper.offsetHeight;
+        if (height > maxHeight) {
+            maxHeight = height;
+        }
+
+        if (isHidden) page.style.display = ''; // Restore display state
+    });
+
+    // Apply the max height to all wrappers
+    if (maxHeight > 0) {
+        // Use clientHeight + 1 pixel buffer to ensure no scrollbar issues
+        const finalHeight = `${maxHeight + 1}px`; 
+        pageWrappers.forEach(wrapper => {
+            wrapper.style.height = finalHeight;
+        });
+    }
+  }
+
+  window.addEventListener('resize', setPageHeight);
+  // Delay initial calculation until assets are loaded
+  window.addEventListener('load', () => {
+    setPageHeight();
+    // Re-run after a short delay to account for select2/tom-select rendering
+    setTimeout(setPageHeight, 100); 
+  });
+  // --------------------------------------------------------------------------
+
   function escapeHtml(str) { 
     if (!str) return ''; 
     return String(str)
@@ -400,9 +463,11 @@
     if(el.value === 'Other' && el.checked){ 
         inp.classList.remove('hidden'); 
         inp.focus(); 
+        setPageHeight(); // Recalculate height when an element appears
     } else { 
         inp.classList.add('hidden'); 
         inp.value = ''; 
+        setPageHeight(); // Recalculate height when an element disappears
     }
   }
 
@@ -411,9 +476,11 @@
     if(select.value === 'Other'){ 
         otherBox.classList.remove('hidden'); 
         otherBox.focus(); 
+        setPageHeight();
     } else { 
         otherBox.classList.add('hidden'); 
         otherBox.value = ''; 
+        setPageHeight();
     }
   }
 
@@ -428,6 +495,7 @@
         d.classList.add('disabled-input'); 
         d.value = ''; 
     }
+    setPageHeight();
   }
 
   function toggleLimitedProfile(isYes) {
@@ -438,6 +506,7 @@
         box.classList.add('hidden'); 
         document.getElementById('limitedProfileDetails').value = ''; 
     }
+    setPageHeight();
   }
 
   function formatPhone(input) {
@@ -522,7 +591,7 @@
     wrap.innerHTML = `
       <div class="flex justify-between items-center mb-2">
         <h3 class="font-bold text-gray-700">Student #${id}</h3>
-        ${id > 1 ? `<button type="button" class="text-xs text-red-600 underline" onclick="document.getElementById('student-${id}').remove(); studentCount--;">Remove</button>` : ''}
+        ${id > 1 ? `<button type="button" class="text-xs text-red-600 underline" onclick="document.getElementById('student-${id}').remove(); studentCount--; setPageHeight();">Remove</button>` : ''}
       </div>
       <div class="grid grid-cols-12 gap-3">
         <div class="col-span-12 md:col-span-3">
@@ -606,6 +675,8 @@
 
     // Scroll to new student if not the first one, but keep offset for mobile sticky headers
     if(studentCount > 1) window.scrollTo({top:wrap.offsetTop - 20, behavior:'smooth'});
+    
+    setPageHeight(); // Recalculate height when a new student row is added
   }
 
   function removeStudent(){ 
@@ -613,6 +684,7 @@
     const el=document.getElementById(`student-${studentCount}`); 
     if(el) el.remove(); 
     studentCount--; 
+    setPageHeight(); // Recalculate height when a student row is removed
   }
 
   function toggleOtherGrade(id){
@@ -620,6 +692,7 @@
     const spec = document.getElementById(`s_${id}_lastgrade_spec`);
     if(sel.value === 'Other'){ spec.classList.remove('hidden'); } 
     else { spec.classList.add('hidden'); spec.value = ''; }
+    setPageHeight();
   }
 
   function toggleProgramDropdown(id){
@@ -635,6 +708,7 @@
       dropdown.classList.add('hidden'); dropdown.value = '';
       spec.classList.add('hidden'); spec.value = '';
     }
+    setPageHeight();
   }
 
   function toggleOtherProg(id){
@@ -642,6 +716,7 @@
     const spec = document.getElementById(`s_${id}_prog_spec`);
     if(sel.value === 'Other'){ spec.classList.remove('hidden'); } 
     else { spec.classList.add('hidden'); spec.value = ''; }
+    setPageHeight();
   }
 
   // Add the first student by default
@@ -700,7 +775,15 @@
     const immTxt = imm === 'Other' ? (document.getElementById('immDocOther').value || 'Other') : imm;
     
     const pAttend = getRadioValue('prevAttend');
-    const pAttendTxt = pAttend === 'Yes' ? (checkboxMark(true) + ' Yes') : (pAttend === 'No' ? checkboxMark(true) + ' No' : '');
+    const prevDetails = document.getElementById('prevDetails').value;
+    let pAttendTxt;
+    if (pAttend === 'Yes') {
+        pAttendTxt = `${checkboxMark(true)} Yes <br><span class="font-normal text-xs">Details: ${escapeHtml(prevDetails)}</span>`;
+    } else if (pAttend === 'No') {
+        pAttendTxt = `${checkboxMark(true)} No`;
+    } else {
+        pAttendTxt = '☐ Yes ☐ No';
+    }
 
     const tr2 = document.createElement('tr');
     tr2.innerHTML = `
@@ -866,8 +949,8 @@
     $('#contactRel').select2({
       dropdownParent: $(document.body),
       dropdownPosition: 'below',
-      width: '100%' // Ensures it fills the responsive column
-    });
+      width: '100%' 
+    }).on('select2:open', setPageHeight).on('select2:close', setPageHeight); // Recalculate height
   });
 
  // Home Language TomSelect

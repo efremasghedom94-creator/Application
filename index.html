@@ -21,27 +21,27 @@
 
     /* BASIC LAYOUT */
     body { 
+        border: 3px solid #C7631C; 
         margin: 0; 
-        /* Border only on larger screens to save space on mobile */
         min-height: 100vh; 
         background-color: white; 
     }
     
-    @media (min-width: 768px) {
-        body { border: 3px solid #C7631C; }
-    }
-
     .wizard { 
         background-color: white; 
         border-radius: 0.5rem; 
-        padding: 1rem; /* Reduced padding for mobile */
-        margin: 1rem auto; 
+        padding: 2rem; /* Original Padding */
+        margin: 2rem auto; 
         max-width: 1100px; 
         box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
     }
     
-    @media (min-width: 768px) {
-        .wizard { padding: 2rem; margin: 2rem auto; }
+    /* Responsive Adjustment: Reduce external padding on mobile */
+    @media (max-width: 767px) {
+        .wizard { 
+            padding: 1rem; /* Smaller internal padding on small screens */
+            margin: 1rem auto;
+        }
     }
 
     .page { 
@@ -92,7 +92,7 @@
     .select2-container .select2-selection--single { height: 42px; border: 1px solid #d1d5db; padding: 6px; }
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; top: 0; }
     
-    /* Mobile Scroll for Table */
+    /* Mobile Scroll for Table - Added */
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -226,7 +226,8 @@
             <label class="block text-sm font-bold">FATHER'S GIVEN NAME</label>
             <input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" />
           </div>
-          <div class="col-span-12 border-b my-2 md:hidden"></div> <div class="col-span-12 md:col-span-6">
+          <div class="col-span-12 border-b my-2 md:hidden"></div> 
+          <div class="col-span-12 md:col-span-6">
             <label class="block text-sm font-bold">MOTHER'S SURNAME</label>
             <input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1" />
           </div>
@@ -517,7 +518,7 @@
     wrap.className = 'p-4 border rounded bg-gray-50 mb-4 shadow-sm';
     wrap.id = `student-${id}`;
 
-    // Note: Converted grid-cols-12 to use col-span-12 for mobile, specific for md/lg
+    // Responsive Change: Grid items within the student row use col-span-12 md:col-span-X
     wrap.innerHTML = `
       <div class="flex justify-between items-center mb-2">
         <h3 class="font-bold text-gray-700">Student #${id}</h3>
@@ -865,7 +866,7 @@
     $('#contactRel').select2({
       dropdownParent: $(document.body),
       dropdownPosition: 'below',
-      width: '100%' // Changed from fixed px to 100%
+      width: '100%' // Ensures it fills the responsive column
     });
   });
 

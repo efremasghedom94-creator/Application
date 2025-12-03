@@ -134,7 +134,7 @@
             <input id="contactPhone" type="text" maxlength="14" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
           </div>
           <div class="col-span-12 md:col-span-4">
-            <label class="block text-sm mt-2 md:mt-6">CONTACT RELATIONSHIP</label>
+            <label class="block text-sm">CONTACT RELATIONSHIP</label>
             <select id="contactRel" class="border rounded p-3 w-full" onchange="toggleOtherRelation(this)">
               <option value="" disabled selected hidden>-- Select --</option>
               <option value="Mother">Mother</option>
@@ -185,11 +185,11 @@
               <input id="immDocOther" type="text" class="hidden border rounded p-1 ml-2 w-32" placeholder="Specify" />
             </div>
           </div>
-          <div class="col-span-12 md:col-span-4 mt-2">
+          <div class="col-span-12 md:col-span-4">
             <label class="block text-sm">EXPIRY DATE</label>
             <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
           </div>
-          <div class="col-span-12 mt-2">
+          <div class="col-span-12">
             <label class="block text-sm">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
             <div class="mt-1 flex gap-4">
               <label><input type="radio" name="prevAttend" value="No" onchange="toggleAttendance(false)"> No</label>
@@ -197,7 +197,7 @@
             </div>
             <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="Details..." disabled />
           </div>
-          <div class="col-span-12 md:col-span-4 mt-2">
+          <div class="col-span-12 md:col-span-4">
             <label class="block text-sm">DATE LANDED</label>
             <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
           </div>
@@ -231,9 +231,15 @@
           <div class="col-span-8 md:col-span-8"><label class="block text-sm">FAMILY ADDRESS</label><input id="address" type="text" class="w-full border rounded p-2 mt-1" /></div>
           <div class="col-span-12 md:col-span-2"><label class="block text-sm">POSTAL CODE</label><input id="postal" type="text" class="w-full border rounded p-2 mt-1" oninput="enforcePostalFormat(this)" /></div>
           
-          <div class="col-span-12 md:col-span-3 mt-2"><label class="block text-sm">FAMILY PHONE #</label><input id="familyPhone" type="text" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" /></div>
-          <div class="col-span-12 md:col-span-6 mt-2"><label class="block text-sm">HOME LANGUAGE(S)</label><select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select></div>
-          <div class="col-span-12 mt-2">
+          <div class="col-span-12 md:col-span-3">
+            <label class="block text-sm">FAMILY PHONE #</label>
+            <input id="familyPhone" type="text" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
+          </div>
+          <div class="col-span-12 md:col-span-6">
+            <label class="block text-sm">HOME LANGUAGE(S)</label>
+            <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
+          </div>
+          <div class="col-span-12">
             <label class="block text-sm">CATHOLIC</label>
             <div class="flex gap-4"><label><input type="radio" name="catholic" value="No"> No</label><label><input type="radio" name="catholic" value="Yes"> Yes</label></div>
             <input id="religionOther" type="text" class="mt-2 w-full md:w-1/2 border rounded p-2" placeholder="If not Catholic..." />

@@ -289,38 +289,35 @@
       </section>
 
 <section class="page hidden" data-step="6">
-  <h2 class="font-medium mb-3">Page 6</h2>
-  <div class="grid grid-cols-12 gap-3">
-    <div class="col-span-4">
-      <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
-      <div class="mt-1 flex items-center gap-6">
-        <label class="inline-flex items-center">
-          <input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)">No
-        </label>
-        <label class="inline-flex items-center">
-          <input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)">Yes
-        </label>
-      </div>
+    <h2 class="font-normal mb-6 text-base">Page 6</h2>
+
+    <div class="grid grid-cols-12 gap-3">
+        <div class="col-span-12">
+            <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
+            <div class="flex gap-4">
+                <label><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)"> No</label>
+                <label><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)"> Yes</label>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
-    <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
-    <p class="text-xs italic text-gray-600">
-      Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin
-    </p>
-    <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2" placeholder="Provide details for each student"></textarea>
-  </div>
+    <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
+        <label class="block text-sm font-medium">If YES, describe for each student, Grade 1–Grade 12, as relevant:</label>
+        <p class="text-xs italic text-gray-600">
+            Number of years as refugees, country of relocation, refugee camp name, nature of schooling, parent country of origin
+        </p>
+        <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2" placeholder="Provide details for each student"></textarea>
+    </div>
 
-  <div class="col-span-12 mt-4">
-    <label class="block text-sm font-medium">NOTE:</label>
-    <textarea id="notes" class="w-full border rounded p-2 mt-1" placeholder="Additional notes if relevant"></textarea>
-  </div>
+    <div class="col-span-12 mt-4">
+        <label class="block text-sm">NOTE:</label>
+        <textarea id="notes" class="w-full border rounded p-2 mt-1" rows="3" placeholder="Additional notes if relevant"></textarea>
+    </div>
 
-  <div class="nav-buttons mt-6">
-    <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition" onclick="goTo(5)">Back</button>
-    <button class="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800 transition" onclick="generateFinal()">Generate Yellow Form</button>
-  </div>
+    <div class="nav-buttons">
+        <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition" onclick="goTo(5)">Back</button>
+        <button class="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800 transition" onclick="generateFinal()">Generate Yellow Form</button>
+    </div>
 </section>
 
     <div id="finalWrap" class="final-wrap hidden mt-6">

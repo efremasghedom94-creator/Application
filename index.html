@@ -598,10 +598,11 @@
     limContent += `<div>${checkboxMark(lim==='Yes')} Yes  ${checkboxMark(lim==='No')} No</div>`;
 
     if (lim === 'Yes') {
-        // Add the descriptive prompt/label from the new HTML version
-        limContent += `<div style="font-size:10px; margin-top: 5px; color:#555;">If YES, describe for each student, Grade 1–Grade 12, as relevant (e.g., years as refugee, camp name, country of origin):</div>`;
-        // Add the actual details provided by the user
-        limContent += `<div class="cell-content" style="padding: 5px 20px; border-top: 1px solid #ccc; white-space: pre-wrap;">${escapeHtml(limDet)}</div>`;
+        // This is the descriptive label/prompt
+        limContent += `<div style="font-size:10px; margin-top: 5px; color:#555;">If YES, describe for each student, Grade 1–Grade 12, as relevant:</div>`;
+        
+        // Removed 'border-top: 1px solid #ccc;' from the style here.
+        limContent += `<div class="cell-content" style="padding: 5px 20px; white-space: pre-wrap;">${escapeHtml(limDet)}</div>`;
     }
 
     tr7.innerHTML = `<td colspan="5">${limContent}</td>`;

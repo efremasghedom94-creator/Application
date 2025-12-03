@@ -81,7 +81,7 @@
 
     /* PDF Print Specifics */
     #finalArea.pdf-scale { width: 100%; font-size: 10px !important; }
-
+    
     /* Print Media Query */
     @media print {
         body { border: none; background-color: white; }
@@ -96,7 +96,7 @@
 
     /* Library Tweaks */
     .select2-container .select2-selection--single { height: 42px; border: 1px solid #d1d5db; padding: 6px; }
-    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; top: 0; }    
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; top: 0; }
   </style>
 </head>
 
@@ -263,10 +263,10 @@
               </div>
               <div class="col-span-12 mt-2">
                 <label class="block text-sm">CATHOLIC</label>
-<div class="flex gap-4">
-  <label><input type="radio" name="catholic" value="No" onclick="deselectRadio(this)"> No</label>
-  <label><input type="radio" name="catholic" value="Yes" onclick="deselectRadio(this)"> Yes</label>
-</div>
+                <div class="flex gap-4">
+                  <label><input type="radio" name="catholic" value="No"> No</label>
+                  <label><input type="radio" name="catholic" value="Yes"> Yes</label>
+                </div>
                 <input id="religionOther" type="text" class="mt-2 w-full md:w-1/2 border rounded p-2" placeholder="Specify religion (Optional)" />
               </div>
             </div>
@@ -297,10 +297,10 @@
         <div class="grid grid-cols-12 gap-3">
             <div class="col-span-12">
                 <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
-               <div class="flex gap-4">
-              <label><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)" onclick="deselectRadio(this)"> No</label>
-                 <label><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)" onclick="deselectRadio(this)"> Yes</label>
-               </div>
+                <div class="flex gap-4">
+                    <label><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)"> No</label>
+                    <label><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)"> Yes</label>
+                </div>
             </div>
         </div>
 
@@ -423,47 +423,6 @@
     input.value = formatted;
   }
 
-}
-
-
-
-    // --- New Deselect Function ---
-function deselectRadio(input) {
-  // Use a timeout to allow the browser's default select action to complete first
-  setTimeout(() => {
-    // Check if the input element has a 'data-checked' attribute
-    // and if its previous state (data-checked) matches the current state (input.checked)
-    if (input.checked && input.getAttribute('data-checked') === 'true') {
-      input.checked = false; // Manually deselect the radio button
-    }
-
-    // Update the 'data-checked' attribute to reflect the current state for the next click
-    input.setAttribute('data-checked', input.checked ? 'true' : 'false');
-
-    // This is important for form logic. If the input is part of a group that
-    // triggers other actions (like 'Other' fields), we need to handle the deselection
-    // (You will need to manually call existing toggle functions if they are needed on deselect)
-
-    // Example of calling an existing toggle function for 'Other' fields if deselected:
-    if (input.name === 'studentStatus' || input.name === 'immDoc') {
-       // Since the input is now unchecked, call toggleOtherField with an unchecked state
-       // We only need to do this if the deselected item was 'Other'
-       if (input.value === 'Other') {
-           const otherId = input.name + 'Other';
-           document.getElementById(otherId)?.classList.add('hidden');
-           document.getElementById(otherId)?.value = '';
-       }
-    }
-    // Add logic for other radio groups if their toggles need to be reset on deselect.
-
-  }, 1);
-}
-// -----------------------------
-
-
-
-
-  
   // ============================================
   // 2. DATA LOADING (COUNTRIES & LANGS)
   // ============================================

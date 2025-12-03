@@ -2,85 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>One World One Centre Student Intake Form</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
   <style>
-    /* GLOBAL BOX SIZING */
+    /* GLOBAL BOX SIZING FIX (Prevents overflow) */
     *, *::before, *::after { box-sizing: border-box; }
 
-    /* BASIC LAYOUT & RESPONSIVENESS */
-    body { 
-        margin: 0; 
-        min-height: 100vh; 
-        background-color: #f3f4f6; 
-    }
-
-    /* Desktop Border (Orange) - Only show on larger screens to save space on mobile */
-    @media (min-width: 768px) {
-        body { border: 3px solid #C7631C; background-color: white; }
-    }
-
-    .wizard { 
-        background-color: white; 
-        border-radius: 0.5rem; 
-        padding: 1.5rem; 
-        margin: 1rem auto; 
-        max-width: 1100px; 
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
-    }
-
-    /* Page transitions */
-    .page { 
-        position: relative; 
-        min-height: 60vh; 
-        background-color: white; 
-        padding: 0.5rem; 
-        border-radius: 0.5rem; 
-        display: flex; 
-        flex-direction: column; 
-        justify-content: space-between; 
-    }
-
-    .nav-buttons { 
-        display: flex; 
-        justify-content: space-between; 
-        margin-top: 2rem; 
-        padding-top: 1rem; 
-        border-top: 1px solid #e5e7eb;
-    }
+    /* BASIC LAYOUT */
+    body { margin: 0; border: 3px solid #C7631C; min-height: 100vh; background-color: white; }
+    .wizard { background-color: white; border-radius: 0.5rem; padding: 2rem; margin: 2rem auto; max-width: 1100px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .page { position: relative; min-height: 70vh; background-color: white; padding: 1.5rem; border-radius: 0.5rem; display: flex; flex-direction: column; justify-content: space-between; }
+    .nav-buttons { display: flex; justify-content: space-between; margin-top: auto; padding-top: 1rem; }
     
     /* INPUT STYLES */
     select { transform-origin: top center !important; }
     .disabled-input { background:#f3f4f6; color:#6b7280; pointer-events: none; }
     
     /* =========================================
-       STRICT YELLOW TABLE STYLING (The Print Output)
+       STRICT YELLOW TABLE STYLING
        ========================================= */
     
-    /* Wrapper to allow scrolling on mobile without breaking print layout */
-    .table-scroll-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        border: 1px solid #ddd;
-        margin-bottom: 1rem;
-    }
-
     /* 1. The Outer Table */
     table.yellow-table {
         width: 100%;
-        min-width: 900px; /* Forces scroll on mobile to keep layout strict */
         border-collapse: collapse; 
         border: 2px solid black; 
         font-size: 0.8rem;
-        table-layout: fixed; 
-        background-color: #fff989; /* Yellow background */
+        table-layout: fixed; /* CRITICAL for overflow prevention */
     }
 
     /* 2. Standard Cells */
@@ -109,10 +69,12 @@
         border-bottom: none !important;
     }
     
-    /* 4. STUDENT ROW SPECIFIC FIXES */
+    /* 4. STUDENT ROW SPECIFIC FIXES (The separator lines) */
+    /* We Override the 'no bottom border' rule for student rows */
     tr.student-row td {
         border-bottom: 1px solid black !important; 
     }
+    /* Optional: Remove border from the very last student to match parent bottom */
     tr.student-row:last-child td {
         border-bottom: none !important;
     }
@@ -127,253 +89,249 @@
     /* Text Formatting */
     .font-semibold { font-weight: 700; margin-bottom: 2px; font-size: 0.75rem; text-transform: uppercase; }
     
+    /* Content Wrapper to catch overflow */
     .cell-content { 
         width: 100%; 
         min-height: 18px; 
         word-break: break-word; 
         overflow-wrap: anywhere;
-        font-family: 'Courier New', Courier, monospace; /* Typewriter look */
-        font-weight: 600;
-        color: #000;
     }
 
+    /* PDF Print Specifics */
+    #finalArea.pdf-scale { width: 100%; font-size: 10px !important; }
+    
     /* Library Tweaks */
     .select2-container .select2-selection--single { height: 42px; border: 1px solid #d1d5db; padding: 6px; }
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; top: 0; }
     
-    /* PRINT MEDIA QUERY */
-    @media print {
-        body { border: none; background: white; }
-        .wizard, .nav-buttons, .no-print { display: none !important; }
-        #finalWrap { display: block !important; margin: 0; padding: 0; }
-        #finalArea { border: none; shadow: none; padding: 0; }
-        .table-scroll-wrapper { border: none; overflow: visible; }
-        table.yellow-table { min-width: 100%; width: 100%; }
-    }
   </style>
 </head>
 
 <body class="bg-gray-100 text-gray-800">
-  <div class="max-w-6xl mx-auto p-2 md:p-6">
-    <div id="wizardRoot" class="wizard bg-white rounded-lg shadow">
+  <div class="max-w-5xl mx-auto p-6">
+    <div id="wizardRoot" class="wizard bg-white rounded-lg shadow p-6">
 
-        <div class="flex flex-col-reverse md:flex-row items-center justify-between mb-6 gap-4 border-b pb-4">
-            <h1 class="text-lg md:text-xl font-semibold leading-tight text-center md:text-left">
-                INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
-            </h1>
-            <div class="w-48 md:w-80 flex-shrink-0">
-               <img src="One World Logo.jpg" alt="One World Logo" class="w-full h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden')">
-               <div id="logo-fallback" class="hidden text-center p-4 bg-gray-200 text-xs">LOGO HERE</div>
-            </div>
-        </div>
 
+
+
+   
+<div class="flex items-center justify-between mb-6 ml-6 mr-6 gap-4">
+    <h1 class="text-xl font-semibold leading-tight pr-4">
+        INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
+    </h1>
+<img src="One World Logo.jpg" 
+     alt="One World One Centre Logo" 
+     class="w-80 h-auto object-contain flex-shrink-0">
+</div>
+
+
+
+
+      
+
+
+      
       <section class="page" data-step="1">
-        <h2 class="font-medium mb-3 text-orange-600 border-b">Intake Details (1/6)</h2>
-        <div class="grid grid-cols-12 gap-3 md:gap-4">
-          <div class="col-span-12 md:col-span-2">
-            <label class="block text-sm font-bold text-gray-700">DATE</label>
+        <h2 class="font-medium mb-3">Page 1</h2>
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-2">
+            <label class="block text-sm">DATE</label>
             <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
           </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-sm font-bold text-gray-700">TAKEN BY</label>
+          <div class="col-span-3">
+            <label class="block text-sm">TAKEN BY</label>
             <input id="takenBy" type="text" class="w-full border rounded p-2 mt-1" />
           </div>
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-sm font-bold text-gray-700">CONTACT NAME / SURNAME</label>
+          <div class="col-span-4">
+            <label class="block text-sm">CONTACT NAME / SURNAME</label>
             <input id="contactName" type="text" class="w-full border rounded p-2 mt-1" />
           </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-sm font-bold text-gray-700">CONTACT PHONE #</label>
-            <input id="contactPhone" type="text" maxlength="14" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" placeholder="(555) 555-5555" />
+          <div class="col-span-2">
+            <label class="block text-sm">CONTACT PHONE #</label>
+            <input id="contactPhone" type="text" maxlength="14" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
           </div>
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-sm font-bold text-gray-700 mt-2">CONTACT RELATIONSHIP</label>
-            <select id="contactRel" class="border rounded p-3 w-full mt-1" onchange="toggleOtherRelation(this)">
+          <div class="col-span-4">
+            <label class="block text-sm mt-6">CONTACT RELATIONSHIP</label>
+            <select id="contactRel" class="border rounded p-3 w-72" onchange="toggleOtherRelation(this)">
               <option value="" disabled selected hidden>-- Select --</option>
               <option value="Mother">Mother</option>
               <option value="Father">Father</option>
+              <option value="Sister">Sister</option>
+              <option value="Brother">Brother</option>
+              <option value="Step-Mother">Step-Mother</option>
+              <option value="Step-Father">Step-Father</option>
+              <option value="Half-Sister">Half-Sister</option>
+              <option value="Half-Brother">Half-Brother</option>
+              <option value="Uncle">Uncle</option>
+              <option value="Aunt">Aunt</option>
+              <option value="Cousin">Cousin</option>
+              <option value="Grandmother">Grandmother</option>
+              <option value="Grandfather">Grandfather</option>
               <option value="Guardian">Guardian</option>
+              <option value="Sponsor">Sponsor</option>
+              <option value="Family Friend">Family Friend</option>
+              <option value="Neighbor">Neighbor</option>
+              <option value="Community Worker">Community Worker</option>
+              <option value="Social Worker">Social Worker</option>
               <option value="Other">Other</option>
             </select>
-            <input type="text" id="otherRelation" class="border rounded p-2 w-full mt-2 hidden" placeholder="Specify Relationship" />
+            <input type="text" id="otherRelation" class="border rounded p-2 w-72 mt-2 hidden" placeholder="Specify" />
           </div>
         </div>
         <div class="nav-buttons justify-end">
-          <button type="button" class="w-full md:w-auto px-6 py-3 bg-green-700 text-white rounded font-bold shadow hover:bg-green-800 transition" onclick="goTo(2)">Next &rarr;</button>
+          <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(2)">Next</button>
         </div>
       </section>
 
+
+
+
+
+
+
+
       <section class="page hidden" data-step="2">
-        <h2 class="font-medium mb-3 text-orange-600 border-b">Status & Immigration (2/6)</h2>
-        <div class="grid grid-cols-12 gap-3 md:gap-4 mb-3">
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold text-gray-700">STUDENT'S STATUS</label>
-            <div class="mt-2 flex flex-wrap gap-4 p-2 bg-gray-50 rounded">
+        <h2 class="font-medium mb-3">Page 2</h2>
+        <div class="grid grid-cols-12 gap-3 mb-3">
+          <div class="col-span-6">
+            <label class="block text-sm">STUDENT'S STATUS</label>
+            <div class="mt-1 flex flex-wrap gap-3">
               <label><input type="radio" name="studentStatus" value="PR" onchange="toggleOtherField('studentStatusOther', this)"> PR</label>
               <label><input type="radio" name="studentStatus" value="RC" onchange="toggleOtherField('studentStatusOther', this)"> RC</label>
               <label><input type="radio" name="studentStatus" value="WP" onchange="toggleOtherField('studentStatusOther', this)"> WP</label>
               <label><input type="radio" name="studentStatus" value="Other" onchange="toggleOtherField('studentStatusOther', this)"> Other</label>
-              <input id="studentStatusOther" type="text" class="hidden border rounded p-1 ml-2 text-sm w-32" placeholder="Specify" />
+              <input id="studentStatusOther" type="text" class="hidden border rounded p-1 ml-2" placeholder="Specify" />
             </div>
           </div>
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold text-gray-700">IMMIGRATION DOC (PARENT)</label>
-            <div class="mt-2 flex flex-wrap gap-4 p-2 bg-gray-50 rounded">
+          <div class="col-span-6">
+            <label class="block text-sm">IMMIGRATION DOC (PARENT)</label>
+            <div class="mt-1 flex flex-wrap gap-3">
               <label><input type="radio" name="immDoc" value="PR" onchange="toggleOtherField('immDocOther', this)"> PR</label>
               <label><input type="radio" name="immDoc" value="RC" onchange="toggleOtherField('immDocOther', this)"> RC</label>
               <label><input type="radio" name="immDoc" value="WP" onchange="toggleOtherField('immDocOther', this)"> WP</label>
               <label><input type="radio" name="immDoc" value="Other" onchange="toggleOtherField('immDocOther', this)"> Other</label>
-              <input id="immDocOther" type="text" class="hidden border rounded p-1 ml-2 text-sm w-32" placeholder="Specify" />
+              <input id="immDocOther" type="text" class="hidden border rounded p-1 ml-2" placeholder="Specify" />
             </div>
           </div>
-          <div class="col-span-12 md:col-span-4 mt-2">
-            <label class="block text-sm font-bold text-gray-700">EXPIRY DATE</label>
+          <div class="col-span-4 mt-2">
+            <label class="block text-sm">EXPIRY DATE</label>
             <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
           </div>
-          <div class="col-span-12 md:col-span-4 mt-2">
-             <label class="block text-sm font-bold text-gray-700">DATE LANDED</label>
-             <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 mt-4">
-            <label class="block text-sm font-bold text-gray-700">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
-            <div class="mt-1 flex gap-6">
-              <label class="flex items-center gap-2"><input type="radio" name="prevAttend" value="No" onchange="toggleAttendance(false)"> No</label>
-              <label class="flex items-center gap-2"><input type="radio" name="prevAttend" value="Yes" onchange="toggleAttendance(true)"> Yes</label>
+          <div class="col-span-12 mt-2">
+            <label class="block text-sm">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
+            <div class="mt-1 flex gap-4">
+              <label><input type="radio" name="prevAttend" value="No" onchange="toggleAttendance(false)"> No</label>
+              <label><input type="radio" name="prevAttend" value="Yes" onchange="toggleAttendance(true)"> Yes</label>
             </div>
-            <textarea id="prevDetails" class="mt-2 w-full border rounded p-2 disabled-input" rows="2" placeholder="If yes, please provide details..." disabled></textarea>
+            <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="Details..." disabled />
+          </div>
+          <div class="col-span-4 mt-2">
+            <label class="block text-sm">DATE LANDED</label>
+            <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
           </div>
         </div>
         <div class="nav-buttons">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" onclick="goTo(1)">&larr; Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800" onclick="goTo(3)">Next &rarr;</button>
+          <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(1)">Back</button>
+          <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(3)">Next</button>
         </div>
       </section>
 
       <section class="page hidden" data-step="3">
-        <h2 class="font-medium mb-3 text-orange-600 border-b">Parent Information (3/6)</h2>
-        <div class="grid grid-cols-12 gap-3 md:gap-4">
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold text-gray-700">FATHER'S SURNAME</label>
-            <input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold text-gray-700">FATHER'S GIVEN NAME</label>
-            <input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold text-gray-700">MOTHER'S SURNAME</label>
-            <input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-6">
-            <label class="block text-sm font-bold text-gray-700">MOTHER'S GIVEN NAME</label>
-            <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
+        <h2 class="font-medium mb-3">Page 3</h2>
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-3"><label class="block text-sm">FATHER'S SURNAME</label><input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1" /></div>
+          <div class="col-span-3"><label class="block text-sm">FATHER'S GIVEN NAME</label><input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" /></div>
+          <div class="col-span-3"><label class="block text-sm">MOTHER'S SURNAME</label><input id="motherSurname" type="text" class="w-full border rounded p-2 mt-1" /></div>
+          <div class="col-span-3"><label class="block text-sm">MOTHER'S GIVEN NAME</label><input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" /></div>
         </div>
         <div class="nav-buttons">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" onclick="goTo(2)">&larr; Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded hover:bg-gray-800" onclick="goTo(4)">Next &rarr;</button>
+          <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(2)">Back</button>
+          <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(4)">Next</button>
         </div>
       </section>
 
       <section class="page hidden" data-step="4">
-        <h2 class="font-medium mb-3 text-orange-600 border-b">Contact & Demographics (4/6)</h2>
-        <div class="grid grid-cols-12 gap-3 md:gap-4">
-          <div class="col-span-4 md:col-span-2">
-            <label class="block text-sm font-bold text-gray-700">APT #</label>
-            <input id="apt" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-8 md:col-span-7">
-            <label class="block text-sm font-bold text-gray-700">STREET ADDRESS</label>
-            <input id="address" type="text" class="w-full border rounded p-2 mt-1" />
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-sm font-bold text-gray-700">POSTAL CODE</label>
-            <input id="postal" type="text" class="w-full border rounded p-2 mt-1 uppercase" oninput="enforcePostalFormat(this)" placeholder="A1A 1A1" />
-          </div>
-          <div class="col-span-12 md:col-span-4 mt-2">
-            <label class="block text-sm font-bold text-gray-700">FAMILY PHONE #</label>
-            <input id="familyPhone" type="text" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" placeholder="(555) 555-5555" />
-          </div>
-          <div class="col-span-12 md:col-span-8 mt-2">
-            <label class="block text-sm font-bold text-gray-700">HOME LANGUAGE(S) <span class="font-normal text-xs text-gray-500">(Type to search)</span></label>
-            <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
-          </div>
-          <div class="col-span-12 mt-4 bg-gray-50 p-3 rounded border">
-            <label class="block text-sm font-bold text-gray-700">RELIGION: CATHOLIC?</label>
-            <div class="flex gap-6 mt-2 mb-2">
-                <label class="flex items-center gap-2"><input type="radio" name="catholic" value="No"> No</label>
-                <label class="flex items-center gap-2"><input type="radio" name="catholic" value="Yes"> Yes</label>
-            </div>
-            <input id="religionOther" type="text" class="w-full md:w-1/2 border rounded p-2" placeholder="If not Catholic, specify here..." />
+        <h2 class="font-medium mb-3">Page 4</h2>
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-2"><label class="block text-sm">APARTMENT #</label><input id="apt" type="text" class="w-full border rounded p-2 mt-1" /></div>
+          <div class="col-span-8"><label class="block text-sm">FAMILY ADDRESS</label><input id="address" type="text" class="w-full border rounded p-2 mt-1" /></div>
+          <div class="col-span-2"><label class="block text-sm">POSTAL CODE</label><input id="postal" type="text" class="w-full border rounded p-2 mt-1" oninput="enforcePostalFormat(this)" /></div>
+          <div class="col-span-2 mt-2"><label class="block text-sm">FAMILY PHONE #</label><input id="familyPhone" type="text" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" /></div>
+          <div class="col-span-6 mt-2 ml-4"><label class="block text-sm">HOME LANGUAGE(S)</label><select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select></div>
+          <div class="col-span-12 mt-2">
+            <label class="block text-sm">CATHOLIC</label>
+            <div class="flex gap-4"><label><input type="radio" name="catholic" value="No"> No</label><label><input type="radio" name="catholic" value="Yes"> Yes</label></div>
+            <input id="religionOther" type="text" class="mt-2 w-full border rounded p-2" placeholder="If not Catholic..." />
           </div>
         </div>
-        <div class="nav-buttons">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" onclick="goTo(3)">&larr; Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded hover:bg-gray-800" onclick="goTo(5)">Next &rarr;</button>
+        <div class="nav-buttons mt-4">
+          <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(3)">Back</button>
+          <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(5)">Next</button>
         </div>
       </section>
 
       <section class="page hidden" data-step="5">
-        <h2 class="font-medium mb-3 text-orange-600 border-b">Student Details (5/6)</h2>
-        <div id="studentsContainer" class="space-y-6"></div>
-        
-        <div class="flex flex-col md:flex-row items-center gap-3 mt-6 border-t pt-4">
-          <button class="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700" onclick="addStudent()" type="button">+ Add Another Student</button>
-          <button class="w-full md:w-auto px-4 py-2 bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200" onclick="removeStudent()" type="button">Remove Last Student</button>
+        <h2 class="font-medium mb-3">Page 5 — Student Details</h2>
+        <div id="studentsContainer" class="space-y-4"></div>
+        <div class="flex items-center gap-3 mt-3">
+          <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="addStudent()" type="button">Add Student</button>
+          <button class="px-3 py-2 bg-red-500 text-white rounded" onclick="removeStudent()" type="button">Remove Last</button>
         </div>
         <div class="nav-buttons">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" onclick="goTo(4)">&larr; Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded hover:bg-gray-800" onclick="goTo(6)">Next &rarr;</button>
+          <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(4)">Back</button>
+          <button type="button" class="px-4 py-2 bg-green-700 text-white rounded" onclick="goTo(6)">Next</button>
         </div>
       </section>
 
       <section class="page hidden" data-step="6">
-        <h2 class="font-medium mb-3 text-orange-600 border-b">Additional Info (6/6)</h2>
+        <h2 class="font-medium mb-3">Page 6</h2>
         <div class="grid grid-cols-12 gap-3">
-            <div class="col-span-12">
-                <label class="block text-sm font-bold text-gray-700">LIMITED FORMAL SCHOOLING?</label>
-                <div class="flex gap-6 mt-2">
-                    <label class="flex items-center gap-2"><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)"> No</label>
-                    <label class="flex items-center gap-2"><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)"> Yes</label>
-                </div>
-            </div>
+            <div class="col-span-6"><label class="block text-sm">LIMITED FORMAL SCHOOLING?</label><div class="flex gap-4"><label><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)"> No</label><label><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)"> Yes</label></div></div>
         </div>
-        <div id="limitedProfileBox" class="col-span-12 mt-4 hidden bg-yellow-50 p-3 rounded border border-yellow-200">
-            <label class="block text-sm font-bold text-gray-700">Please provide details:</label>
-            <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2" rows="3"></textarea>
+        <div id="limitedProfileBox" class="col-span-12 mt-4 hidden">
+            <label class="block text-sm">Details:</label>
+            <textarea id="limitedProfileDetails" class="w-full border rounded p-2 mt-2"></textarea>
         </div>
-        <div class="col-span-12 mt-6">
-            <label class="block text-sm font-bold text-gray-700">ADDITIONAL NOTES:</label>
-            <textarea id="notes" class="w-full border rounded p-2 mt-1" rows="4" placeholder="Enter any other relevant information here..."></textarea>
-        </div>
+        <div class="col-span-12 mt-4"><label class="block text-sm">NOTE:</label><textarea id="notes" class="w-full border rounded p-2 mt-1"></textarea></div>
         <div class="nav-buttons">
-          <button class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" onclick="goTo(5)">&larr; Back</button>
-          <button class="w-full md:w-auto px-6 py-3 bg-indigo-700 text-white rounded font-bold shadow-lg hover:bg-indigo-800 animate-pulse" onclick="generateFinal()">Generate Yellow Form</button>
+          <button class="px-4 py-2 bg-gray-500 text-white rounded" onclick="goTo(5)">Back</button>
+          <button class="px-4 py-2 bg-green-700 text-white rounded" onclick="generateFinal()">Generate Yellow Form</button>
         </div>
       </section>
     </div>
 
     <div id="finalWrap" class="final-wrap hidden mt-6">
-      
-      <div class="mb-4 flex flex-col md:flex-row justify-center gap-3 no-print">
-         <button id="editBtn" onclick="document.getElementById('finalWrap').classList.add('hidden'); document.getElementById('wizardRoot').classList.remove('hidden'); window.scrollTo(0,0);" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Edit Data</button>
-         <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="window.print()">Print Form</button>
-         <button id="pdfBtn" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700" onclick="downloadPDF()">Download PDF</button>
-         <button id="newFormBtn" onclick="location.reload()" class="px-4 py-2 bg-white text-red-600 border border-red-600 rounded hover:bg-red-50">New Form</button>
-      </div>
-
-      <div class="table-scroll-wrapper shadow-lg">
-          <div id="finalArea" class="p-6 md:p-8" style="background-color: #fff989;">
-              </div>
-      </div>
-      
-      <p class="text-center text-xs text-gray-500 mt-2 no-print">
-          Note: If the yellow form looks cut off on your phone, scroll left/right on the table above. 
-          The PDF download will contain the full size document.
-      </p>
-
+      <div id="finalArea" class="p-6 rounded shadow border" style="background-color: #fff989;"></div>
+     <div class="mt-4 flex justify-center gap-3 relative">
+    
+    <div id="orientationSelector" 
+         class="absolute hidden bottom-full right-1/2 translate-x-1/2 mb-3 p-3 rounded shadow-xl z-20 text-sm" 
+         style="background-color: #fff8dc; border: 1px solid #C7631C; width: 200px;">
+        
+        <p class="font-bold mb-2 text-gray-800">Select PDF Orientation:</p>
+        
+        <button id="downloadPortraitBtn" class="w-full mb-1 px-3 py-1 text-white rounded hover:opacity-90 transition" 
+                style="background-color: #C7631C;">
+            Portrait (Taller)
+        </button>
+        
+        <button id="downloadLandscapeBtn" class="w-full px-3 py-1 text-white rounded hover:opacity-90 transition" 
+                style="background-color: #C7631C;">
+            Landscape (Wider)
+        </button>
+    </div>
+    
+    <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
+    <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
+    <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
+    <button id="newFormBtn" class="px-4 py-2 bg-red-700 text-white rounded">New Form</button>
+</div>
     </div>
   </div>
+
+
+
+
 
   <script>
   // ============================================
@@ -534,18 +492,6 @@
     if(selectedValue) { $s.val(selectedValue).trigger('change'); }
   }
 
-  // Pre-load Languages into Select2
-  $(document).ready(function() {
-      // Basic language list
-      const langs = ["English", "French", "Spanish", "Arabic", "Tagalog", "Punjabi", "Cantonese", "Mandarin", "Ukrainian", "Hindi", "Urdu", "Vietnamese", "Korean", "German", "Italian", "Portuguese", "Russian", "Polish", "Persian", "Pashto", "Tigrinya", "Amharic", "Somali", "Oromo", "Swahili", "Other"];
-      const $l = $('#homeLang');
-      langs.forEach(l => $l.append(new Option(l, l)));
-      $l.select2({
-          placeholder: "Select or type language(s)",
-          tags: true
-      });
-  });
-
   // ============================================
   // 3. DYNAMIC STUDENT ROWS
   // ============================================
@@ -554,26 +500,24 @@
     const id = studentCount;
     const container = document.getElementById('studentsContainer');
     const wrap = document.createElement('div');
-    wrap.className = 'p-4 border rounded bg-white shadow-sm relative';
+    wrap.className = 'p-4 border rounded bg-gray-50 mb-4';
     wrap.id = `student-${id}`;
 
-    // Note: Adjusted grid classes for mobile (col-span-12) vs desktop (col-span-X)
     wrap.innerHTML = `
-      <div class="absolute top-2 right-2 bg-gray-200 text-gray-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">#${id}</div>
-      <div class="grid grid-cols-12 gap-3">
-        <div class="col-span-12 md:col-span-3">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-3">
             <label class="text-xs font-bold text-gray-700">STUDENT'S SURNAME</label>
             <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
         </div>
-        <div class="col-span-12 md:col-span-3">
+        <div class="col-span-3">
             <label class="text-xs font-bold text-gray-700">STUDENT'S GIVEN NAME</label>
             <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
         </div>
-        <div class="col-span-6 md:col-span-3">
+        <div class="col-span-3">
             <label class="text-xs font-bold text-gray-700">DOB</label>
             <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" />
         </div>
-        <div class="col-span-12 md:col-span-3">
+        <div class="col-span-3">
             <label class="text-xs font-bold text-gray-700">BIRTH COUNTRY</label>
             <select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1">
                 <option disabled selected>Loading...</option>
@@ -581,8 +525,8 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-12 gap-3 mt-3">
-        <div class="col-span-12 md:col-span-4 overflow-visible">
+      <div class="grid grid-cols-12 gap-4 mt-3">
+        <div class="col-span-4 overflow-visible">
             <label class="text-xs font-bold text-gray-700">LAST GRADE COMPLETED</label>
             <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
                 <option value="" disabled selected hidden>Select grade</option>
@@ -594,10 +538,10 @@
             <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
         </div>
 
-        <div class="col-span-12 md:col-span-8">
+        <div class="col-span-8">
             <label class="text-xs font-bold text-gray-700">PROGRAM</label>
-            <div class="mt-1 p-2 border rounded bg-gray-50">
-                <div class="flex flex-wrap items-center gap-4">
+            <div class="mt-1 p-2 border rounded bg-white">
+                <div class="flex items-center gap-4">
                     <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular</label>
                     <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special</label>
                 </div>
@@ -613,19 +557,19 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-12 gap-3 mt-3">
+      <div class="grid grid-cols-12 gap-4 mt-3">
         <div class="col-span-6">
             <label class="text-xs font-bold text-gray-700">GENDER</label>
-            <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-gray-50">
+            <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
                 <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
                 <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
             </div>
         </div>
         <div class="col-span-6">
             <label class="text-xs font-bold text-gray-700">SCHOOL YEAR</label>
-            <div class="mt-1 flex items-center gap-4 p-2 border rounded bg-gray-50">
-                <label class="inline-flex items-center text-xs md:text-sm"><input type="radio" name="s_${id}_year" value="Current" class="mr-1">This year</label>
-                <label class="inline-flex items-center text-xs md:text-sm"><input type="radio" name="s_${id}_year" value="Next" class="mr-1">Next year</label>
+            <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
+                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
+                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
             </div>
         </div>
       </div>
@@ -639,6 +583,8 @@
     } else {
       loadCountriesPromise.then(()=> populateCountrySelectById(selectEl, prefill?.birth || ''));
     }
+
+    if(studentCount > 1) window.scrollTo({top:wrap.offsetTop-60, behavior:'smooth'});
   }
 
   function removeStudent(){ 
@@ -685,26 +631,23 @@
   // 4. GENERATE FINAL FORM (COMPLETE)
   // ============================================
   function generateFinal(){
-    // Hide Wizard, Show Final
-    document.getElementById('wizardRoot').classList.add('hidden');
-    document.getElementById('finalWrap').classList.remove('hidden');
-    window.scrollTo({top:0});
-
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
     
-    // Header for PDF
+    // --- PASTE THIS RIGHT AFTER final.innerHTML = ''; ---
+    
     final.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center justify-between mb-6 gap-4">
-          <h1 class="text-xl font-bold leading-tight pr-4">
+      <div class="flex items-center justify-between mb-6 ml-6 mr-6 gap-4">
+          <h1 class="text-xl font-semibold leading-tight pr-4">
               INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
           </h1>
           <img src="One World Logo.jpg" 
                alt="One World One Centre Logo" 
-               class="w-64 h-auto object-contain flex-shrink-0"
-               onerror="this.style.display='none'">
+               class="w-80 h-auto object-contain flex-shrink-0">
       </div>
     `);
+
+    // ----------------------------------------------------
 
     const tbl = document.createElement('table');
     tbl.className = 'yellow-table';
@@ -730,7 +673,7 @@
     `;
     tbl.appendChild(tr1);
 
-    // --- ROW 2: Status & Immigration ---
+    // --- ROW 2: Status & Immigration (WITH OTHER TEXT SUPPORT) ---
     const sStatus = getRadioValue('studentStatus');
     const sStatusTxt = sStatus === 'Other' ? (document.getElementById('studentStatusOther').value || 'Other') : sStatus;
     
@@ -772,139 +715,387 @@
       <td colspan="5" class="no-padding">
         <table class="nested-table">
           <tr>
-            <td width="10%">${c('APT #', document.getElementById('apt').value)}</td>
-            <td width="55%">${c('FAMILY ADDRESS', document.getElementById('address').value)}</td>
-            <td width="15%">${c('POSTAL CODE', document.getElementById('postal').value)}</td>
-            <td width="20%">${c('FAMILY PHONE #', document.getElementById('familyPhone').value)}</td>
+            <td width="20%">${c("APARTMENT #", document.getElementById('apt').value)}</td>
+            <td width="60%">${c("FAMILY ADDRESS", document.getElementById('address').value)}</td>
+            <td width="20%">${c("POSTAL CODE", document.getElementById('postal').value)}</td>
           </tr>
         </table>
       </td>
     `;
     tbl.appendChild(tr4);
 
-    // --- ROW 5: LANGUAGE & RELIGION ---
-    const selectedLangs = $('#homeLang').val() || [];
-    const langStr = selectedLangs.join(', ');
-
-    const cathVal = getRadioValue('catholic');
-    let cathStr = "Unspecified";
-    if(cathVal === 'Yes') cathStr = checkboxMark(true) + " Yes";
-    else if(cathVal === 'No') {
-        const otherRel = document.getElementById('religionOther').value;
-        cathStr = checkboxMark(true) + " No" + (otherRel ? " ("+otherRel+")" : "");
+    // --- ROW 5: INFO & HOME LANG FIX ---
+    let homeLangs = '';
+    const hlSelect = document.getElementById('homeLang');
+    if (hlSelect.tomselect) {
+        // TomSelect active
+        const val = hlSelect.tomselect.getValue();
+        homeLangs = Array.isArray(val) ? val.join(', ') : val;
+    } else {
+        // Standard Select fallback
+        homeLangs = Array.from(hlSelect.selectedOptions).map(o=>o.value).join(', ');
     }
+    
+    const cathVal = getRadioValue('catholic');
+    const relOther = document.getElementById('religionOther').value;
+    const cathTxt = `${checkboxMark(cathVal==='Yes')} Yes  ${checkboxMark(cathVal==='No')} No` + (relOther ? `<br><strong>Note:</strong> ${escapeHtml(relOther)}` : '');
 
     const tr5 = document.createElement('tr');
     tr5.innerHTML = `
-      <td colspan="3">${c('HOME LANGUAGE(S)', langStr)}</td>
-      <td colspan="2">${c('CATHOLIC', cathStr)}</td>
+      <td colspan="5" class="no-padding">
+        <table class="nested-table">
+          <tr>
+            <td width="33%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td>
+            <td width="34%">${c("HOME LANGUAGE", homeLangs)}</td>
+            <td width="33%">${c("CATHOLIC", cathTxt)}</td>
+          </tr>
+        </table>
+      </td>
     `;
     tbl.appendChild(tr5);
 
-    // --- ROW 6: STUDENTS LOOP ---
-    // Create header for students
-    const trStudHeader = document.createElement('tr');
-    trStudHeader.innerHTML = `
-        <td colspan="5" class="no-padding" style="background-color: #fef08a;">
-            <table class="nested-table" style="font-size: 0.7rem; font-weight: bold; text-align: center;">
-                <tr>
-                    <td width="20%">STUDENT'S SURNAME</td>
-                    <td width="20%">STUDENT'S GIVEN NAME</td>
-                    <td width="5%">M</td>
-                    <td width="5%">F</td>
-                    <td width="15%">DOB (Y/M/D)</td>
-                    <td width="15%">COUNTRY OF BIRTH</td>
-                    <td width="10%">L. GRADE</td>
-                    <td width="10%">PROGRAM</td>
-                </tr>
-            </table>
-        </td>
-    `;
-    tbl.appendChild(trStudHeader);
-
-    // Loop through students
+    // --- ROW 6: STUDENTS (WITH SEPARATOR LINES) ---
+    // Widths: Surname 18%, Given 18%, Gender 8%, DOB 12%, Country 14%, Grade 10%, Year 10%, Prog 10%
+    let stRows = '';
+    
     for(let i=1; i<=studentCount; i++){
-        // If element doesn't exist (deleted), skip
-        if(!document.getElementById(`student-${i}`)) continue;
+        const sn = document.getElementById(`s_${i}_surname`)?.value;
+        
+        // Skip empty rows if we have more than 1 student
+        if(!sn && studentCount > 1) continue; 
+        
+        if(document.getElementById(`s_${i}_surname`)){
+            const gn = document.getElementById(`s_${i}_given`).value;
+            const dob = document.getElementById(`s_${i}_dob`).value;
+            const birth = document.getElementById(`s_${i}_birth`).value;
+            const gender = getRadioValue(`s_${i}_gender`);
+            const year = getRadioValue(`s_${i}_year`) === 'ThisYear' ? 'This year' : 'Next year';
+            
+            // Program Logic
+            let prog = '';
+            const pt = getRadioValue(`s_${i}_progType`);
+            if(pt === 'Regular') prog = 'Regular';
+            else if(pt === 'Special') {
+                const pd = document.getElementById(`s_${i}_prog_dropdown`).value;
+                const ps = document.getElementById(`s_${i}_prog_spec`).value;
+                prog = `Special - ${pd === 'Other' ? ps : pd}`;
+            }
 
-        const sur = document.getElementById(`s_${i}_surname`).value;
-        const giv = document.getElementById(`s_${i}_given`).value;
-        
-        const gen = getRadioValue(`s_${i}_gender`);
-        const mCheck = gen === 'M' ? '✓' : '';
-        const fCheck = gen === 'F' ? '✓' : '';
-        
-        const dob = document.getElementById(`s_${i}_dob`).value;
-        const birth = $(`#s_${i}_birth`).val() || ''; // Select2 value
-        
-        // Grade logic
-        const gVal = document.getElementById(`s_${i}_lastgrade`).value;
-        const gTxt = gVal === 'Other' ? document.getElementById(`s_${i}_lastgrade_spec`).value : gVal;
+            // Grade Logic
+            let grd = document.getElementById(`s_${i}_lastgrade`).value;
+            if(grd === 'Other') grd = document.getElementById(`s_${i}_lastgrade_spec`).value;
 
-        // Program Logic
-        let pTxt = '';
-        const pType = getRadioValue(`s_${i}_progType`);
-        if(pType === 'Regular') pTxt = 'Regular';
-        else if(pType === 'Special') {
-            const drop = document.getElementById(`s_${i}_prog_dropdown`).value;
-            pTxt = drop === 'Other' ? document.getElementById(`s_${i}_prog_spec`).value : drop;
+            // Apply 'student-row' class for black line separation
+            stRows += `<tr class="student-row">
+                <td class="cell-content">${escapeHtml(sn)}</td>
+                <td class="cell-content">${escapeHtml(gn)}</td>
+                <td class="text-center">${checkboxMark(gender==='F')} F ${checkboxMark(gender==='M')} M</td>
+                <td class="text-center cell-content">${escapeHtml(dob)}</td>
+                <td class="cell-content">${escapeHtml(birth)}</td>
+                <td class="text-center">${escapeHtml(grd)}</td>
+                <td class="text-center">${year}</td>
+                <td class="text-center cell-content">${escapeHtml(prog)}</td>
+            </tr>`;
         }
-
-        const trS = document.createElement('tr');
-        trS.className = 'student-row';
-        trS.innerHTML = `
-            <td colspan="5" class="no-padding">
-                <table class="nested-table">
-                    <tr>
-                        <td width="20%" style="height:35px; vertical-align:middle;">${escapeHtml(sur)}</td>
-                        <td width="20%" style="vertical-align:middle;">${escapeHtml(giv)}</td>
-                        <td width="5%" style="text-align:center; vertical-align:middle;">${mCheck}</td>
-                        <td width="5%" style="text-align:center; vertical-align:middle;">${fCheck}</td>
-                        <td width="15%" style="vertical-align:middle;">${escapeHtml(dob)}</td>
-                        <td width="15%" style="vertical-align:middle;">${escapeHtml(birth)}</td>
-                        <td width="10%" style="vertical-align:middle;">${escapeHtml(gTxt)}</td>
-                        <td width="10%" style="vertical-align:middle;">${escapeHtml(pTxt)}</td>
-                    </tr>
-                </table>
-            </td>
-        `;
-        tbl.appendChild(trS);
     }
 
-    // --- ROW 7: LIMITED SCHOOLING ---
-    const lim = getRadioValue('limitedProfile');
-    const limDetails = document.getElementById('limitedProfileDetails').value;
-    let limText = "";
-    if(lim === 'Yes') limText = checkboxMark(true) + " Yes (" + limDetails + ")";
-    else if(lim === 'No') limText = checkboxMark(true) + " No";
-
-    const tr7 = document.createElement('tr');
-    tr7.innerHTML = `
-        <td colspan="5">${c('LIMITED FORMAL SCHOOLING', limText)}</td>
+    const tr6 = document.createElement('tr');
+    tr6.innerHTML = `
+      <td colspan="5" class="no-padding">
+        <table class="nested-table">
+          <tr style="background-color:#fff8dc;"> <th width="18%">SURNAME</th>
+             <th width="18%">GIVEN NAME</th>
+             <th width="8%">GENDER</th>
+             <th width="12%">DOB</th>
+             <th width="14%">BIRTH COUNTRY</th>
+             <th width="10%">LAST GRADE</th>
+             <th width="10%">SCHOOL YEAR</th>
+             <th width="10%">PROGRAM</th>
+          </tr>
+          ${stRows}
+        </table>
+      </td>
     `;
+    tbl.appendChild(tr6);
+
+    // --- ROW 7: LIMITED PROFILE (Overflow Fix) ---
+    const lim = getRadioValue('limitedProfile');
+    const limDet = document.getElementById('limitedProfileDetails').value;
+    const tr7 = document.createElement('tr');
+    tr7.innerHTML = `<td colspan="5">
+        <div class="font-semibold">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</div>
+        <div>${checkboxMark(lim==='Yes')} Yes  ${checkboxMark(lim==='No')} No</div>
+        ${lim==='Yes' ? `<div class="cell-content" style="padding-left:20px;">${escapeHtml(limDet)}</div>` : ''}
+    </td>`;
     tbl.appendChild(tr7);
 
-    // --- ROW 8: NOTES ---
+    // --- ROW 8: NOTES (Overflow Fix) ---
+    const notes = document.getElementById('notes').value;
     const tr8 = document.createElement('tr');
-    tr8.innerHTML = `
-        <td colspan="5" style="height: 60px;">${c('NOTE', document.getElementById('notes').value)}</td>
-    `;
+    tr8.innerHTML = `<td colspan="5">
+        <div class="font-semibold">NOTES</div>
+        <div class="cell-content" style="padding-left:20px;">${escapeHtml(notes)}</div>
+    </td>`;
     tbl.appendChild(tr8);
 
     final.appendChild(tbl);
+    
+    // Switch Views
+    document.getElementById('wizardRoot').classList.add('hidden');
+    document.getElementById('finalWrap').classList.remove('hidden');
+    window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  function downloadPDF() {
-      const element = document.getElementById('finalArea');
-      const opt = {
-        margin:       0.2,
-        filename:     'Intake_Form.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-      };
-      html2pdf().set(opt).from(element).save();
-  }
-  </script>
+  // ============================================
+  // 5. INITIALIZATION
+  // ============================================
+  
+  // Page 1 Select2
+  $(document).ready(function() {
+    $('#contactRel').select2({
+      dropdownParent: $(document.body),
+      dropdownPosition: 'below',
+      width: '288px'
+    });
+  });
+
+ // Home Language TomSelect
+const languages = [
+  "English", "Tigrinya", "Amharic", "Arabic", "French", "Spanish", "Somali", "Swahili", "Hindi",
+  "Mandarin Chinese", "Cantonese", "Portuguese", "Tagalog", "Italian", "German", "Russian",
+  "Punjabi", "Urdu", "Bengali", "Korean", "Japanese", "Vietnamese", "Cree", "Ojibwe", "Inuktitut",
+  "Persian (Farsi)", "Kurdish", "Pashto", "Ukrainian", "Polish", "Turkish", "Greek", "Tamil",
+  "Malayalam", "Telugu", "Gujarati", "Thai", "Indonesian", "Malay", "Burmese", "Sinhalese",
+  "Nepali", "Dari", "Hebrew", "Armenian", "Albanian", "Serbian", "Croatian", "Bosnian",
+  "Bulgarian", "Romanian", "Dutch", "Swedish", "Finnish", "Norwegian", "Danish", "Czech",
+  "Slovak", "Hungarian", "Latvian", "Lithuanian", "Estonian", "Haitian Creole", "Afrikaans",
+  "Zulu", "Xhosa", "Shona", "Twi", "Ewe", "Yoruba", "Igbo", "Hausa", "Oromo", "Tigré", "Nuer",
+  "Dinka", "Acholi", "Somali Bantu", "Khmer", "Lao", "Mongolian", "Kazakh", "Uzbek", "Tajik",
+  "Azerbaijani", "Georgian", "Macedonian", "Cebuano (Bisaya)", "Catalan", "Basque", "Galician",
+  "Samoan", "Tongan", "Fijian", "Fula", "Maori", "Luganda", "Bantu", "Bilen", "Kinyarwanda",
+  "Kinyabwishya", "Kinyamulenge", "Kikongo ya leta", "Lingala", "Mano", "Kpelle", "Kikuyu",
+  "Kamba", "Other"
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const select = document.getElementById('homeLang');
+  // ... rest of the TomSelect setup ...
+    languages.forEach(lang => {
+        const opt = document.createElement('option');
+        opt.value = lang; opt.textContent = lang;
+        select.appendChild(opt);
+    });
+    new TomSelect(select, {
+        placeholder: "Select or type language(s)",
+        maxOptions: 500, create: true, plugins: ['remove_button']
+    });
+  });
+
+  // Buttons
+// Buttons
+// New dedicated function to handle PDF generation
+function downloadPDF(orientation) {
+    const final = document.getElementById('finalArea');
+    final.classList.add('pdf-scale');
+    
+    // Hide the selector box immediately upon selection
+    document.getElementById('orientationSelector').classList.add('hidden');
+    
+    const opt = { 
+        margin: 0.2, 
+        filename: `intake-form-${orientation}.pdf`, 
+        image: { type: 'jpeg', quality: 0.98 }, 
+        html2canvas: { scale: 2, useCORS: true }, 
+        jsPDF: { unit: 'in', format: 'a4', orientation: orientation } // Uses the selected orientation
+    };
+    
+    html2pdf().set(opt).from(final).save().then(() => {
+        final.classList.remove('pdf-scale');
+    });
+}
+
+document.getElementById('editBtn').onclick = () => {
+    document.getElementById('wizardRoot').classList.remove('hidden');
+    document.getElementById('finalWrap').classList.add('hidden');
+    document.getElementById('orientationSelector').classList.add('hidden'); // Hide selector on edit
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Modify pdfBtn to toggle the orientation selector visibility
+document.getElementById('pdfBtn').onclick = (event) => {
+    event.stopPropagation(); // Prevents immediate closing via the global click listener
+    document.getElementById('orientationSelector').classList.toggle('hidden');
+}
+
+// Attach listeners to the new Portrait/Landscape buttons (requires DOM to be loaded)
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
+    document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
+});
+
+// Global listener to close the selector if the user clicks outside of it
+document.addEventListener('click', function(event) {
+    const selector = document.getElementById('orientationSelector');
+    const pdfBtn = document.getElementById('pdfBtn');
+    
+    // If the selector is visible and the click target is not the selector or the PDF button itself, hide it.
+    if (!selector.classList.contains('hidden') && event.target !== selector && !selector.contains(event.target) && event.target !== pdfBtn) {
+        selector.classList.add('hidden');
+    }
+});
+
+document.getElementById('newFormBtn').onclick = () => { 
+    if(!confirm("Start new form? Data will be lost.")) return; 
+    location.reload(); 
+};
+</script>
+
+<script>
+/**
+ * KEYBOARD NAVIGATION SCRIPT
+ * - Arrows: Loop through fields.
+ * - Shift+Arrows: Page Navigation.
+ * - Enter: Selects/Opens Dropdowns.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. Find all focusable elements
+    function getFocusableElements(container) {
+        if (!container) return [];
+        const selector = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]';
+        let elements = Array.from(container.querySelectorAll(selector));
+        const select2Triggers = Array.from(container.querySelectorAll('.select2-selection'));
+        const tomSelectInputs = Array.from(container.querySelectorAll('.ts-control input'));
+        const allCandidates = [...elements, ...select2Triggers, ...tomSelectInputs];
+
+        return allCandidates.filter(el => {
+            if (el.closest('.nav-buttons')) return false;
+            if (el.offsetParent === null) return false;
+            if (el.tagName === 'SELECT' && (el.classList.contains('select2-hidden-accessible') || el.style.display === 'none')) return false;
+            if (el.closest('.hidden')) return false;
+            return true;
+        }).sort((a, b) => {
+            return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+        });
+    }
+
+    // 2. Main Key Handler
+    document.addEventListener('keydown', function(event) {
+        const currentStep = document.querySelector('.page:not(.hidden)');
+        if (!currentStep) return;
+
+        const activeEl = document.activeElement;
+        const key = event.key;
+        const isShift = event.shiftKey;
+
+        // A. PAGE NAVIGATION (Shift + Left/Right)
+        if (isShift && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+            event.preventDefault();
+            const currentStepNum = parseInt(currentStep.dataset.step, 10);
+            let nextStepNum = key === 'ArrowRight' ? currentStepNum + 1 : currentStepNum - 1;
+            if (typeof goTo === 'function' && nextStepNum >= 1 && nextStepNum <= 6) {
+                goTo(nextStepNum);
+                setTimeout(() => {
+                    const newPage = document.querySelector(`.page[data-step="${nextStepNum}"]`);
+                    const focusables = getFocusableElements(newPage);
+                    if (focusables[0]) focusables[0].focus();
+                }, 50);
+            }
+            return;
+        }
+
+        // B. FIELD NAVIGATION (Arrows)
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+            // Check dropdowns first
+            const isSelect2Open = document.querySelector('.select2-container--open');
+            const tsWrapper = activeEl.closest('.ts-wrapper');
+            const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('input-active') && activeEl.closest('.ts-control');
+
+            if (isSelect2Open || isTomSelectOpen) return; // Let library handle it
+
+            // Text/Date Input boundaries
+            const isTextLike = activeEl.tagName === 'INPUT' && ['text', 'password', 'email', 'tel', 'number', 'search', 'url'].includes(activeEl.type);
+            const isTextArea = activeEl.tagName === 'TEXTAREA';
+            
+            if (isTextLike || isTextArea) {
+                 try {
+                    if (key === 'ArrowLeft' && activeEl.selectionStart > 0) return;
+                    if (key === 'ArrowRight' && activeEl.selectionStart < activeEl.value.length) return;
+                } catch (e) {}
+            }
+            if (activeEl.tagName === 'INPUT' && activeEl.type === 'date') {
+                 if (key === 'ArrowLeft' || key === 'ArrowRight') return; 
+            }
+
+            // Loop Navigation
+            event.preventDefault(); 
+            const focusables = getFocusableElements(currentStep);
+            if (focusables.length === 0) return;
+
+            const idx = focusables.indexOf(activeEl);
+            let nextIdx = idx;
+
+            if (key === 'ArrowRight' || key === 'ArrowDown') {
+                nextIdx = (idx + 1) % focusables.length;
+            } else {
+                nextIdx = (idx - 1 + focusables.length) % focusables.length;
+            }
+
+            if (focusables[nextIdx]) focusables[nextIdx].focus();
+        }
+
+        // C. SELECTION (Enter)
+        if (key === 'Enter') {
+            if (activeEl.tagName === "SELECT") return; 
+            if (activeEl.tagName === 'TEXTAREA') return; // Allow new lines
+
+            event.preventDefault(); 
+
+            // Radio Toggle
+            if (activeEl.type === 'radio') {
+                if (activeEl.checked && activeEl.wasChecked) {
+                    activeEl.checked = false;
+                    activeEl.wasChecked = false;
+                    if (activeEl.value === "Other") {
+                        const target = activeEl.getAttribute("onchange")?.match(/'(.*?)'/)?.[1];
+                        if (target) {
+                            const input = document.getElementById(target);
+                            input.classList.add("hidden");
+                            input.value = "";
+                        }
+                    }
+                    return;
+                }
+                document.querySelectorAll(`input[name="${activeEl.name}"]`).forEach(r => (r.wasChecked = false));
+                activeEl.wasChecked = true;
+                activeEl.checked = true;
+                activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+                return;
+            }
+
+            // Trigger Buttons/Dropdowns
+            if (activeEl.classList.contains('select2-selection')) { $(activeEl).trigger('click'); return; }
+            if (activeEl.closest('.ts-control')) { activeEl.click(); return; }
+            if (activeEl.tagName === 'BUTTON') { activeEl.click(); }
+        }
+      // --- D. GENERATE FORM SHORTCUT (Spacebar) ---
+        if (key === ' ' && currentStep.dataset.step === '6') {
+            // Do not execute if user is typing in a field
+            const isTextType = activeEl.tagName === 'INPUT' && activeEl.type !== 'radio' && activeEl.type !== 'checkbox';
+            if (isTextType || activeEl.tagName === 'TEXTAREA') {
+                return; 
+            }
+
+            // Trigger the "Generate Yellow Form" button
+            const generateBtn = document.querySelector('.page[data-step="6"] button:last-child');
+            if (generateBtn && generateBtn.textContent.includes('Generate Yellow Form')) {
+                event.preventDefault();
+                generateBtn.click();
+            }
+        }
+    });
+});
+</script>
+
 </body>
 </html>

@@ -204,7 +204,7 @@
               <label><input type="radio" name="prevAttend" value="No" onchange="toggleAttendance(false)"> No</label>
               <label><input type="radio" name="prevAttend" value="Yes" onchange="toggleAttendance(true)"> Yes</label>
             </div>
-            <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="Details..." disabled />
+            <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="If Yes: Where / Grade / For how long" disabled />
           </div>
           <div class="col-span-12 md:col-span-4 mt-2">
             <label class="block text-sm">DATE LANDED</label>
@@ -623,7 +623,7 @@ if (yearVal === 'ThisYear') {
             <th width="12%">DOB</th>
             <th width="14%">BIRTH COUNTRY</th>
             <th width="10%">LAST GRADE</th>
-            <th width="10%">SCHOOL YEAR</th>
+            <th width="10%">Sch. Yr.</th>
             <th width="10%">PROGRAM</th>
         </tr>
         ${stRows}

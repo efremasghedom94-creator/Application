@@ -16,64 +16,67 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
   <style>
-    /* GLOBAL BOX SIZING FIX */
+    /* GLOBAL BOX SIZING */
     *, *::before, *::after { box-sizing: border-box; }
 
-    /* BASIC LAYOUT */
     body { 
-        border: 3px solid #C7631C; 
         margin: 0; 
         min-height: 100vh; 
-        background-color: white; 
+        background-color: #f3f4f6;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     
-    .wizard { 
-        background-color: white; 
-        border-radius: 0.5rem; 
-        padding: 2rem; 
-        margin: 2rem auto; 
-        max-width: 1100px; 
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
-    }
-    
-    /* Responsive Adjustment: Reduce external padding on mobile */
-    @media (max-width: 767px) {
-        .wizard { 
-            padding: 1rem; 
-            margin: 1rem auto;
-        }
+    /* WIZARD CONTAINER - FIXED HEIGHT STRATEGY */
+    .wizard-wrapper {
+        background-color: white;
+        border: 3px solid #C7631C; 
+        border-radius: 0.5rem;
+        margin: 1rem auto;
+        max-width: 1100px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        display: flex;
+        flex-direction: column;
+        /* Fixed height for the whole card (adjust 85vh to preference) */
+        height: 85vh; 
+        min-height: 600px;
     }
 
-    .page { 
-        position: relative; 
-        /* Removed min-height: 60vh; */
-        background-color: white; 
-        padding: 0.5rem; 
-        border-radius: 0.5rem; 
-        display: flex; 
-        flex-direction: column; 
-        /* min-height is now handled by the JS/wrapper for consistency */
+    /* HEADER (Fixed at top) */
+    .wizard-header {
+        flex-shrink: 0;
+        padding: 1rem 1.5rem;
+        border-bottom: 2px solid #e5e7eb;
     }
-    
-    /* --- NEW: Wrapper for consistent height --- */
-    .page-content-wrapper {
-        transition: height 0.3s ease-out; /* Smooth transition for resizing */
-        overflow: hidden; /* Prevent content from pushing the bottom */
-        flex-grow: 1; /* Allow content to take up space */
-    }
-    /* ------------------------------------------- */
 
-    .nav-buttons { 
-        display: flex; 
-        justify-content: space-between; 
-        margin-top: auto; 
-        padding-top: 2rem; 
+    /* CONTENT AREA (Scrollable) */
+    .wizard-content {
+        flex-grow: 1;
+        overflow-y: auto; /* Internal scroll */
+        padding: 1.5rem;
+        position: relative;
     }
-    
+
+    /* FOOTER (Fixed at bottom) */
+    .wizard-footer {
+        flex-shrink: 0;
+        padding: 1rem 1.5rem;
+        border-top: 2px solid #e5e7eb;
+        background-color: #f9fafb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
     /* INPUT STYLES */
     select { transform-origin: top center !important; }
     .disabled-input { background:#f3f4f6; color:#6b7280; pointer-events: none; }
     
+    /* HIDE SCROLLBAR visually but allow scroll */
+    .wizard-content::-webkit-scrollbar { width: 8px; }
+    .wizard-content::-webkit-scrollbar-track { background: #f1f1f1; }
+    .wizard-content::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+    .wizard-content::-webkit-scrollbar-thumb:hover { background: #555; }
+
     /* YELLOW TABLE STYLING */
     table.yellow-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 0.8rem; table-layout: fixed; min-width: 700px; }
     table.yellow-table td, table.yellow-table th { border: 1px solid black; padding: 4px 6px; vertical-align: top; word-wrap: break-word; overflow-wrap: anywhere; }
@@ -101,28 +104,30 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; top: 0; }
     
     /* Mobile Scroll for Table */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    
+    /* Helper Utilities */
+    .hidden { display: none !important; }
+    .invisible { visibility: hidden; }
   </style>
 </head>
 
 <body class="bg-gray-100 text-gray-800">
-  <div class="max-w-5xl mx-auto p-2 md:p-6">
-    <div id="wizardRoot" class="wizard bg-white rounded-lg shadow">
 
-    <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4 border-b pb-4">
-        <h1 class="text-lg md:text-xl font-semibold leading-tight text-center md:text-left">
-            INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
+  <div id="wizardRoot" class="wizard-wrapper">
+    
+    <div class="wizard-header flex flex-col md:flex-row items-center justify-between gap-4">
+        <h1 class="text-lg md:text-xl font-bold leading-tight text-center md:text-left text-gray-700">
+            ONE WORLD ONE CENTRE<br><span class="text-sm font-normal text-gray-500">Student Intake Form</span>
         </h1>
-        <img src="One World Logo.jpg" alt="One World One Centre Logo" class="w-48 md:w-80 h-auto object-contain flex-shrink-0">
+        <img src="One World Logo.jpg" alt="Logo" class="w-32 md:w-48 h-auto object-contain flex-shrink-0">
     </div>
 
-      <section class="page" data-step="1">
-        <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 1: Contact Info</h2>
-        <div class="page-content-wrapper">
-            <div class="grid grid-cols-12 gap-3">
+    <div class="wizard-content">
+        
+        <section class="page" data-step="1">
+            <h2 class="font-medium mb-4 text-lg border-b pb-2 text-orange-600">Step 1: Contact Information</h2>
+            <div class="grid grid-cols-12 gap-4">
               <div class="col-span-12 md:col-span-2">
                 <label class="block text-sm font-bold">DATE</label>
                 <input id="date" type="date" class="w-full border rounded p-2 mt-1" />
@@ -140,7 +145,7 @@
                 <input id="contactPhone" type="tel" maxlength="14" class="w-full border rounded p-2 mt-1" oninput="formatPhone(this)" />
               </div>
               
-              <div class="col-span-12 md:col-span-6 mt-4">
+              <div class="col-span-12 md:col-span-6 mt-2">
                 <label class="block text-sm font-bold mb-1">CONTACT RELATIONSHIP</label>
                 <select id="contactRel" class="border rounded p-3 w-full" onchange="toggleOtherRelation(this)">
                   <option value="" disabled selected hidden>-- Select --</option>
@@ -168,44 +173,39 @@
                 <input type="text" id="otherRelation" class="border rounded p-2 w-full mt-2 hidden" placeholder="Specify" />
               </div>
             </div>
-        </div>
-        <div class="nav-buttons justify-end">
-          <button type="button" class="w-full md:w-auto px-6 py-3 bg-green-700 text-white rounded font-bold shadow hover:bg-green-800 transition" onclick="goTo(2)">Next</button>
-        </div>
-      </section>
+        </section>
 
-      <section class="page hidden" data-step="2">
-        <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 2: Status & History</h2>
-        <div class="page-content-wrapper">
-            <div class="grid grid-cols-12 gap-3 mb-3">
+        <section class="page hidden" data-step="2">
+            <h2 class="font-medium mb-4 text-lg border-b pb-2 text-orange-600">Step 2: Status & History</h2>
+            <div class="grid grid-cols-12 gap-4">
               <div class="col-span-12 md:col-span-6">
                 <label class="block text-sm font-bold">STUDENT'S STATUS</label>
-                <div class="mt-1 flex flex-wrap gap-3 p-2 bg-gray-50 rounded border">
-                  <label class="flex items-center"><input type="radio" name="studentStatus" value="PR" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> PR</label>
-                  <label class="flex items-center"><input type="radio" name="studentStatus" value="RC" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> RC</label>
-                  <label class="flex items-center"><input type="radio" name="studentStatus" value="WP" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> WP</label>
-                  <label class="flex items-center"><input type="radio" name="studentStatus" value="Other" class="mr-1" onchange="toggleOtherField('studentStatusOther', this)"> Other</label>
+                <div class="mt-1 flex flex-wrap gap-3 p-3 bg-gray-50 rounded border">
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="studentStatus" value="PR" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)"> PR</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="studentStatus" value="RC" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)"> RC</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="studentStatus" value="WP" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)"> WP</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="studentStatus" value="Other" class="mr-2" onchange="toggleOtherField('studentStatusOther', this)"> Other</label>
                 </div>
                 <input id="studentStatusOther" type="text" class="hidden w-full border rounded p-2 mt-2" placeholder="Specify" />
               </div>
               
               <div class="col-span-12 md:col-span-6">
                 <label class="block text-sm font-bold">IMMIGRATION DOC (PARENT)</label>
-                <div class="mt-1 flex flex-wrap gap-3 p-2 bg-gray-50 rounded border">
-                  <label class="flex items-center"><input type="radio" name="immDoc" value="PR" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> PR</label>
-                  <label class="flex items-center"><input type="radio" name="immDoc" value="RC" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> RC</label>
-                  <label class="flex items-center"><input type="radio" name="immDoc" value="WP" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> WP</label>
-                  <label class="flex items-center"><input type="radio" name="immDoc" value="Other" class="mr-1" onchange="toggleOtherField('immDocOther', this)"> Other</label>
+                <div class="mt-1 flex flex-wrap gap-3 p-3 bg-gray-50 rounded border">
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="immDoc" value="PR" class="mr-2" onchange="toggleOtherField('immDocOther', this)"> PR</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="immDoc" value="RC" class="mr-2" onchange="toggleOtherField('immDocOther', this)"> RC</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="immDoc" value="WP" class="mr-2" onchange="toggleOtherField('immDocOther', this)"> WP</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="immDoc" value="Other" class="mr-2" onchange="toggleOtherField('immDocOther', this)"> Other</label>
                 </div>
                 <input id="immDocOther" type="text" class="hidden w-full border rounded p-2 mt-2" placeholder="Specify" />
               </div>
               
-              <div class="col-span-12 md:col-span-6 mt-2">
+              <div class="col-span-12 md:col-span-6">
                 <label class="block text-sm font-bold">EXPIRY DATE</label>
                 <input id="expiry" type="date" class="w-full border rounded p-2 mt-1" />
               </div>
               
-              <div class="col-span-12 md:col-span-6 mt-2">
+              <div class="col-span-12 md:col-span-6">
                 <label class="block text-sm font-bold">DATE LANDED</label>
                 <input id="landed" type="date" class="w-full border rounded p-2 mt-1" />
               </div>
@@ -213,23 +213,16 @@
               <div class="col-span-12 mt-4 border-t pt-4">
                 <label class="block text-sm font-bold">PREVIOUS ATTENDANCE IN CANADIAN SCHOOLS?</label>
                 <div class="mt-2 flex gap-6">
-                  <label class="flex items-center"><input type="radio" name="prevAttend" value="No" class="mr-2 transform scale-125" onchange="toggleAttendance(false)"> No</label>
-                  <label class="flex items-center"><input type="radio" name="prevAttend" value="Yes" class="mr-2 transform scale-125" onchange="toggleAttendance(true)"> Yes</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="prevAttend" value="No" class="mr-2 transform scale-125" onchange="toggleAttendance(false)"> No</label>
+                  <label class="flex items-center cursor-pointer"><input type="radio" name="prevAttend" value="Yes" class="mr-2 transform scale-125" onchange="toggleAttendance(true)"> Yes</label>
                 </div>
                 <input id="prevDetails" type="text" class="mt-2 w-full border rounded p-2 disabled-input" placeholder="Details (School Name, Grade)..." disabled />
               </div>
             </div>
-        </div>
-        
-        <div class="nav-buttons">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(1)">Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded shadow hover:bg-green-800 transition" onclick="goTo(3)">Next</button>
-        </div>
-      </section>
+        </section>
 
-      <section class="page hidden" data-step="3">
-        <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 3: Parents</h2>
-        <div class="page-content-wrapper">
+        <section class="page hidden" data-step="3">
+            <h2 class="font-medium mb-4 text-lg border-b pb-2 text-orange-600">Step 3: Parent/Guardian Details</h2>
             <div class="grid grid-cols-12 gap-4">
               <div class="col-span-12 md:col-span-6">
                 <label class="block text-sm font-bold">FATHER'S SURNAME</label>
@@ -249,17 +242,11 @@
                 <input id="motherGiven" type="text" class="w-full border rounded p-2 mt-1" />
               </div>
             </div>
-        </div>
-        <div class="nav-buttons">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(2)">Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded shadow hover:bg-green-800 transition" onclick="goTo(4)">Next</button>
-        </div>
-      </section>
+        </section>
 
-      <section class="page hidden" data-step="4">
-        <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 4: Address & Language</h2>
-        <div class="page-content-wrapper">
-            <div class="grid grid-cols-12 gap-3">
+        <section class="page hidden" data-step="4">
+            <h2 class="font-medium mb-4 text-lg border-b pb-2 text-orange-600">Step 4: Address & Language</h2>
+            <div class="grid grid-cols-12 gap-4">
               <div class="col-span-4 md:col-span-2">
                 <label class="block text-sm font-bold">APT #</label>
                 <input id="apt" type="text" class="w-full border rounded p-2 mt-1" />
@@ -283,48 +270,35 @@
                 <select id="homeLang" multiple class="w-full border rounded p-2 mt-1"></select>
               </div>
               
-              <div class="col-span-12 mt-4 p-3 bg-blue-50 rounded border border-blue-100">
+              <div class="col-span-12 mt-4 p-4 bg-blue-50 rounded border border-blue-100">
                 <label class="block text-sm font-bold">CATHOLIC RATEPAYER?</label>
                 <div class="flex gap-6 mt-2">
-                    <label class="flex items-center"><input type="radio" name="catholic" value="No" class="mr-2"> No</label>
-                    <label class="flex items-center"><input type="radio" name="catholic" value="Yes" class="mr-2"> Yes</label>
+                    <label class="flex items-center cursor-pointer"><input type="radio" name="catholic" value="No" class="mr-2"> No</label>
+                    <label class="flex items-center cursor-pointer"><input type="radio" name="catholic" value="Yes" class="mr-2"> Yes</label>
                 </div>
                 <input id="religionOther" type="text" class="mt-2 w-full border rounded p-2 bg-white" placeholder="If not Catholic, specify..." />
               </div>
             </div>
-        </div>
-        <div class="nav-buttons mt-4">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(3)">Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded shadow hover:bg-green-800 transition" onclick="goTo(5)">Next</button>
-        </div>
-      </section>
+        </section>
 
-      <section class="page hidden" data-step="5">
-        <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 5 — Student Details</h2>
-        <div class="page-content-wrapper flex flex-col">
-            <div id="studentsContainer" class="space-y-6 flex-grow"></div>
+        <section class="page hidden" data-step="5">
+            <h2 class="font-medium mb-4 text-lg border-b pb-2 text-orange-600">Step 5: Student Details</h2>
+            <div id="studentsContainer" class="space-y-6"></div>
             
             <div class="flex flex-col md:flex-row items-center gap-3 mt-6 border-t pt-4">
               <button class="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition" onclick="addStudent()" type="button">+ Add Another Student</button>
               <button class="w-full md:w-auto px-4 py-2 bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200 transition" onclick="removeStudent()" type="button">Remove Last Student</button>
             </div>
-        </div>
-        
-        <div class="nav-buttons">
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(4)">Back</button>
-          <button type="button" class="w-1/3 md:w-auto px-4 py-2 bg-green-700 text-white rounded shadow hover:bg-green-800 transition" onclick="goTo(6)">Next</button>
-        </div>
-      </section>
+        </section>
 
-      <section class="page hidden" data-step="6">
-        <h2 class="font-medium mb-3 text-lg border-b pb-1">Page 6: Final Notes</h2>
-        <div class="page-content-wrapper">
-            <div class="grid grid-cols-12 gap-3">
+        <section class="page hidden" data-step="6">
+            <h2 class="font-medium mb-4 text-lg border-b pb-2 text-orange-600">Step 6: Final Notes</h2>
+            <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12">
                     <label class="block text-sm font-bold">LIMITED FORMAL SCHOOLING?</label>
-                    <div class="flex gap-6 mt-2 p-2 bg-gray-50 border rounded">
-                        <label class="flex items-center"><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)" class="mr-2"> No</label>
-                        <label class="flex items-center"><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)" class="mr-2"> Yes</label>
+                    <div class="flex gap-6 mt-2 p-3 bg-gray-50 border rounded">
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)" class="mr-2"> No</label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)" class="mr-2"> Yes</label>
                     </div>
                 </div>
             </div>
@@ -336,45 +310,36 @@
                 <label class="block text-sm font-bold">NOTE:</label>
                 <textarea id="notes" rows="4" class="w-full border rounded p-2 mt-1" placeholder="Siblings, special needs, appointment preferences..."></textarea>
             </div>
-        </div>
-        <div class="nav-buttons">
-          <button class="w-1/3 md:w-auto px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition" onclick="goTo(5)">Back</button>
-          <button class="w-full md:w-auto px-6 py-3 bg-green-700 text-white rounded font-bold shadow hover:bg-green-800 transition" onclick="generateFinal()">Generate Yellow Form</button>
-        </div>
-      </section>
+        </section>
     </div>
 
-    <div id="finalWrap" class="final-wrap hidden mt-6">
+    <div class="wizard-footer">
+        <button id="navBackBtn" type="button" class="w-32 px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600 transition invisible" onclick="handleBack()">
+            &larr; Back
+        </button>
+        <button id="navNextBtn" type="button" class="w-48 px-4 py-2 bg-green-700 text-white rounded shadow hover:bg-green-800 transition font-bold" onclick="handleNext()">
+            Next &rarr;
+        </button>
+    </div>
+
+  </div> <div id="finalWrap" class="hidden max-w-5xl mx-auto mt-6 p-4">
       
       <div class="table-responsive bg-gray-200 p-2 rounded border mb-4">
-        <div id="finalArea" class="p-6 rounded shadow border min-w-[700px]" style="background-color: #fff989;"></div>
+        <div id="finalArea" class="p-6 rounded shadow border min-w-[700px] bg-white"></div>
       </div>
 
       <div class="mt-4 flex flex-col md:flex-row justify-center gap-3 relative">
-    
-        <div id="orientationSelector" 
-             class="absolute hidden bottom-full left-1/2 md:left-auto md:right-1/2 -translate-x-1/2 md:translate-x-1/2 mb-3 p-3 rounded shadow-xl z-20 text-sm" 
-             style="background-color: #fff8dc; border: 1px solid #C7631C; width: 220px;">
-             
+        <div id="orientationSelector" class="absolute hidden bottom-full left-1/2 -translate-x-1/2 mb-3 p-3 rounded shadow-xl z-20 text-sm bg-[#fff8dc] border border-[#C7631C] w-56">
             <p class="font-bold mb-2 text-gray-800 text-center">Select PDF Orientation:</p>
-            
-            <button id="downloadPortraitBtn" class="w-full mb-1 px-3 py-2 text-white rounded hover:opacity-90 transition" 
-                    style="background-color: #C7631C;">
-                Portrait (Taller)
-            </button>
-            
-            <button id="downloadLandscapeBtn" class="w-full px-3 py-2 text-white rounded hover:opacity-90 transition" 
-                    style="background-color: #C7631C;">
-                Landscape (Wider)
-            </button>
+            <button id="downloadPortraitBtn" class="w-full mb-1 px-3 py-2 text-white rounded hover:opacity-90 transition bg-[#C7631C]">Portrait (Taller)</button>
+            <button id="downloadLandscapeBtn" class="w-full px-3 py-2 text-white rounded hover:opacity-90 transition bg-[#C7631C]">Landscape (Wider)</button>
         </div>
     
         <button id="editBtn" class="w-full md:w-auto px-4 py-3 bg-green-700 text-white rounded shadow">Back to Edit</button>
         <button id="printBtn" class="w-full md:w-auto px-4 py-3 bg-blue-600 text-white rounded shadow" onclick="window.print()">Print</button>
-        <button id="pdfBtn" class="w-full md:w-auto px-4 py-3 text-white rounded shadow" style="background-color: #C7631C;">Download PDF</button>
+        <button id="pdfBtn" class="w-full md:w-auto px-4 py-3 text-white rounded shadow bg-[#C7631C]">Download PDF</button>
         <button id="newFormBtn" class="w-full md:w-auto px-4 py-3 bg-red-700 text-white rounded shadow">New Form</button>
       </div>
-    </div>
   </div>
 
   <script>
@@ -387,49 +352,7 @@
   let countriesLoaded = false;
   const loadCountriesPromise = loadCountries(); 
 
-  // --- NEW: Function to set all page heights to the maximum observed height ---
-  function setPageHeight() {
-    const pageWrappers = document.querySelectorAll('.page-content-wrapper');
-    if (pageWrappers.length === 0) return;
-
-    // Reset heights to calculate natural height
-    pageWrappers.forEach(wrapper => wrapper.style.height = 'auto');
-
-    let maxHeight = 0;
-    // Calculate the maximum height needed
-    pageWrappers.forEach(wrapper => {
-        // Ensure the element is visible for accurate measurement
-        const page = wrapper.closest('.page');
-        const isHidden = page && page.classList.contains('hidden');
-        if (isHidden) page.style.display = 'flex'; // Temporarily make page visible for measurement
-        
-        const height = wrapper.offsetHeight;
-        if (height > maxHeight) {
-            maxHeight = height;
-        }
-
-        if (isHidden) page.style.display = ''; // Restore display state
-    });
-
-    // Apply the max height to all wrappers
-    if (maxHeight > 0) {
-        // Use clientHeight + 1 pixel buffer to ensure no scrollbar issues
-        const finalHeight = `${maxHeight + 1}px`; 
-        pageWrappers.forEach(wrapper => {
-            wrapper.style.height = finalHeight;
-        });
-    }
-  }
-
-  window.addEventListener('resize', setPageHeight);
-  // Delay initial calculation until assets are loaded
-  window.addEventListener('load', () => {
-    setPageHeight();
-    // Re-run after a short delay to account for select2/tom-select rendering
-    setTimeout(setPageHeight, 100); 
-  });
-  // --------------------------------------------------------------------------
-
+  // Format Strings
   function escapeHtml(str) { 
     if (!str) return ''; 
     return String(str)
@@ -447,27 +370,72 @@
     return r ? r.value : ''; 
   }
 
+  // NAVIGATION LOGIC
+  function handleNext() {
+      if (currentStep < 6) {
+          goTo(currentStep + 1);
+      } else {
+          generateFinal();
+      }
+  }
+
+  function handleBack() {
+      if (currentStep > 1) {
+          goTo(currentStep - 1);
+      }
+  }
+
   function goTo(step){
     if (step < 1 || step > 6) return;
+    
+    // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    
+    // Show target page
     const target = document.querySelector(`.page[data-step='${step}']`);
     if(target) {
         target.classList.remove('hidden');
         currentStep = step;
-        window.scrollTo({top:0, behavior:'smooth'});
+        
+        // Scroll content area to top (not the whole body)
+        document.querySelector('.wizard-content').scrollTop = 0;
+        
+        updateNavButtons();
     }
   }
 
+  function updateNavButtons() {
+      const backBtn = document.getElementById('navBackBtn');
+      const nextBtn = document.getElementById('navNextBtn');
+
+      // Update Back Button
+      if (currentStep === 1) {
+          backBtn.classList.add('invisible');
+      } else {
+          backBtn.classList.remove('invisible');
+      }
+
+      // Update Next Button
+      if (currentStep === 6) {
+          nextBtn.innerHTML = "Generate Yellow Form";
+          nextBtn.classList.remove('bg-green-700', 'hover:bg-green-800');
+          nextBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+      } else {
+          nextBtn.innerHTML = "Next &rarr;";
+          nextBtn.classList.add('bg-green-700', 'hover:bg-green-800');
+          nextBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+      }
+  }
+
+  // Toggles
   function toggleOtherField(id, el){ 
     const inp = document.getElementById(id); 
     if(el.value === 'Other' && el.checked){ 
         inp.classList.remove('hidden'); 
         inp.focus(); 
-        setPageHeight(); // Recalculate height when an element appears
     } else { 
         inp.classList.add('hidden'); 
         inp.value = ''; 
-        setPageHeight(); // Recalculate height when an element disappears
     }
   }
 
@@ -476,11 +444,9 @@
     if(select.value === 'Other'){ 
         otherBox.classList.remove('hidden'); 
         otherBox.focus(); 
-        setPageHeight();
     } else { 
         otherBox.classList.add('hidden'); 
         otherBox.value = ''; 
-        setPageHeight();
     }
   }
 
@@ -495,7 +461,6 @@
         d.classList.add('disabled-input'); 
         d.value = ''; 
     }
-    setPageHeight();
   }
 
   function toggleLimitedProfile(isYes) {
@@ -506,9 +471,9 @@
         box.classList.add('hidden'); 
         document.getElementById('limitedProfileDetails').value = ''; 
     }
-    setPageHeight();
   }
 
+  // Formatters
   function formatPhone(input) {
     let value = input.value.replace(/\D/g, '');
     if (value.length > 3 && value.length <= 6) {
@@ -543,6 +508,7 @@
     }
   });
 
+  // Country Loader
   async function loadCountries(){
     try {
       const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
@@ -577,21 +543,20 @@
   }
 
   // ============================================
-  // 3. DYNAMIC STUDENT ROWS (RESPONSIVE UPDATES)
+  // 3. DYNAMIC STUDENT ROWS
   // ============================================
   function addStudent(prefill){
     studentCount++;
     const id = studentCount;
     const container = document.getElementById('studentsContainer');
     const wrap = document.createElement('div');
-    wrap.className = 'p-4 border rounded bg-gray-50 mb-4 shadow-sm';
+    wrap.className = 'p-4 border rounded bg-gray-50 mb-4 shadow-sm relative';
     wrap.id = `student-${id}`;
 
-    // Responsive Change: Grid items within the student row use col-span-12 md:col-span-X
     wrap.innerHTML = `
-      <div class="flex justify-between items-center mb-2">
+      <div class="flex justify-between items-center mb-2 border-b pb-2">
         <h3 class="font-bold text-gray-700">Student #${id}</h3>
-        ${id > 1 ? `<button type="button" class="text-xs text-red-600 underline" onclick="document.getElementById('student-${id}').remove(); studentCount--; setPageHeight();">Remove</button>` : ''}
+        ${id > 1 ? `<button type="button" class="text-xs text-red-600 underline hover:text-red-800" onclick="removeSpecificStudent(${id})">Remove</button>` : ''}
       </div>
       <div class="grid grid-cols-12 gap-3">
         <div class="col-span-12 md:col-span-3">
@@ -631,8 +596,8 @@
             <label class="text-xs font-bold text-gray-700">PROGRAM</label>
             <div class="mt-1 p-2 border rounded bg-white">
                 <div class="flex items-center gap-4">
-                    <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular</label>
-                    <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special</label>
+                    <label class="inline-flex items-center cursor-pointer"><input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular</label>
+                    <label class="inline-flex items-center cursor-pointer"><input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special</label>
                 </div>
                 <select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})">
                     <option value="" disabled selected hidden>Select program</option>
@@ -650,49 +615,56 @@
         <div class="col-span-12 md:col-span-6">
             <label class="text-xs font-bold text-gray-700">GENDER</label>
             <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
+                <label class="inline-flex items-center cursor-pointer"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
+                <label class="inline-flex items-center cursor-pointer"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
             </div>
         </div>
         <div class="col-span-12 md:col-span-6">
             <label class="text-xs font-bold text-gray-700">SCHOOL YEAR</label>
             <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
+                <label class="inline-flex items-center cursor-pointer"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label>
+                <label class="inline-flex items-center cursor-pointer"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label>
             </div>
         </div>
       </div>
     `;
-
+    
     container.appendChild(wrap);
 
-   const selectEl = wrap.querySelector(`#s_${id}_birth`);
+    // Load Countries
+    const selectEl = wrap.querySelector(`#s_${id}_birth`);
     if (countriesLoaded) {
       populateCountrySelectById(selectEl, prefill?.birth || '');
     } else {
       loadCountriesPromise.then(()=> populateCountrySelectById(selectEl, prefill?.birth || ''));
     }
 
-    // Scroll to new student if not the first one, but keep offset for mobile sticky headers
-    if(studentCount > 1) window.scrollTo({top:wrap.offsetTop - 20, behavior:'smooth'});
-    
-    setPageHeight(); // Recalculate height when a new student row is added
+    // Only scroll if adding new student via button (not initial load)
+    if(studentCount > 1 && !prefill) {
+        // Smooth scroll inside the content area
+        const contentArea = document.querySelector('.wizard-content');
+        contentArea.scrollTo({top: contentArea.scrollHeight, behavior: 'smooth'});
+    }
   }
 
   function removeStudent(){ 
-    if(studentCount===0) return; 
-    const el=document.getElementById(`student-${studentCount}`); 
+    if(studentCount <= 1) return; 
+    const el = document.getElementById(`student-${studentCount}`); 
     if(el) el.remove(); 
     studentCount--; 
-    setPageHeight(); // Recalculate height when a student row is removed
+  }
+  
+  function removeSpecificStudent(id) {
+    // Basic removal, note: IDs might get non-sequential but iteration handles it by checking existence
+    const el = document.getElementById(`student-${id}`);
+    if(el) el.remove();
   }
 
   function toggleOtherGrade(id){
     const sel = document.getElementById(`s_${id}_lastgrade`);
     const spec = document.getElementById(`s_${id}_lastgrade_spec`);
-    if(sel.value === 'Other'){ spec.classList.remove('hidden'); } 
+    if(sel.value === 'Other'){ spec.classList.remove('hidden'); spec.focus(); } 
     else { spec.classList.add('hidden'); spec.value = ''; }
-    setPageHeight();
   }
 
   function toggleProgramDropdown(id){
@@ -708,22 +680,18 @@
       dropdown.classList.add('hidden'); dropdown.value = '';
       spec.classList.add('hidden'); spec.value = '';
     }
-    setPageHeight();
   }
 
   function toggleOtherProg(id){
     const sel = document.getElementById(`s_${id}_prog_dropdown`);
     const spec = document.getElementById(`s_${id}_prog_spec`);
-    if(sel.value === 'Other'){ spec.classList.remove('hidden'); } 
+    if(sel.value === 'Other'){ spec.classList.remove('hidden'); spec.focus(); } 
     else { spec.classList.add('hidden'); spec.value = ''; }
-    setPageHeight();
   }
 
-  // Add the first student by default
-  addStudent();
 
   // ============================================
-  // 4. GENERATE FINAL FORM (COMPLETE)
+  // 4. GENERATE FINAL FORM
   // ============================================
   function generateFinal(){
     const final = document.getElementById('finalArea');
@@ -732,31 +700,25 @@
     // --- HEADER ---
     final.insertAdjacentHTML('beforeend', `
       <div class="flex items-center justify-between mb-6 ml-6 mr-6 gap-4">
-          <h1 class="text-xl font-semibold leading-tight pr-4">
+          <h1 class="text-xl font-bold leading-tight pr-4 text-[#C7631C]">
               INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
           </h1>
-          <img src="One World Logo.jpg" 
-               alt="One World One Centre Logo" 
-               class="w-80 h-auto object-contain flex-shrink-0">
+          <img src="One World Logo.jpg" alt="Logo" class="w-80 h-auto object-contain flex-shrink-0">
       </div>
     `);
-
-    // ----------------------------------------------------
 
     const tbl = document.createElement('table');
     tbl.className = 'yellow-table';
 
-    // Helper: cell creator
     const c = (lbl, val) => `<div class="font-semibold">${lbl}</div><div class="cell-content">${escapeHtml(val)}</div>`;
     
-    // Helper: Contact Relationship
     function getContactRel() {
         const rel = document.getElementById('contactRel')?.value;
         const other = document.getElementById('otherRelation')?.value;
         return rel === 'Other' ? (other || 'Other') : (rel || '');
     }
 
-    // --- ROW 1: Contact ---
+    // ROW 1
     const tr1 = document.createElement('tr');
     tr1.innerHTML = `
       <td width="15%">${c('DATE', document.getElementById('date').value)}</td>
@@ -767,7 +729,7 @@
     `;
     tbl.appendChild(tr1);
 
-    // --- ROW 2: Status & Immigration ---
+    // ROW 2
     const sStatus = getRadioValue('studentStatus');
     const sStatusTxt = sStatus === 'Other' ? (document.getElementById('studentStatusOther').value || 'Other') : sStatus;
     
@@ -776,14 +738,7 @@
     
     const pAttend = getRadioValue('prevAttend');
     const prevDetails = document.getElementById('prevDetails').value;
-    let pAttendTxt;
-    if (pAttend === 'Yes') {
-        pAttendTxt = `${checkboxMark(true)} Yes <br><span class="font-normal text-xs">Details: ${escapeHtml(prevDetails)}</span>`;
-    } else if (pAttend === 'No') {
-        pAttendTxt = `${checkboxMark(true)} No`;
-    } else {
-        pAttendTxt = '☐ Yes ☐ No';
-    }
+    let pAttendTxt = (pAttend === 'Yes') ? `${checkboxMark(true)} Yes <br><span class="font-normal text-xs">Details: ${escapeHtml(prevDetails)}</span>` : `${checkboxMark(pAttend === 'No')} No`;
 
     const tr2 = document.createElement('tr');
     tr2.innerHTML = `
@@ -795,7 +750,7 @@
     `;
     tbl.appendChild(tr2);
 
-    // --- ROW 3: PARENTS ---
+    // ROW 3
     const tr3 = document.createElement('tr');
     tr3.innerHTML = `
       <td colspan="5" class="no-padding">
@@ -811,7 +766,7 @@
     `;
     tbl.appendChild(tr3);
 
-    // --- ROW 4: ADDRESS ---
+    // ROW 4
     const tr4 = document.createElement('tr');
     tr4.innerHTML = `
       <td colspan="5" class="no-padding">
@@ -826,7 +781,7 @@
     `;
     tbl.appendChild(tr4);
 
-    // --- ROW 5: INFO & HOME LANG ---
+    // ROW 5
     let homeLangs = '';
     const hlSelect = document.getElementById('homeLang');
     if (hlSelect.tomselect) {
@@ -854,14 +809,13 @@
     `;
     tbl.appendChild(tr5);
 
-    // --- ROW 6: STUDENTS ---
+    // ROW 6: STUDENTS
     let stRows = '';
-    
+    // Loop through possible student IDs based on current count
     for(let i=1; i<=studentCount; i++){
-        const sn = document.getElementById(`s_${i}_surname`)?.value;
-        if(!sn && studentCount > 1) continue; 
-        
+        // Check if element exists (in case middle ones were deleted)
         if(document.getElementById(`s_${i}_surname`)){
+            const sn = document.getElementById(`s_${i}_surname`).value;
             const gn = document.getElementById(`s_${i}_given`).value;
             const dob = document.getElementById(`s_${i}_dob`).value;
             const birth = document.getElementById(`s_${i}_birth`).value;
@@ -897,7 +851,8 @@
     tr6.innerHTML = `
       <td colspan="5" class="no-padding">
         <table class="nested-table">
-          <tr style="background-color:#fff8dc;"> <th width="18%">SURNAME</th>
+          <tr style="background-color:#ffcc00;"> 
+             <th width="18%">SURNAME</th>
              <th width="18%">GIVEN NAME</th>
              <th width="8%">GENDER</th>
              <th width="12%">DOB</th>
@@ -906,13 +861,13 @@
              <th width="10%">SCHOOL YEAR</th>
              <th width="10%">PROGRAM</th>
           </tr>
-          ${stRows}
+          ${stRows || '<tr><td colspan="8" class="text-center p-2">No students added.</td></tr>'}
         </table>
       </td>
     `;
     tbl.appendChild(tr6);
 
-    // --- ROW 7: LIMITED PROFILE ---
+    // ROW 7
     const lim = getRadioValue('limitedProfile');
     const limDet = document.getElementById('limitedProfileDetails').value;
     const tr7 = document.createElement('tr');
@@ -923,7 +878,7 @@
     </td>`;
     tbl.appendChild(tr7);
 
-    // --- ROW 8: NOTES ---
+    // ROW 8
     const notes = document.getElementById('notes').value;
     const tr8 = document.createElement('tr');
     tr8.innerHTML = `<td colspan="5">
@@ -941,38 +896,35 @@
   }
 
   // ============================================
-  // 5. INITIALIZATION
+  // 5. INITIALIZATION & EVENTS
   // ============================================
-  
-  // Page 1 Select2 - RESPONSIVE WIDTH
+
+  // INIT PAGE 1 Select2
   $(document).ready(function() {
     $('#contactRel').select2({
       dropdownParent: $(document.body),
-      dropdownPosition: 'below',
       width: '100%' 
-    }).on('select2:open', setPageHeight).on('select2:close', setPageHeight); // Recalculate height
+    });
+    
+    // Default Date to Today
+    document.getElementById('date').valueAsDate = new Date();
+    
+    // Add First Student
+    addStudent();
   });
 
- // Home Language TomSelect
-const languages = [
-  "English", "Tigrinya", "Amharic", "Arabic", "French", "Spanish", "Somali", "Swahili", "Hindi",
-  "Mandarin Chinese", "Cantonese", "Portuguese", "Tagalog", "Italian", "German", "Russian",
-  "Punjabi", "Urdu", "Bengali", "Korean", "Japanese", "Vietnamese", "Cree", "Ojibwe", "Inuktitut",
-  "Persian (Farsi)", "Kurdish", "Pashto", "Ukrainian", "Polish", "Turkish", "Greek", "Tamil",
-  "Malayalam", "Telugu", "Gujarati", "Thai", "Indonesian", "Malay", "Burmese", "Sinhalese",
-  "Nepali", "Dari", "Hebrew", "Armenian", "Albanian", "Serbian", "Croatian", "Bosnian",
-  "Bulgarian", "Romanian", "Dutch", "Swedish", "Finnish", "Norwegian", "Danish", "Czech",
-  "Slovak", "Hungarian", "Latvian", "Lithuanian", "Estonian", "Haitian Creole", "Afrikaans",
-  "Zulu", "Xhosa", "Shona", "Twi", "Ewe", "Yoruba", "Igbo", "Hausa", "Oromo", "Tigré", "Nuer",
-  "Dinka", "Acholi", "Somali Bantu", "Khmer", "Lao", "Mongolian", "Kazakh", "Uzbek", "Tajik",
-  "Azerbaijani", "Georgian", "Macedonian", "Cebuano (Bisaya)", "Catalan", "Basque", "Galician",
-  "Samoan", "Tongan", "Fijian", "Fula", "Maori", "Luganda", "Bantu", "Bilen", "Kinyarwanda",
-  "Kinyabwishya", "Kinyamulenge", "Kikongo ya leta", "Lingala", "Mano", "Kpelle", "Kikuyu",
-  "Kamba", "Other"
-];
+  // Home Language List
+  const languages = [
+    "English", "Tigrinya", "Amharic", "Arabic", "French", "Spanish", "Somali", "Swahili", "Hindi",
+    "Mandarin Chinese", "Cantonese", "Portuguese", "Tagalog", "Italian", "German", "Russian",
+    "Punjabi", "Urdu", "Bengali", "Korean", "Japanese", "Vietnamese", "Cree", "Ojibwe", "Inuktitut",
+    "Persian (Farsi)", "Kurdish", "Pashto", "Ukrainian", "Polish", "Turkish", "Greek", "Tamil",
+    "Malayalam", "Telugu", "Gujarati", "Thai", "Indonesian", "Malay", "Burmese", "Sinhalese",
+    "Other"
+  ];
 
-document.addEventListener('DOMContentLoaded', () => {
-  const select = document.getElementById('homeLang');
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('homeLang');
     languages.forEach(lang => {
         const opt = document.createElement('option');
         opt.value = lang; opt.textContent = lang;
@@ -984,181 +936,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-function downloadPDF(orientation) {
+  // PDF LOGIC
+  function downloadPDF(orientation) {
     const final = document.getElementById('finalArea');
     final.classList.add('pdf-scale');
     document.getElementById('orientationSelector').classList.add('hidden');
     
     const opt = { 
         margin: 0.2, 
-        filename: `intake-form-${orientation}.pdf`, 
+        filename: `intake-form-${document.getElementById('date').value}.pdf`, 
         image: { type: 'jpeg', quality: 0.98 }, 
         html2canvas: { scale: 2, useCORS: true }, 
-        jsPDF: { unit: 'in', format: 'a4', orientation: orientation } 
+        jsPDF: { unit: 'in', format: 'letter', orientation: orientation } 
     };
     
     html2pdf().set(opt).from(final).save().then(() => {
         final.classList.remove('pdf-scale');
     });
-}
+  }
 
-document.getElementById('editBtn').onclick = () => {
+  // BUTTON HANDLERS
+  document.getElementById('editBtn').onclick = () => {
     document.getElementById('wizardRoot').classList.remove('hidden');
     document.getElementById('finalWrap').classList.add('hidden');
     document.getElementById('orientationSelector').classList.add('hidden'); 
-    window.scrollTo({top:0,behavior:'smooth'});
-}
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
 
-document.getElementById('pdfBtn').onclick = (event) => {
+  document.getElementById('pdfBtn').onclick = (event) => {
     event.stopPropagation(); 
-    document.getElementById('orientationSelector').classList.toggle('hidden');
-}
+    const sel = document.getElementById('orientationSelector');
+    sel.classList.toggle('hidden');
+    
+    // Position menu above button
+    const btnRect = event.target.getBoundingClientRect();
+    sel.style.bottom = "100%"; // Simple positioning via CSS class
+  }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
-    document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
-});
+  document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
+  document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
 
-document.addEventListener('click', function(event) {
+  document.addEventListener('click', function(event) {
     const selector = document.getElementById('orientationSelector');
     const pdfBtn = document.getElementById('pdfBtn');
-    
-    if (!selector.classList.contains('hidden') && event.target !== selector && !selector.contains(event.target) && event.target !== pdfBtn) {
+    if (!selector.classList.contains('hidden') && !selector.contains(event.target) && event.target !== pdfBtn) {
         selector.classList.add('hidden');
     }
-});
+  });
 
-document.getElementById('newFormBtn').onclick = () => { 
-    if(!confirm("Start new form? Data will be lost.")) return; 
+  document.getElementById('newFormBtn').onclick = () => { 
+    if(!confirm("Start new form? Current data will be lost.")) return; 
     location.reload(); 
-};
-
-// Keyboard Nav Logic
-document.addEventListener('DOMContentLoaded', () => {
-    function getFocusableElements(container) {
-        if (!container) return [];
-        const selector = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]';
-        let elements = Array.from(container.querySelectorAll(selector));
-        const select2Triggers = Array.from(container.querySelectorAll('.select2-selection'));
-        const tomSelectInputs = Array.from(container.querySelectorAll('.ts-control input'));
-        const allCandidates = [...elements, ...select2Triggers, ...tomSelectInputs];
-
-        return allCandidates.filter(el => {
-            if (el.closest('.nav-buttons')) return false;
-            if (el.offsetParent === null) return false;
-            if (el.tagName === 'SELECT' && (el.classList.contains('select2-hidden-accessible') || el.style.display === 'none')) return false;
-            if (el.closest('.hidden')) return false;
-            return true;
-        }).sort((a, b) => {
-            return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
-        });
-    }
-
-    document.addEventListener('keydown', function(event) {
-        const currentStep = document.querySelector('.page:not(.hidden)');
-        if (!currentStep) return;
-
-        const activeEl = document.activeElement;
-        const key = event.key;
-        const isShift = event.shiftKey;
-
-        if (isShift && (key === 'ArrowLeft' || key === 'ArrowRight')) {
-            event.preventDefault();
-            const currentStepNum = parseInt(currentStep.dataset.step, 10);
-            let nextStepNum = key === 'ArrowRight' ? currentStepNum + 1 : currentStepNum - 1;
-            if (typeof goTo === 'function' && nextStepNum >= 1 && nextStepNum <= 6) {
-                goTo(nextStepNum);
-                setTimeout(() => {
-                    const newPage = document.querySelector(`.page[data-step="${nextStepNum}"]`);
-                    const focusables = getFocusableElements(newPage);
-                    if (focusables[0]) focusables[0].focus();
-                }, 50);
-            }
-            return;
-        }
-
-        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
-            const isSelect2Open = document.querySelector('.select2-container--open');
-            const tsWrapper = activeEl.closest('.ts-wrapper');
-            const isTomSelectOpen = tsWrapper && tsWrapper.classList.contains('input-active') && activeEl.closest('.ts-control');
-
-            if (isSelect2Open || isTomSelectOpen) return;
-
-            const isTextLike = activeEl.tagName === 'INPUT' && ['text', 'password', 'email', 'tel', 'number', 'search', 'url'].includes(activeEl.type);
-            const isTextArea = activeEl.tagName === 'TEXTAREA';
-            
-            if (isTextLike || isTextArea) {
-                 try {
-                    if (key === 'ArrowLeft' && activeEl.selectionStart > 0) return;
-                    if (key === 'ArrowRight' && activeEl.selectionStart < activeEl.value.length) return;
-                } catch (e) {}
-            }
-            if (activeEl.tagName === 'INPUT' && activeEl.type === 'date') {
-                 if (key === 'ArrowLeft' || key === 'ArrowRight') return; 
-            }
-
-            event.preventDefault(); 
-            const focusables = getFocusableElements(currentStep);
-            if (focusables.length === 0) return;
-
-            const idx = focusables.indexOf(activeEl);
-            let nextIdx = idx;
-
-            if (key === 'ArrowRight' || key === 'ArrowDown') {
-                nextIdx = (idx + 1) % focusables.length;
-            } else {
-                nextIdx = (idx - 1 + focusables.length) % focusables.length;
-            }
-
-            if (focusables[nextIdx]) focusables[nextIdx].focus();
-        }
-
-        if (key === 'Enter') {
-            if (activeEl.tagName === "SELECT") return; 
-            if (activeEl.tagName === 'TEXTAREA') return;
-
-            event.preventDefault(); 
-
-            if (activeEl.type === 'radio') {
-                if (activeEl.checked && activeEl.wasChecked) {
-                    activeEl.checked = false;
-                    activeEl.wasChecked = false;
-                    if (activeEl.value === "Other") {
-                        const target = activeEl.getAttribute("onchange")?.match(/'(.*?)'/)?.[1];
-                        if (target) {
-                            const input = document.getElementById(target);
-                            input.classList.add("hidden");
-                            input.value = "";
-                        }
-                    }
-                    return;
-                }
-                document.querySelectorAll(`input[name="${activeEl.name}"]`).forEach(r => (r.wasChecked = false));
-                activeEl.wasChecked = true;
-                activeEl.checked = true;
-                activeEl.dispatchEvent(new Event('change', { bubbles: true }));
-                return;
-            }
-
-            if (activeEl.classList.contains('select2-selection')) { $(activeEl).trigger('click'); return; }
-            if (activeEl.closest('.ts-control')) { activeEl.click(); return; }
-            if (activeEl.tagName === 'BUTTON') { activeEl.click(); }
-        }
-      
-        if (key === ' ' && currentStep.dataset.step === '6') {
-            const isTextType = activeEl.tagName === 'INPUT' && activeEl.type !== 'radio' && activeEl.type !== 'checkbox';
-            if (isTextType || activeEl.tagName === 'TEXTAREA') {
-                return; 
-            }
-            const generateBtn = document.querySelector('.page[data-step="6"] button:last-child');
-            if (generateBtn && generateBtn.textContent.includes('Generate Yellow Form')) {
-                event.preventDefault();
-                generateBtn.click();
-            }
-        }
-    });
-});
-</script>
-
+  };
+  
+  // Initialize Buttons
+  updateNavButtons();
+  
+  </script>
 </body>
 </html>

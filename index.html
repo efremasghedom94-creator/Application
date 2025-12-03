@@ -557,8 +557,16 @@
             const dob = document.getElementById(`s_${i}_dob`).value;
             const birth = $(`#s_${i}_birth`).val() || ''; // JQuery for Select2
             const gender = getRadioValue(`s_${i}_gender`);
-            const year = getRadioValue(`s_${i}_year`) === 'ThisYear' ? 'This year' : 'Next year';
-            
+         // Get the actual value
+const yearVal = getRadioValue(`s_${i}_year`);
+let year = '';
+
+// Only assign text if a specific button was checked
+if (yearVal === 'ThisYear') {
+    year = 'This year';
+} else if (yearVal === 'NextYear') {
+    year = 'Next year';
+}
             let prog = '';
             const pt = getRadioValue(`s_${i}_progType`);
             if(pt === 'Regular') prog = 'Regular';

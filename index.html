@@ -493,16 +493,16 @@
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
     
-    // HEADER WITH LOGO ONLY (NO SEPARATOR ON YELLOW FORM)
-    final.insertAdjacentHTML('beforeend', `
-        <div class="flex flex-col md:flex-row items-center justify-between ml-6 mr-6 gap-4">
-            <h1 class="text-base md:text-lg font-semibold leading-tight text-center md:text-left">
-              INFORMATION NEEDED FOR BOOKING APPOINTMENTS 
-        <span class="whitespace-nowrap">and SENDING REQUESTS</span>
-    </h1>
-            <img src="One World Logo.jpg" alt="One World One Centre Logo" class="w-56 md:w-96 h-auto object-contain flex-shrink-0">
-    </div>
-    `);
+   // HEADER WITH LOGO ONLY (NO SEPARATOR ON YELLOW FORM)
+final.insertAdjacentHTML('beforeend', `
+     <div class="flex items-center justify-between gap-4 mb-2">
+         <h1 class="text-base md:text-lg font-semibold leading-tight text-left" style="padding-left: 6px;">
+           INFORMATION NEEDED FOR BOOKING APPOINTMENTS 
+     <span class="whitespace-nowrap">and SENDING REQUESTS</span>
+   </h1>
+         <img src="One World Logo.jpg" alt="One World One Centre Logo" class="w-56 md:w-96 h-auto object-contain flex-shrink-0" style="padding-right: 6px;">
+   </div>
+ `);
 
 
 

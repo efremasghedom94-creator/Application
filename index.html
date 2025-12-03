@@ -297,10 +297,10 @@
         <div class="grid grid-cols-12 gap-3">
             <div class="col-span-12">
                 <label class="block text-sm">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</label>
-                <div class="flex gap-4">
-                    <label><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)"> No</label>
-                    <label><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)"> Yes</label>
-                </div>
+               <div class="flex gap-4">
+              <label><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)" onclick="deselectRadio(this)"> No</label>
+                 <label><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)" onclick="deselectRadio(this)"> Yes</label>
+               </div>
             </div>
         </div>
 

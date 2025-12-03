@@ -610,12 +610,18 @@ if (yearVal === 'ThisYear') {
         }
     }
 
-    const tr6 = document.createElement('tr');
+
+
+
+
+
+
+const tr6 = document.createElement('tr');
    tr6.innerHTML = `<td colspan="5" class="no-padding">
     <table class="nested-table">
-        <tr style="background-color:#fcf89f; border-bottom: 1px solid #000000;">
-            <th width="18%">SURNAME</th>
-            <th width="18%">GIVEN NAME</th>
+        <tr style="background-color:#fcf89f; border-bottom: 1px solid #000000; font-size: 8pt;">
+            <th width="18%">STUDENT'S SURNAME</th>
+            <th width="18%">STUDENT'S GIVEN NAME</th>
             <th width="8%">GENDER</th>
             <th width="12%">DOB</th>
             <th width="14%">BIRTH COUNTRY</th>
@@ -626,7 +632,10 @@ if (yearVal === 'ThisYear') {
         ${stRows}
     </table>
 </td>`;
-    tbl.appendChild(tr6);
+tbl.appendChild(tr6);
+
+
+    
 
     // --- ROW 7: LIMITED PROFILE ---
     const lim = getRadioValue('limitedProfile');

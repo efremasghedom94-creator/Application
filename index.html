@@ -567,7 +567,7 @@
     
     tbl.appendChild(tr5);
 
-    // --- ROW 6: STUDENTS (WITH SEPARATOR LINES) ---
+    // --- ROW 6: 
     let stRows = '';
     for(let i=1; i<=studentCount; i++){
         const sn = document.getElementById(`s_${i}_surname`)?.value;
@@ -614,7 +614,21 @@ if (yearVal === 'ThisYear') {
     }
 
     const tr6 = document.createElement('tr');
-    tr6.innerHTML = `<td colspan="5" class="no-padding"><table class="nested-table"><tr style="background-color:#fff8dc;"><th width="18%">SURNAME</th><th width="18%">GIVEN NAME</th><th width="8%">GENDER</th><th width="12%">DOB</th><th width="14%">BIRTH COUNTRY</th><th width="10%">LAST GRADE</th><th width="10%">SCHOOL YEAR</th><th width="10%">PROGRAM</th></tr>${stRows}</table></td>`;
+   tr6.innerHTML = `<td colspan="5" class="no-padding">
+    <table class="nested-table">
+        <tr style="background-color:#fff8dc; border-bottom: 1px solid #ccc;">
+            <th width="18%">SURNAME</th>
+            <th width="18%">GIVEN NAME</th>
+            <th width="8%">GENDER</th>
+            <th width="12%">DOB</th>
+            <th width="14%">BIRTH COUNTRY</th>
+            <th width="10%">LAST GRADE</th>
+            <th width="10%">SCHOOL YEAR</th>
+            <th width="10%">PROGRAM</th>
+        </tr>
+        ${stRows}
+    </table>
+</td>`;
     tbl.appendChild(tr6);
 
     // --- ROW 7: LIMITED PROFILE ---

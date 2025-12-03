@@ -495,34 +495,26 @@
 
 
 
+
+
+
+    
     final.insertAdjacentHTML('beforeend', `
         <div class="w-full flex items-center justify-between mb-2">
-            <h1 class="text-lg font-bold leading-tight text-left uppercase">
+            <h1 class="text-lg font-semibold leading-tight text-left uppercase">
                 INFORMATION NEEDED FOR BOOKING<br>APPOINTMENTS AND SENDING REQUESTS
             </h1>
             <img src="One World Logo.jpg" 
                  alt="One World One Centre Logo" 
-                 class="w-40 md:w-64 h-auto object-contain">
+                 class="w-56 md:w-96 h-auto object-contain">
         </div>
     `);
 
-    // ... The rest of your table generation code goes here ...
 
 
 
 
     
-    // HEADER WITH LOGO ONLY (NO SEPARATOR ON YELLOW FORM)
-    final.insertAdjacentHTML('beforeend', `
-        <div class="flex flex-col md:flex-row items-center justify-between ml-6 mr-6 gap-4">
-            <h1 class="text-xl font-semibold leading-tight pr-4 text-center md:text-left">
-                INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
-            </h1>
-            <img src="One World Logo.jpg" 
-                 alt="One World One Centre Logo" 
-                 class="w-48 md:w-80 h-auto object-contain flex-shrink-0">
-        </div>
-    `);
 
     // Create a wrapper for mobile scrolling
     const scrollWrap = document.createElement('div');

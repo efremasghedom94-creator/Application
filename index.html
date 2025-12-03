@@ -536,14 +536,35 @@
     tbl.appendChild(tr4);
 
     // ROW 5 (Info)
+// ROW 5 (Info)
     let homeLangs = '';
     const hlSelect = document.getElementById('homeLang');
     if (hlSelect.tomselect) { const val = hlSelect.tomselect.getValue(); homeLangs = Array.isArray(val) ? val.join(', ') : val; } 
     else { homeLangs = Array.from(hlSelect.selectedOptions).map(o=>o.value).join(', '); }
-    const cath = getRadioValue('catholic'); const relOther = document.getElementById('religionOther').value;
-    const cathTxt = `${checkboxMark(cath==='Yes')} Yes  ${checkboxMark(cath==='No')} No` + (relOther ? `<br><strong>Note:</strong> ${escapeHtml(relOther)}` : '');
+    
+    const cath = getRadioValue('catholic'); 
+    const relOther = document.getElementById('religionOther').value;
+    
+    // CHANGE 1: We removed <strong> and </strong> around "Note:"
+    const cathTxt = `${checkboxMark(cath==='Yes')} Yes  ${checkboxMark(cath==='No')} No` + (relOther ? `<br>Note: ${escapeHtml(relOther)}` : '');
+    
     const tr5 = document.createElement('tr');
-    tr5.innerHTML = `<td colspan="5" class="no-padding"><table class="nested-table"><tr><td width="33%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td><td width="34%">${c("HOME LANGUAGE", homeLangs)}</td><td width="33%">${c("CATHOLIC", cathTxt)}</td></tr></table></td>`;
+
+    // CHANGE 2: We manually write the HTML for the Catholic cell.
+    // This allows the <br> to work as a line break, while still keeping user input safe.
+    tr5.innerHTML = `<td colspan="5" class="no-padding">
+        <table class="nested-table">
+            <tr>
+                <td width="33%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td>
+                <td width="34%">${c("HOME LANGUAGE", homeLangs)}</td>
+                <td width="33%">
+                    <div class="font-semibold">CATHOLIC</div>
+                    <div class="cell-content">${cathTxt}</div>
+                </td>
+            </tr>
+        </table>
+    </td>`;
+    
     tbl.appendChild(tr5);
 
     // --- ROW 6: STUDENTS (WITH SEPARATOR LINES) ---

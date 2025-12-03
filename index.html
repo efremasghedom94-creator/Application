@@ -104,15 +104,18 @@
   <div class="max-w-5xl mx-auto p-2 md:p-6">
     <div id="wizardRoot" class="wizard bg-white rounded-lg shadow">
 
-    <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
         <h1 class="text-lg md:text-xl font-semibold leading-tight text-center md:text-left">
             INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
         </h1>
         <img src="One World Logo.jpg" alt="One World One Centre Logo" class="w-48 md:w-80 h-auto object-contain flex-shrink-0">
     </div>
+    
+    <hr class="border-t border-gray-300 my-4" />
 
       <section class="page" data-step="1">
-        <h2 class="font-medium mb-3 text-lg">Page 1 — Contact Info</h2>
+        <h2 class="font-medium mb-6 text-lg">Page 1 — Contact Info</h2>
+        
         <div class="grid grid-cols-12 gap-3">
           <div class="col-span-12 md:col-span-2">
             <label class="block text-sm">DATE</label>
@@ -148,7 +151,8 @@
       </section>
 
       <section class="page hidden" data-step="2">
-        <h2 class="font-medium mb-3 text-lg">Page 2 — Status & History</h2>
+        <h2 class="font-medium mb-6 text-lg">Page 2 — Status & History</h2>
+        
         <div class="grid grid-cols-12 gap-3 mb-3">
           <div class="col-span-12 md:col-span-6">
             <label class="block text-sm">STUDENT'S STATUS</label>
@@ -194,7 +198,8 @@
       </section>
 
       <section class="page hidden" data-step="3">
-        <h2 class="font-medium mb-3 text-lg">Page 3 — Parent Info</h2>
+        <h2 class="font-medium mb-6 text-lg">Page 3 — Parent Info</h2>
+        
         <div class="grid grid-cols-12 gap-3">
           <div class="col-span-12 md:col-span-3"><label class="block text-sm">FATHER'S SURNAME</label><input id="fatherSurname" type="text" class="w-full border rounded p-2 mt-1" /></div>
           <div class="col-span-12 md:col-span-3"><label class="block text-sm">FATHER'S GIVEN NAME</label><input id="fatherGiven" type="text" class="w-full border rounded p-2 mt-1" /></div>
@@ -208,7 +213,8 @@
       </section>
 
       <section class="page hidden" data-step="4">
-        <h2 class="font-medium mb-3 text-lg">Page 4 — Address & Demographics</h2>
+        <h2 class="font-medium mb-6 text-lg">Page 4 — Address & Demographics</h2>
+        
         <div class="grid grid-cols-12 gap-3">
           <div class="col-span-4 md:col-span-2"><label class="block text-sm">APT #</label><input id="apt" type="text" class="w-full border rounded p-2 mt-1" /></div>
           <div class="col-span-8 md:col-span-8"><label class="block text-sm">FAMILY ADDRESS</label><input id="address" type="text" class="w-full border rounded p-2 mt-1" /></div>
@@ -229,7 +235,8 @@
       </section>
 
       <section class="page hidden" data-step="5">
-        <h2 class="font-medium mb-3 text-lg">Page 5 — Student Details</h2>
+        <h2 class="font-medium mb-6 text-lg">Page 5 — Student Details</h2>
+        
         <div id="studentsContainer" class="space-y-4"></div>
         <div class="flex items-center gap-3 mt-3 flex-wrap">
           <button class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" onclick="addStudent()" type="button">Add Student</button>
@@ -242,7 +249,8 @@
       </section>
 
       <section class="page hidden" data-step="6">
-        <h2 class="font-medium mb-3 text-lg">Page 6 — Final Notes</h2>
+        <h2 class="font-medium mb-6 text-lg">Page 6 — Final Notes</h2>
+        
         <div class="grid grid-cols-12 gap-3">
             <div class="col-span-12"><label class="block text-sm">LIMITED FORMAL SCHOOLING?</label><div class="flex gap-4"><label><input type="radio" name="limitedProfile" value="No" onchange="toggleLimitedProfile(false)"> No</label><label><input type="radio" name="limitedProfile" value="Yes" onchange="toggleLimitedProfile(true)"> Yes</label></div></div>
         </div>
@@ -427,9 +435,9 @@
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
     
-    // HEADER WITH LOGO
+    // HEADER WITH LOGO & SEPARATOR
     final.insertAdjacentHTML('beforeend', `
-        <div class="flex flex-col md:flex-row items-center justify-between mb-6 ml-6 mr-6 gap-4">
+        <div class="flex flex-col md:flex-row items-center justify-between ml-6 mr-6 gap-4">
             <h1 class="text-xl font-semibold leading-tight pr-4 text-center md:text-left">
                 INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
             </h1>
@@ -437,6 +445,7 @@
                  alt="One World One Centre Logo" 
                  class="w-48 md:w-80 h-auto object-contain flex-shrink-0">
         </div>
+        <hr class="border-t border-gray-500 my-4" />
     `);
 
     // Create a wrapper for mobile scrolling

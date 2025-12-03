@@ -177,22 +177,25 @@
           <div class="col-span-12 md:col-span-6">
             <label class="block text-sm">STUDENT'S STATUS</label>
             <div class="mt-1 flex flex-wrap gap-3">
-              <label><input type="radio" name="studentStatus" value="PR" onchange="toggleOtherField('studentStatusOther', this)"> PR</label>
-              <label><input type="radio" name="studentStatus" value="RC" onchange="toggleOtherField('studentStatusOther', this)"> RC</label>
-              <label><input type="radio" name="studentStatus" value="WP" onchange="toggleOtherField('studentStatusOther', this)"> WP</label>
-              <label><input type="radio" name="studentStatus" value="Other" onchange="toggleOtherField('studentStatusOther', this)"> Other</label>
-              <input id="studentStatusOther" type="text" class="hidden border rounded p-1 ml-2 w-32" placeholder="Specify" />
+  <label><input type="radio" name="studentStatus" value="PR" onchange="toggleOtherField('studentStatusOther', this)"> PR</label>
+  <label><input type="radio" name="studentStatus" value="WP" onchange="toggleOtherField('studentStatusOther', this)"> WP</label>
+  <label><input type="radio" name="studentStatus" value="SP" onchange="toggleOtherField('studentStatusOther', this)"> SP</label>
+  <label><input type="radio" name="studentStatus" value="RC" onchange="toggleOtherField('studentStatusOther', this)"> RC</label>
+  <label><input type="radio" name="studentStatus" value="Other" onchange="toggleOtherField('studentStatusOther', this)"> Other</label>
+  <input id="studentStatusOther" type="text" class="hidden border rounded p-1 ml-2 w-32" placeholder="Specify" />
+             
             </div>
           </div>
           <div class="col-span-12 md:col-span-6">
             <label class="block text-sm">IMMIGRATION DOC (PARENT)</label>
-            <div class="mt-1 flex flex-wrap gap-3">
-              <label><input type="radio" name="immDoc" value="PR" onchange="toggleOtherField('immDocOther', this)"> PR</label>
-              <label><input type="radio" name="immDoc" value="RC" onchange="toggleOtherField('immDocOther', this)"> RC</label>
-              <label><input type="radio" name="immDoc" value="WP" onchange="toggleOtherField('immDocOther', this)"> WP</label>
-              <label><input type="radio" name="immDoc" value="Other" onchange="toggleOtherField('immDocOther', this)"> Other</label>
-              <input id="immDocOther" type="text" class="hidden border rounded p-1 ml-2 w-32" placeholder="Specify" />
-            </div>
+<div class="mt-1 flex flex-wrap gap-3">
+  <label><input type="radio" name="immDoc" value="PR" onchange="toggleOtherField('immDocOther', this)"> PR</label>
+  <label><input type="radio" name="immDoc" value="WP" onchange="toggleOtherField('immDocOther', this)"> WP</label>
+  <label><input type="radio" name="immDoc" value="SP" onchange="toggleOtherField('immDocOther', this)"> SP</label>
+  <label><input type="radio" name="immDoc" value="RC" onchange="toggleOtherField('immDocOther', this)"> RC</label>
+  <label><input type="radio" name="immDoc" value="Other" onchange="toggleOtherField('immDocOther', this)"> Other</label>
+  <input id="immDocOther" type="text" class="hidden border rounded p-1 ml-2 w-32" placeholder="Specify" />
+</div>
           </div>
           <div class="col-span-12 md:col-span-4 mt-2">
             <label class="block text-sm">EXPIRY DATE</label>

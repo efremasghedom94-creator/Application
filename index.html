@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -103,34 +104,14 @@
     /* Library Tweaks */
     .select2-container .select2-selection--single { height: 42px; border: 1px solid #d1d5db; padding: 6px; }
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; top: 0; }
-    
   </style>
 </head>
 
 <body class="bg-gray-100 text-gray-800">
   <div class="max-w-5xl mx-auto p-6">
     <div id="wizardRoot" class="wizard bg-white rounded-lg shadow p-6">
+       <h1 class="text-xl font-semibold mb-6 ml-6">INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS</h1>
 
-
-
-
-   
-<div class="flex items-center justify-between mb-6 ml-6 mr-6 gap-4">
-    <h1 class="text-xl font-semibold leading-tight pr-4">
-        INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
-    </h1>
-<img src="One World Logo.jpg" 
-     alt="One World One Centre Logo" 
-     class="w-80 h-auto object-contain flex-shrink-0">
-</div>
-
-
-
-
-      
-
-
-      
       <section class="page" data-step="1">
         <h2 class="font-medium mb-3">Page 1</h2>
         <div class="grid grid-cols-12 gap-3">
@@ -156,23 +137,7 @@
               <option value="" disabled selected hidden>-- Select --</option>
               <option value="Mother">Mother</option>
               <option value="Father">Father</option>
-              <option value="Sister">Sister</option>
-              <option value="Brother">Brother</option>
-              <option value="Step-Mother">Step-Mother</option>
-              <option value="Step-Father">Step-Father</option>
-              <option value="Half-Sister">Half-Sister</option>
-              <option value="Half-Brother">Half-Brother</option>
-              <option value="Uncle">Uncle</option>
-              <option value="Aunt">Aunt</option>
-              <option value="Cousin">Cousin</option>
-              <option value="Grandmother">Grandmother</option>
-              <option value="Grandfather">Grandfather</option>
               <option value="Guardian">Guardian</option>
-              <option value="Sponsor">Sponsor</option>
-              <option value="Family Friend">Family Friend</option>
-              <option value="Neighbor">Neighbor</option>
-              <option value="Community Worker">Community Worker</option>
-              <option value="Social Worker">Social Worker</option>
               <option value="Other">Other</option>
             </select>
             <input type="text" id="otherRelation" class="border rounded p-2 w-72 mt-2 hidden" placeholder="Specify" />
@@ -302,30 +267,12 @@
 
     <div id="finalWrap" class="final-wrap hidden mt-6">
       <div id="finalArea" class="p-6 rounded shadow border" style="background-color: #fff989;"></div>
-     <div class="mt-4 flex justify-center gap-3 relative">
-    
-    <div id="orientationSelector" 
-         class="absolute hidden bottom-full right-1/2 translate-x-1/2 mb-3 p-3 rounded shadow-xl z-20 text-sm" 
-         style="background-color: #fff8dc; border: 1px solid #C7631C; width: 200px;">
-        
-        <p class="font-bold mb-2 text-gray-800">Select PDF Orientation:</p>
-        
-        <button id="downloadPortraitBtn" class="w-full mb-1 px-3 py-1 text-white rounded hover:opacity-90 transition" 
-                style="background-color: #C7631C;">
-            Portrait (Taller)
-        </button>
-        
-        <button id="downloadLandscapeBtn" class="w-full px-3 py-1 text-white rounded hover:opacity-90 transition" 
-                style="background-color: #C7631C;">
-            Landscape (Wider)
-        </button>
-    </div>
-    
-    <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
-    <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
-    <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
-    <button id="newFormBtn" class="px-4 py-2 bg-red-700 text-white rounded">New Form</button>
-</div>
+      <div class="mt-4 flex justify-center gap-3">
+        <button id="editBtn" class="px-4 py-2 bg-green-700 text-white rounded">Back to Edit</button>
+        <button id="printBtn" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="window.print()">Print</button>
+        <button id="pdfBtn" class="px-4 py-2 text-white rounded" style="background-color: #C7631C;">Download PDF</button>
+        <button id="newFormBtn" class="px-4 py-2 bg-red-700 text-white rounded">New Form</button>
+      </div>
     </div>
   </div>
 
@@ -634,20 +581,7 @@
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
     
-    // --- PASTE THIS RIGHT AFTER final.innerHTML = ''; ---
-    
-    final.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center justify-between mb-6 ml-6 mr-6 gap-4">
-          <h1 class="text-xl font-semibold leading-tight pr-4">
-              INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS
-          </h1>
-          <img src="One World Logo.jpg" 
-               alt="One World One Centre Logo" 
-               class="w-80 h-auto object-contain flex-shrink-0">
-      </div>
-    `);
-
-    // ----------------------------------------------------
+    final.insertAdjacentHTML('beforeend', '<h1 class="text-xl font-semibold mb-6 ml-0 pl-0.5">INFORMATION NEEDED FOR BOOKING APPOINTMENTS AND SENDING REQUESTS</h1>');
 
     const tbl = document.createElement('table');
     tbl.className = 'yellow-table';
@@ -859,27 +793,10 @@
     });
   });
 
- // Home Language TomSelect
-const languages = [
-  "English", "Tigrinya", "Amharic", "Arabic", "French", "Spanish", "Somali", "Swahili", "Hindi",
-  "Mandarin Chinese", "Cantonese", "Portuguese", "Tagalog", "Italian", "German", "Russian",
-  "Punjabi", "Urdu", "Bengali", "Korean", "Japanese", "Vietnamese", "Cree", "Ojibwe", "Inuktitut",
-  "Persian (Farsi)", "Kurdish", "Pashto", "Ukrainian", "Polish", "Turkish", "Greek", "Tamil",
-  "Malayalam", "Telugu", "Gujarati", "Thai", "Indonesian", "Malay", "Burmese", "Sinhalese",
-  "Nepali", "Dari", "Hebrew", "Armenian", "Albanian", "Serbian", "Croatian", "Bosnian",
-  "Bulgarian", "Romanian", "Dutch", "Swedish", "Finnish", "Norwegian", "Danish", "Czech",
-  "Slovak", "Hungarian", "Latvian", "Lithuanian", "Estonian", "Haitian Creole", "Afrikaans",
-  "Zulu", "Xhosa", "Shona", "Twi", "Ewe", "Yoruba", "Igbo", "Hausa", "Oromo", "Tigré", "Nuer",
-  "Dinka", "Acholi", "Somali Bantu", "Khmer", "Lao", "Mongolian", "Kazakh", "Uzbek", "Tajik",
-  "Azerbaijani", "Georgian", "Macedonian", "Cebuano (Bisaya)", "Catalan", "Basque", "Galician",
-  "Samoan", "Tongan", "Fijian", "Fula", "Maori", "Luganda", "Bantu", "Bilen", "Kinyarwanda",
-  "Kinyabwishya", "Kinyamulenge", "Kikongo ya leta", "Lingala", "Mano", "Kpelle", "Kikuyu",
-  "Kamba", "Other"
-];
-
-document.addEventListener('DOMContentLoaded', () => {
-  const select = document.getElementById('homeLang');
-  // ... rest of the TomSelect setup ...
+  // Home Language TomSelect
+  const languages = ["English","Tigrinya","Amharic","Arabic","French","Spanish","Somali","Swahili","Hindi","Mandarin Chinese","Cantonese","Tagalog","Ukraine","Russian","Vietnamese","Other"];
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('homeLang');
     languages.forEach(lang => {
         const opt = document.createElement('option');
         opt.value = lang; opt.textContent = lang;
@@ -892,62 +809,33 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Buttons
-// Buttons
-// New dedicated function to handle PDF generation
-function downloadPDF(orientation) {
+  document.getElementById('editBtn').onclick = () => {
+    document.getElementById('wizardRoot').classList.remove('hidden');
+    document.getElementById('finalWrap').classList.add('hidden');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  document.getElementById('pdfBtn').onclick = () => {
     const final = document.getElementById('finalArea');
     final.classList.add('pdf-scale');
     
-    // Hide the selector box immediately upon selection
-    document.getElementById('orientationSelector').classList.add('hidden');
-    
     const opt = { 
         margin: 0.2, 
-        filename: `intake-form-${orientation}.pdf`, 
+        filename: 'intake-form.pdf', 
         image: { type: 'jpeg', quality: 0.98 }, 
         html2canvas: { scale: 2, useCORS: true }, 
-        jsPDF: { unit: 'in', format: 'a4', orientation: orientation } // Uses the selected orientation
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } 
     };
     
     html2pdf().set(opt).from(final).save().then(() => {
         final.classList.remove('pdf-scale');
     });
-}
+  };
 
-document.getElementById('editBtn').onclick = () => {
-    document.getElementById('wizardRoot').classList.remove('hidden');
-    document.getElementById('finalWrap').classList.add('hidden');
-    document.getElementById('orientationSelector').classList.add('hidden'); // Hide selector on edit
-    window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// Modify pdfBtn to toggle the orientation selector visibility
-document.getElementById('pdfBtn').onclick = (event) => {
-    event.stopPropagation(); // Prevents immediate closing via the global click listener
-    document.getElementById('orientationSelector').classList.toggle('hidden');
-}
-
-// Attach listeners to the new Portrait/Landscape buttons (requires DOM to be loaded)
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
-    document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
-});
-
-// Global listener to close the selector if the user clicks outside of it
-document.addEventListener('click', function(event) {
-    const selector = document.getElementById('orientationSelector');
-    const pdfBtn = document.getElementById('pdfBtn');
-    
-    // If the selector is visible and the click target is not the selector or the PDF button itself, hide it.
-    if (!selector.classList.contains('hidden') && event.target !== selector && !selector.contains(event.target) && event.target !== pdfBtn) {
-        selector.classList.add('hidden');
-    }
-});
-
-document.getElementById('newFormBtn').onclick = () => { 
-    if(!confirm("Start new form? Data will be lost.")) return; 
+  document.getElementById('newFormBtn').onclick = () => {
+    if(!confirm("Start new form? Data will be lost.")) return;
     location.reload(); 
-};
+  };
 </script>
 
 <script>

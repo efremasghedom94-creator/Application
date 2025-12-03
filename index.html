@@ -111,7 +111,7 @@
         <img src="One World Logo.jpg" alt="One World One Centre Logo" class="w-48 md:w-80 h-auto object-contain flex-shrink-0">
     </div>
     
-    <hr class="border-t border-gray-300 my-4" />
+    <hr class="border-t border-gray-200 my-4" />
 
       <section class="page" data-step="1">
         <h2 class="font-medium mb-6 text-lg">Page 1 — Contact Info</h2>
@@ -139,7 +139,18 @@
               <option value="" disabled selected hidden>-- Select --</option>
               <option value="Mother">Mother</option>
               <option value="Father">Father</option>
+              <option value="Step-Mother">Step-Mother</option>
+              <option value="Step-Father">Step-Father</option>
+              <option value="Grandmother">Grandmother</option>
+              <option value="Grandfather">Grandfather</option>
+              <option value="Sister">Sister</option>
+              <option value="Brother">Brother</option>
+              <option value="Aunt">Aunt</option>
+              <option value="Uncle">Uncle</option>
+              <option value="Cousin">Cousin</option>
               <option value="Guardian">Guardian</option>
+              <option value="Foster Parent">Foster Parent</option>
+              <option value="Social Worker">Social Worker</option>
               <option value="Other">Other</option>
             </select>
             <input type="text" id="otherRelation" class="border rounded p-2 w-full mt-2 hidden" placeholder="Specify" />
@@ -435,7 +446,7 @@
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
     
-    // HEADER WITH LOGO & SEPARATOR
+    // HEADER WITH LOGO ONLY (NO SEPARATOR ON YELLOW FORM)
     final.insertAdjacentHTML('beforeend', `
         <div class="flex flex-col md:flex-row items-center justify-between ml-6 mr-6 gap-4">
             <h1 class="text-xl font-semibold leading-tight pr-4 text-center md:text-left">
@@ -445,7 +456,6 @@
                  alt="One World One Centre Logo" 
                  class="w-48 md:w-80 h-auto object-contain flex-shrink-0">
         </div>
-        <hr class="border-t border-gray-500 my-4" />
     `);
 
     // Create a wrapper for mobile scrolling

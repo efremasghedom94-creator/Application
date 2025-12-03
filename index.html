@@ -264,7 +264,7 @@
                   <label><input type="radio" name="catholic" value="No"> No</label>
                   <label><input type="radio" name="catholic" value="Yes"> Yes</label>
                 </div>
-                <input id="religionOther" type="text" class="mt-2 w-full md:w-1/2 border rounded p-2" placeholder="If not Catholic..." />
+                <input id="religionOther" type="text" class="mt-2 w-full md:w-1/2 border rounded p-2" placeholder="Specify religion (Optional)" />
               </div>
             </div>
         </div>
@@ -489,6 +489,13 @@
   function generateFinal(){
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
+
+
+
+
+
+
+
     
     // HEADER WITH LOGO ONLY (NO SEPARATOR ON YELLOW FORM)
     final.insertAdjacentHTML('beforeend', `
@@ -536,7 +543,6 @@
     tbl.appendChild(tr4);
 
     // ROW 5 (Info)
-// ROW 5 (Info)
     let homeLangs = '';
     const hlSelect = document.getElementById('homeLang');
     if (hlSelect.tomselect) { const val = hlSelect.tomselect.getValue(); homeLangs = Array.isArray(val) ? val.join(', ') : val; } 
@@ -544,14 +550,8 @@
     
     const cath = getRadioValue('catholic'); 
     const relOther = document.getElementById('religionOther').value;
-    
-    // CHANGE 1: We removed <strong> and </strong> around "Note:"
-    const cathTxt = `${checkboxMark(cath==='Yes')} Yes  ${checkboxMark(cath==='No')} No` + (relOther ? `<br>Note: ${escapeHtml(relOther)}` : '');
-    
+    const cathTxt = `${checkboxMark(cath==='Yes')} Yes  ${checkboxMark(cath==='No')} No` + (relOther ? `<br>Note: ${escapeHtml(relOther)}` : '');  
     const tr5 = document.createElement('tr');
-
-    // CHANGE 2: We manually write the HTML for the Catholic cell.
-    // This allows the <br> to work as a line break, while still keeping user input safe.
     tr5.innerHTML = `<td colspan="5" class="no-padding">
         <table class="nested-table">
             <tr>
@@ -627,10 +627,7 @@ if (yearVal === 'ThisYear') {
     limContent += `<div>${checkboxMark(lim==='Yes')} Yes  ${checkboxMark(lim==='No')} No</div>`;
 
     if (lim === 'Yes') {
-        // This is the descriptive label/prompt
         limContent += `<div style="font-size:10px; margin-top: 5px; color:#555;">If YES, describe for each student, Grade 1–Grade 12, as relevant:</div>`;
-        
-        // Removed 'border-top: 1px solid #ccc;' from the style here.
         limContent += `<div class="cell-content" style="padding: 5px 20px; white-space: pre-wrap;">${escapeHtml(limDet)}</div>`;
     }
 
@@ -640,7 +637,6 @@ if (yearVal === 'ThisYear') {
     // --- ROW 8: NOTES ---
     const notes = document.getElementById('notes').value;
     const tr8 = document.createElement('tr');
-    // Added white-space: pre-wrap; to preserve formatting/line breaks
     tr8.innerHTML = `<td colspan="5"><div class="font-semibold">NOTES</div><div class="cell-content" style="padding: 5px 20px; white-space: pre-wrap;">${escapeHtml(notes)}</div></td>`;
     tbl.appendChild(tr8);
 

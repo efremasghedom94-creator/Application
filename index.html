@@ -562,12 +562,12 @@ function addStudent(prefill){
 
     <div class="grid grid-cols-12 gap-4 mt-3">
       
-      <div class="col-span-6 md:col-span-4">
+      <div class="col-span-6 md:col-span-2">
           <label class="text-xs font-bold text-gray-700">DOB</label>
           <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" onchange="updateGrade(${id})" />
       </div>
       
-      <div class="col-span-6 md:col-span-3 overflow-visible">
+      <div class="col-span-6 md:col-span-4 overflow-visible">
           <label class="text-xs font-bold text-gray-700">LAST GRADE COMPLETED</label>
           <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
               <option value="" disabled selected hidden>Select grade</option>
@@ -579,7 +579,7 @@ function addStudent(prefill){
           <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
       </div>
       
-      <div class="col-span-12 md:col-span-4">
+      <div class="col-span-12 md:col-span-6">
           <label class="text-xs font-bold text-gray-700">PROGRAM</label>
           <div class="mt-1 p-2 border rounded bg-white">
               <div class="flex items-center gap-4">

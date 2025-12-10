@@ -551,102 +551,106 @@
   }
 
   // ============================================
-  // 3. STUDENT ROWS (Responsive)
-  // ============================================
-  function addStudent(prefill){
-    studentCount++;
-    const id = studentCount;
-    const container = document.getElementById('studentsContainer');
-    const wrap = document.createElement('div');
-    wrap.className = 'p-4 border rounded bg-gray-50 mb-4';
-    wrap.id = `student-${id}`;
-    
-    // UPDATED HTML STRUCTURE: Added "AGE APPR. GRADE" box and onchange triggers
-    wrap.innerHTML = `
-      <div class="grid grid-cols-12 gap-3">
-        <div class="col-span-12 md:col-span-3">
-            <label class="text-xs font-bold text-gray-700">STUDENT'S SURNAME</label>
-            <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
-        </div>
-        <div class="col-span-12 md:col-span-3">
-            <label class="text-xs font-bold text-gray-700">STUDENT'S GIVEN NAME</label>
-            <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
-        </div>
-        
-        <div class="col-span-6 md:col-span-2">
-            <label class="text-xs font-bold text-gray-700">DOB</label>
-            <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" onchange="updateGrade(${id})" />
-        </div>
-        <div class="col-span-6 md:col-span-2">
-            <label class="text-xs font-bold text-gray-700 text-blue-700">AGE APPR. GRADE</label>
-            <input type="text" id="s_${id}_calc_grade" class="w-full border rounded p-2 mt-1 bg-blue-50 font-bold text-blue-800" readonly tabindex="-1" placeholder="Auto" />
-        </div>
-
-        <div class="col-span-12 md:col-span-2">
-            <label class="text-xs font-bold text-gray-700">BIRTH COUNTRY</label>
-            <select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1"><option disabled selected>Loading...</option></select>
-        </div>
+// ============================================
+// 3. STUDENT ROWS (Responsive)
+// ============================================
+function addStudent(prefill){
+  studentCount++;
+  const id = studentCount;
+  const container = document.getElementById('studentsContainer');
+  const wrap = document.createElement('div');
+  wrap.className = 'p-4 border rounded bg-gray-50 mb-4';
+  wrap.id = `student-${id}`;
+  
+  // REVISED HTML STRUCTURE: DOB and AGE APPR. GRADE moved to the second half.
+  wrap.innerHTML = `
+    <div class="grid grid-cols-12 gap-3">
+      <div class="col-span-12 md:col-span-4">
+          <label class="text-xs font-bold text-gray-700">STUDENT'S SURNAME</label>
+          <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
       </div>
-
-      <div class="grid grid-cols-12 gap-4 mt-3">
-        <div class="col-span-12 md:col-span-4 overflow-visible">
-            <label class="text-xs font-bold text-gray-700">LAST GRADE COMPLETED</label>
-            <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
-                <option value="" disabled selected hidden>Select grade</option>
-                <option value="Pre KG">Pre KG</option>
-                <option value="KG">KG</option>
-                ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
-                <option value="Other">Other</option>
-            </select>
-            <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
-        </div>
-        <div class="col-span-12 md:col-span-8">
-            <label class="text-xs font-bold text-gray-700">PROGRAM</label>
-            <div class="mt-1 p-2 border rounded bg-white">
-                <div class="flex items-center gap-4">
-                    <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular</label>
-                    <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special</label>
-                </div>
-                <select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})">
-                    <option value="" disabled selected hidden>Select program</option>
-                    <option value="French Immersion">French Immersion</option>
-                    <option value="Spanish Bilingual">Spanish Bilingual</option>
-                    <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
-            </div>
-        </div>
+      <div class="col-span-12 md:col-span-4">
+          <label class="text-xs font-bold text-gray-700">STUDENT'S GIVEN NAME</label>
+          <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
       </div>
-      <div class="grid grid-cols-12 gap-4 mt-3">
-        <div class="col-span-12 md:col-span-6">
-            <label class="text-xs font-bold text-gray-700">GENDER</label>
-            <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
-            </div>
-        </div>
-        <div class="col-span-12 md:col-span-6">
-            <label class="text-xs font-bold text-gray-700">SCHOOL YEAR</label>
-            <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2" onchange="updateGrade(${id})">This year</label>
-                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2" onchange="updateGrade(${id})">Next year</label>
-            </div>
-        </div>
-      </div>`;
-    
-    container.appendChild(wrap);
-    const selectEl = wrap.querySelector(`#s_${id}_birth`);
-    
-    // Init Country
-    if (countriesLoaded) { populateCountrySelectById(selectEl, prefill?.birth || ''); } 
-    else { loadCountriesPromise.then(()=> populateCountrySelectById(selectEl, prefill?.birth || '')); }
-    
-    // Trigger calc if prefill exists
-    if (prefill?.dob) updateGrade(id);
+      <div class="col-span-12 md:col-span-4">
+          <label class="text-xs font-bold text-gray-700">BIRTH COUNTRY</label>
+          <select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1"><option disabled selected>Loading...</option></select>
+      </div>
+    </div>
 
-    if(studentCount > 1) window.scrollTo({top:wrap.offsetTop-60, behavior:'smooth'});
-  }
+    <div class="grid grid-cols-12 gap-4 mt-3">
+      
+      <div class="col-span-6 md:col-span-2">
+          <label class="text-xs font-bold text-gray-700">DOB</label>
+          <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" onchange="updateGrade(${id})" />
+      </div>
+      
+      <div class="col-span-6 md:col-span-4 overflow-visible">
+          <label class="text-xs font-bold text-gray-700">LAST GRADE COMPLETED</label>
+          <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
+              <option value="" disabled selected hidden>Select grade</option>
+              <option value="Pre KG">Pre KG</option>
+              <option value="KG">KG</option>
+              ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+              <option value="Other">Other</option>
+          </select>
+          <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
+      </div>
+      
+      <div class="col-span-12 md:col-span-6">
+          <label class="text-xs font-bold text-gray-700">PROGRAM</label>
+          <div class="mt-1 p-2 border rounded bg-white">
+              <div class="flex items-center gap-4">
+                  <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular</label>
+                  <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special</label>
+              </div>
+              <select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})">
+                  <option value="" disabled selected hidden>Select program</option>
+                  <option value="French Immersion">French Immersion</option>
+                  <option value="Spanish Bilingual">Spanish Bilingual</option>
+                  <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
+                  <option value="Other">Other</option>
+              </select>
+              <input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
+          </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-4 mt-3">
+      <div class="col-span-12 md:col-span-4">
+          <label class="text-xs font-bold text-gray-700">GENDER</label>
+          <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
+              <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
+              <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
+          </div>
+      </div>
+      <div class="col-span-12 md:col-span-4">
+          <label class="text-xs font-bold text-gray-700">SCHOOL YEAR</label>
+          <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
+              <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2" onchange="updateGrade(${id})">This year</label>
+              <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2" onchange="updateGrade(${id})">Next year</label>
+          </div>
+      </div>
+      
+      <div class="col-span-12 md:col-span-4">
+          <label class="text-xs font-bold text-gray-700 text-blue-700">AGE APPR. GRADE</label>
+          <input type="text" id="s_${id}_calc_grade" class="w-full border rounded p-2 mt-1 bg-blue-50 font-bold text-blue-800" readonly tabindex="-1" placeholder="Auto" />
+      </div>
+    </div>`;
+  
+  container.appendChild(wrap);
+  const selectEl = wrap.querySelector(`#s_${id}_birth`);
+  
+  // Init Country
+  if (countriesLoaded) { populateCountrySelectById(selectEl, prefill?.birth || ''); } 
+  else { loadCountriesPromise.then(()=> populateCountrySelectById(selectEl, prefill?.birth || '')); }
+  
+  // Trigger calc if prefill exists
+  if (prefill?.dob) updateGrade(id);
+
+  if(studentCount > 1) window.scrollTo({top:wrap.offsetTop-60, behavior:'smooth'});
+}
 
   function removeStudent(){ if(studentCount===0)return; document.getElementById(`student-${studentCount}`)?.remove(); studentCount--; }
   function toggleOtherGrade(id){ const sel=document.getElementById(`s_${id}_lastgrade`); const spec=document.getElementById(`s_${id}_lastgrade_spec`); if(sel.value==='Other'){spec.classList.remove('hidden');}else{spec.classList.add('hidden');spec.value='';} }

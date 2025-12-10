@@ -893,6 +893,9 @@ async function addFillableFields(pdfBytes) {
     link.click();
     link.remove();
 }
+  });
+
+  document.getElementById('newFormBtn').onclick = () => { if(!confirm("Start new form? Data will be lost.")) return; location.reload(); };
 
 
   // ============================================

@@ -642,14 +642,14 @@ function addStudent(prefill){
   addStudent(); // Default first student
 
   
-// ============================================
+  
+  // ============================================
   // 4. GENERATE FINAL FORM
   // ============================================
   function generateFinal(){
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
-    
-    // Header
+    // Reverting title to original state as requested year logic is handled by radio buttons
     final.insertAdjacentHTML('beforeend', `
         <div class="w-full flex items-center justify-between mb-2">
             <h1 class="text-lg font-semibold leading-tight text-left uppercase">
@@ -707,8 +707,6 @@ function addStudent(prefill){
 
     // --- ROW 6: STUDENTS TABLE ---
     let stRows = '';
-    let capturedGrades = []; // Store grades here to display in Row 7
-
     for(let i=1; i<=studentCount; i++){
         const sn = document.getElementById(`s_${i}_surname`)?.value;
         if(!sn && studentCount > 1) continue; 
@@ -721,7 +719,7 @@ function addStudent(prefill){
             const gender = getRadioValue(`s_${i}_gender`);
             
             const yearVal = getRadioValue(`s_${i}_year`);
-            let year = (yearVal === 'ThisYear') ? '2025-26' : ((yearVal === 'NextYear') ? '2026-27' : '');
+            let year = (yearVal === 'ThisYear') ? 'AY 2025-26' : ((yearVal === 'NextYear') ? 'AY 2026-27' : '');
 
             let prog = '';
             const pt = getRadioValue(`s_${i}_progType`);
@@ -735,15 +733,12 @@ function addStudent(prefill){
             let grd = document.getElementById(`s_${i}_lastgrade`).value;
             if(grd === 'Other') grd = document.getElementById(`s_${i}_lastgrade_spec`).value;
 
-            // Save grade for Row 7
-            capturedGrades.push({ name: gn, grade: calcGrade });
-
-            // Note: REMOVED the Grade Placement <td> from here
             stRows += `<tr class="student-row">
                 <td class="cell-content">${escapeHtml(sn)}</td>
                 <td class="cell-content">${escapeHtml(gn)}</td>
                 <td class="text-center">${checkboxMark(gender==='F')} F ${checkboxMark(gender==='M')} M</td>
                 <td class="text-center cell-content">${escapeHtml(dob)}</td>
+                <td class="text-center font-bold" style="background-color:#fcf89f;">${escapeHtml(calcGrade)}</td>
                 <td class="cell-content">${escapeHtml(birth)}</td>
                 <td class="text-center">${escapeHtml(grd)}</td>
                 <td class="text-center">${year}</td>
@@ -753,17 +748,17 @@ function addStudent(prefill){
     }
 
     const tr6 = document.createElement('tr');
-    // Note: REMOVED the Grade Placement <th> header and adjusted widths
     tr6.innerHTML = `<td colspan="5" class="no-padding">
         <table class="nested-table">
             <tr style="background-color:#fcf89f; border-bottom: 1px solid #000000; font-size: 8pt;">
                 <th width="15%">STUDENT'S SURNAME</th>
                 <th width="15%">STUDENT'S GIVEN NAME</th>
-                <th width="10%">GENDER</th>
-                <th width="15%">DOB: YYYY/MM/DD</th>
-                <th width="15%">BIRTH COUNTRY</th>
-                <th width="10%">LAST GRADE</th>
-                <th width="10%">SCHOOL YEAR</th>
+                <th width="8%">GENDER</th>
+                <th width="12%">DOB: YYYY/MM/DD</th>
+                <th width="10%">GRADE PLACEMENT</th>
+                <th width="12%">BIRTH COUNTRY</th>
+                <th width="9%">LAST GRADE</th>
+                <th width="9%">SCHOOL YEAR</th>
                 <th width="10%">PROGRAM</th>
             </tr>
             ${stRows}
@@ -771,35 +766,17 @@ function addStudent(prefill){
     </td>`;
     tbl.appendChild(tr6);
 
-    // --- ROW 7: LIMITED PROFILE (Left) & GRADE PLACEMENT (Right) ---
+    // --- ROW 7: LIMITED PROFILE ---
     const lim = getRadioValue('limitedProfile');
     const limDet = document.getElementById('limitedProfileDetails').value;
     const tr7 = document.createElement('tr');
-    
-    // Left Side Content
     let limContent = `<div class="font-semibold">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</div>`;
     limContent += `<div>${checkboxMark(lim==='Yes')} Yes  ${checkboxMark(lim==='No')} No</div>`;
     if (lim === 'Yes') {
         limContent += `<div style="font-size:10px; margin-top: 5px; color:#555;">If YES, describe for each student...</div>`;
         limContent += `<div class="cell-content" style="padding: 5px 20px; white-space: pre-wrap;">${escapeHtml(limDet)}</div>`;
     }
-
-    // Right Side Content (Grades List)
-    let gradesListHtml = capturedGrades.map((g, idx) => 
-        `<div style="border-bottom:1px solid #ddd; padding: 2px 0;">
-            <span class="text-gray-600 text-xs">${idx+1}.</span> 
-            <strong>${escapeHtml(g.grade)}</strong>
-         </div>`
-    ).join('');
-
-    // Table Row Split: Colspan 4 for Limited Profile (Big space), Colspan 1 for Grades
-    tr7.innerHTML = `
-        <td colspan="4" style="vertical-align:top;">${limContent}</td>
-        <td colspan="1" style="vertical-align:top; background-color:#fcf89f; border-left:1px solid #ccc;">
-            <div class="font-semibold text-center mb-1">GRADE PLACEMENT</div>
-            <div class="cell-content text-center">${gradesListHtml}</div>
-        </td>
-    `;
+    tr7.innerHTML = `<td colspan="5">${limContent}</td>`;
     tbl.appendChild(tr7);
 
     // --- ROW 8: NOTES ---
@@ -815,6 +792,7 @@ function addStudent(prefill){
     document.getElementById('finalWrap').classList.remove('hidden');
     window.scrollTo({top:0, behavior:'smooth'});
   }
+
   // ============================================
   // 5. INITIALIZATION
   // ============================================

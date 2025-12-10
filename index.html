@@ -826,7 +826,7 @@ function addStudent(prefill){
     new TomSelect(select, { placeholder: "Select or type language(s)", maxOptions: 500, create: true, plugins: ['remove_button'] });
   });
 
-//Buttons Logic & PDF
+// Buttons Logic & PDF
   function downloadPDF(orientation) {
       const final = document.getElementById('finalArea');
       final.classList.add('pdf-scale');
@@ -840,13 +840,15 @@ function addStudent(prefill){
           jsPDF: { unit: 'in', format: 'a4', orientation: orientation } 
       };
       
-      // MODIFIED: Intercept PDF generation to add interactive fields
+      // MODIFIED: Re-organized promise chain for better compatibility
       html2pdf().set(opt).from(final).toPdf().get('pdf').then(function(pdf) {
+          
+          // --- Start AcroForm Field Injection ---
           
           // 1. Add a clean new page for Admin use
           pdf.addPage();
 
-          // 2. Set Admin Fonts
+          // 2. Set Admin Fonts and Coordinates
           const margin = 0.5;
           let yPos = 1.0; 
           
@@ -861,6 +863,7 @@ function addStudent(prefill){
           // --- FIELD: Approved By ---
           pdf.text("Approved By:", margin, yPos);
           const textField = new pdf.AcroForm.TextField();
+          // Rect arguments: [x, y, width, height] (in inches)
           textField.Rect = [margin + 1.2, yPos - 0.15, 3.0, 0.25]; 
           textField.fieldName = "adminName";
           pdf.addField(textField);
@@ -903,11 +906,18 @@ function addStudent(prefill){
           
           // Visual border around notes
           pdf.rect(margin, yPos, 7.0, 2.0); 
-
-          // 3. Save the file
+          
+          // --- End AcroForm Field Injection ---
+          
+          // 3. Save the file now that all content is added
           pdf.save(opt.filename);
           
           // Cleanup
+          final.classList.remove('pdf-scale');
+      }).catch(error => {
+          // IMPORTANT: If this fails, it often means the AcroForm plugin is missing.
+          console.error("PDF generation failed:", error);
+          alert("Error generating PDF. Check console for details. (Possible missing AcroForm support in jsPDF bundle)");
           final.classList.remove('pdf-scale');
       });
   }
@@ -938,7 +948,6 @@ function addStudent(prefill){
   });
 
   document.getElementById('newFormBtn').onclick = () => { if(!confirm("Start new form? Data will be lost.")) return; location.reload(); };
-
 
   // ============================================
   // 6. KEYBOARD NAVIGATION

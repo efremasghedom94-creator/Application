@@ -15,8 +15,11 @@
   <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/jspdf/dist/jspdf.plugin.acroform.js"></script>
+
+
   <style>
-    https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js</script>
 
     /* GLOBAL BOX SIZING FIX */
     *, *::before, *::after { box-sizing: border-box; }
@@ -828,50 +831,71 @@ function addStudent(prefill){
     new TomSelect(select, { placeholder: "Select or type language(s)", maxOptions: 500, create: true, plugins: ['remove_button'] });
   });
 
-  // Buttons Logic & PDF
-  function downloadPDF(orientation) {
-      const final = document.getElementById('finalArea');
-      final.classList.add('pdf-scale');
-      document.getElementById('orientationSelector').classList.add('hidden');
-      
-      const opt = { 
-          margin: 0.2, 
-          filename: `intake-form-${orientation}.pdf`, 
-          image: { type: 'jpeg', quality: 0.98 }, 
-          html2canvas: { scale: 2, useCORS: true }, 
-          jsPDF: { unit: 'in', format: 'a4', orientation: orientation } 
-      };
-      
-      html2pdf().set(opt).from(final).save().then(() => { final.classList.remove('pdf-scale'); });
-  }
 
-  document.getElementById('editBtn').onclick = () => {
-    document.getElementById('wizardRoot').classList.remove('hidden');
-    document.getElementById('finalWrap').classList.add('hidden');
+
+
+
+  
+
+async function downloadPDF(orientation) {
+    const final = document.getElementById('finalArea');
+    final.classList.add('pdf-scale');
     document.getElementById('orientationSelector').classList.add('hidden');
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
 
-  document.getElementById('pdfBtn').onclick = (event) => {
-      event.stopPropagation();
-      document.getElementById('orientationSelector').classList.toggle('hidden');
-  }
+    const opt = { 
+        margin: 0.2, 
+        filename: `intake-form-${orientation}.pdf`, 
+        image: { type: 'jpeg', quality: 0.98 }, 
+        html2canvas: { scale: 2, useCORS: true }, 
+        jsPDF: { unit: 'pt', format: 'a4', orientation: orientation } 
+    };
 
-  document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
-      document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
-  });
+    // STEP 1 — Generate PDF as a blob (NOT saving yet)
+    const blob = await html2pdf()
+        .set(opt)
+        .from(final)
+        .outputPdf('blob');
 
-  document.addEventListener('click', function(event) {
-      const selector = document.getElementById('orientationSelector');
-      const pdfBtn = document.getElementById('pdfBtn');
-      if (!selector.classList.contains('hidden') && event.target !== selector && !selector.contains(event.target) && event.target !== pdfBtn) {
-          selector.classList.add('hidden');
-      }
-  });
+    final.classList.remove('pdf-scale');
 
-  document.getElementById('newFormBtn').onclick = () => { if(!confirm("Start new form? Data will be lost.")) return; location.reload(); };
+    // STEP 2 — Add interactive fields
+    addFillableFields(blob, orientation);
+}
+async function addFillableFields(pdfBlob, orientation) {
+    // Convert blob → ArrayBuffer
+    const pdfArrayBuffer = await pdfBlob.arrayBuffer();
 
+    // Load PDF using jsPDF
+    const pdf = new jspdf.jsPDF({
+        unit: "pt",
+        format: "a4",
+        orientation: orientation
+    });
+
+    // Import existing PDF content
+    const existing = await pdf.loadFile(pdfArrayBuffer);
+    pdf.addPage();
+    pdf.setPage(1);
+    pdf.fromPDF(existing);
+
+    // Enable AcroForms
+    pdf.initForm();
+
+    // EXAMPLE FIELD: "Additional Information" text box
+    pdf.addField({
+        name: "additionalInfo",
+        type: "text",
+        x: 60,
+        y: 700,
+        width: 480,
+        height: 30
+    });
+
+    // Save final fillable PDF
+    pdf.save("intake-form-fillable.pdf");
+}
+
+  
 
 
   // ============================================

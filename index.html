@@ -15,6 +15,8 @@
   <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
+
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://unpkg.com/jspdf/dist/jspdf.plugin.acroform.js"></script>
 
@@ -842,58 +844,63 @@ async function downloadPDF(orientation) {
     final.classList.add('pdf-scale');
     document.getElementById('orientationSelector').classList.add('hidden');
 
-    const opt = { 
-        margin: 0.2, 
-        filename: `intake-form-${orientation}.pdf`, 
-        image: { type: 'jpeg', quality: 0.98 }, 
-        html2canvas: { scale: 2, useCORS: true }, 
-        jsPDF: { unit: 'pt', format: 'a4', orientation: orientation } 
+    const opt = {
+        margin: 0.2,
+        filename: `intake-form-${orientation}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'pt', format: 'a4', orientation: orientation }
     };
 
-    // STEP 1 — Generate PDF as a blob (NOT saving yet)
-    const blob = await html2pdf()
+    // Step 1 — Generate FLAT PDF as ArrayBuffer
+    const pdfArrayBuffer = await html2pdf()
         .set(opt)
         .from(final)
-        .outputPdf('blob');
+        .outputPdf('arraybuffer');
 
     final.classList.remove('pdf-scale');
 
-    // STEP 2 — Add interactive fields
-    addFillableFields(blob, orientation);
+    // Step 2 — Add fillable fields using pdf-lib
+    await addFillableFields(pdfArrayBuffer);
 }
-async function addFillableFields(pdfBlob, orientation) {
-    // Convert blob → ArrayBuffer
-    const pdfArrayBuffer = await pdfBlob.arrayBuffer();
 
-    // Load PDF using jsPDF
-    const pdf = new jspdf.jsPDF({
-        unit: "pt",
-        format: "a4",
-        orientation: orientation
-    });
 
-    // Import existing PDF content
-    const existing = await pdf.loadFile(pdfArrayBuffer);
-    pdf.addPage();
-    pdf.setPage(1);
-    pdf.fromPDF(existing);
+async function addFillableFields(pdfBytes) {
+    const { PDFDocument, StandardFonts } = PDFLib;
 
-    // Enable AcroForms
-    pdf.initForm();
+    // Load the generated PDF
+    const pdfDoc = await PDFDocument.load(pdfBytes);
 
-    // EXAMPLE FIELD: "Additional Information" text box
-    pdf.addField({
-        name: "additionalInfo",
-        type: "text",
-        x: 60,
-        y: 700,
-        width: 480,
-        height: 30
-    });
+    // Enable forms
+    const form = pdfDoc.getForm();
 
-    // Save final fillable PDF
-    pdf.save("intake-form-fillable.pdf");
+    // Add a text field
+    const additionalInfo = form.createTextField("additional_information");
+    additionalInfo.setText(""); // blank
+    additionalInfo.enableMultiline();
+
+    // Place the field (adjust coordinates)
+    additionalInfo.addToPage(
+        pdfDoc.getPages()[0],
+        {
+            x: 60,
+            y: 700,
+            width: 480,
+            height: 60
+        }
+    );
+
+    // Output the final fillable PDF
+    const finalPdfBytes = await pdfDoc.save();
+
+    // Trigger download
+    const blob = new Blob([finalPdfBytes], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "intake-form-fillable.pdf";
+    link.click();
 }
+
 
   
 

@@ -425,6 +425,11 @@
     input.value = formatted;
   }
 
+
+
+
+
+  
   // ============================================
   // 2. DATA LOADING (COUNTRIES & LANGS)
   // ============================================
@@ -514,15 +519,11 @@
     });
 
     if (dobInput && gradeInput && dobInput.value && selectedYearValue) {
-        // Determine the academic start year based on the current date (Dec 2025)
-        // If "ThisYear" is chosen, the school year is 2025/2026. Start Year = 2025.
-        // If "NextYear" is chosen, the school year is 2026/2027. Start Year = 2026.
-        let targetStartYear = new Date().getFullYear(); 
-        
+        let targetStartYear = new Date().getFullYear();    
         if (selectedYearValue === 'ThisYear') {
-            targetStartYear = 2025; // Explicitly set based on context
+            targetStartYear = 2025; 
         } else if (selectedYearValue === 'NextYear') {
-            targetStartYear = 2026; // Explicitly set based on context
+            targetStartYear = 2026; 
         }
 
         gradeInput.value = calculateGrade(dobInput.value, targetStartYear);

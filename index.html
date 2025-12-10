@@ -826,7 +826,7 @@ function addStudent(prefill){
     new TomSelect(select, { placeholder: "Select or type language(s)", maxOptions: 500, create: true, plugins: ['remove_button'] });
   });
 
-// Buttons Logic & PDF
+//Buttons Logic & PDF
   function downloadPDF(orientation) {
       const final = document.getElementById('finalArea');
       final.classList.add('pdf-scale');
@@ -840,15 +840,15 @@ function addStudent(prefill){
           jsPDF: { unit: 'in', format: 'a4', orientation: orientation } 
       };
       
-      // We break the chain here to intercept the PDF object before saving
+      // MODIFIED: Intercept PDF generation to add interactive fields
       html2pdf().set(opt).from(final).toPdf().get('pdf').then(function(pdf) {
           
-          // 1. Add a new page specifically for Admin/Office use
+          // 1. Add a clean new page for Admin use
           pdf.addPage();
 
-          // 2. Set up fonts for the Admin Page
+          // 2. Set Admin Fonts
           const margin = 0.5;
-          let yPos = 1.0; // Start 1 inch down
+          let yPos = 1.0; 
           
           pdf.setFontSize(16);
           pdf.setFont(undefined, 'bold');
@@ -858,21 +858,15 @@ function addStudent(prefill){
           pdf.setFontSize(11);
           pdf.setFont(undefined, 'normal');
 
-          // --- FIELD 1: APPROVED BY (Text Input) ---
+          // --- FIELD: Approved By ---
           pdf.text("Approved By:", margin, yPos);
-          
-          // Create the interactive text field
-          // Rect arguments: [x, y, width, height] (in inches because opt uses 'in')
           const textField = new pdf.AcroForm.TextField();
           textField.Rect = [margin + 1.2, yPos - 0.15, 3.0, 0.25]; 
           textField.fieldName = "adminName";
-          textField.value = ""; // Default empty
           pdf.addField(textField);
 
-          // --- FIELD 2: DATE (Text Input) ---
-          // Positioned to the right of the previous field
+          // --- FIELD: Date ---
           pdf.text("Date:", margin + 4.5, yPos);
-          
           const dateField = new pdf.AcroForm.TextField();
           dateField.Rect = [margin + 5.0, yPos - 0.15, 1.5, 0.25];
           dateField.fieldName = "approvalDate";
@@ -880,17 +874,15 @@ function addStudent(prefill){
 
           yPos += 0.5;
 
-          // --- FIELD 3: STATUS (Checkboxes) ---
+          // --- FIELD: Status Checkboxes ---
           pdf.text("Application Status:", margin, yPos);
 
-          // Checkbox: Accepted
           const chkAccepted = new pdf.AcroForm.CheckBox();
           chkAccepted.Rect = [margin + 1.5, yPos - 0.15, 0.2, 0.2];
           chkAccepted.fieldName = "statusAccepted";
           pdf.addField(chkAccepted);
           pdf.text("Accepted", margin + 1.8, yPos);
 
-          // Checkbox: Pending
           const chkPending = new pdf.AcroForm.CheckBox();
           chkPending.Rect = [margin + 3.0, yPos - 0.15, 0.2, 0.2];
           chkPending.fieldName = "statusPending";
@@ -899,26 +891,51 @@ function addStudent(prefill){
 
           yPos += 0.5;
 
-          // --- FIELD 4: ADMIN NOTES (Multiline Text Area) ---
+          // --- FIELD: Admin Notes ---
           pdf.text("Administrative Notes:", margin, yPos);
           yPos += 0.2;
           
           const notesField = new pdf.AcroForm.TextField();
-          notesField.Rect = [margin, yPos, 7.0, 2.0]; // Large box
+          notesField.Rect = [margin, yPos, 7.0, 2.0]; 
           notesField.multiline = true;
           notesField.fieldName = "adminNotes";
           pdf.addField(notesField);
           
-          // Draw a border around the notes area purely for visuals (optional)
+          // Visual border around notes
           pdf.rect(margin, yPos, 7.0, 2.0); 
 
-          // 3. Save the PDF
+          // 3. Save the file
           pdf.save(opt.filename);
           
-          // Cleanup CSS
+          // Cleanup
           final.classList.remove('pdf-scale');
       });
   }
+
+  document.getElementById('editBtn').onclick = () => {
+    document.getElementById('wizardRoot').classList.remove('hidden');
+    document.getElementById('finalWrap').classList.add('hidden');
+    document.getElementById('orientationSelector').classList.add('hidden');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  document.getElementById('pdfBtn').onclick = (event) => {
+      event.stopPropagation();
+      document.getElementById('orientationSelector').classList.toggle('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
+      document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
+  });
+
+  document.addEventListener('click', function(event) {
+      const selector = document.getElementById('orientationSelector');
+      const pdfBtn = document.getElementById('pdfBtn');
+      if (!selector.classList.contains('hidden') && event.target !== selector && !selector.contains(event.target) && event.target !== pdfBtn) {
+          selector.classList.add('hidden');
+      }
+  });
 
   document.getElementById('newFormBtn').onclick = () => { if(!confirm("Start new form? Data will be lost.")) return; location.reload(); };
 

@@ -641,8 +641,7 @@ function addStudent(prefill){
 
   addStudent(); // Default first student
 
-  
-  // ============================================
+// ============================================
   // 4. GENERATE FINAL FORM
   // ============================================
   function generateFinal(){
@@ -700,8 +699,21 @@ function addStudent(prefill){
     const cath = getRadioValue('catholic'); 
     const relOther = document.getElementById('religionOther').value;
     const cathTxt = `${checkboxMark(cath==='Yes')} Yes  ${checkboxMark(cath==='No')} No` + (relOther ? `<br>Note: ${escapeHtml(relOther)}` : '');  
+    
+    // Attempt to get Program value, default to empty if ID 'program' doesn't exist
+    const progVal = document.getElementById('program') ? document.getElementById('program').value : '';
+
     const tr5 = document.createElement('tr');
-    tr5.innerHTML = `<td colspan="5" class="no-padding"><table class="nested-table"><tr><td width="33%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td><td width="34%">${c("HOME LANGUAGE", homeLangs)}</td><td width="33%"><div class="font-semibold">CATHOLIC</div><div class="cell-content">${cathTxt}</div></td></tr></table></td>`;
+    tr5.innerHTML = `<td colspan="5" class="no-padding">
+        <table class="nested-table">
+            <tr>
+                <td width="20%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td>
+                <td width="20%">${c("HOME LANGUAGE", homeLangs)}</td>
+                <td><div class="font-semibold">CATHOLIC</div><div class="cell-content">${cathTxt}</div></td>
+                <td width="20%">${c("PROGRAM", progVal)}</td>
+            </tr>
+        </table>
+    </td>`;
     tbl.appendChild(tr5);
 
     // --- ROW 6: STUDENTS TABLE ---

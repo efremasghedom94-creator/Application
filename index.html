@@ -865,43 +865,34 @@ async function downloadPDF(orientation) {
 
 
 async function addFillableFields(pdfBytes) {
-    const { PDFDocument, StandardFonts } = PDFLib;
+    const { PDFDocument } = PDFLib;
 
-    // Load the generated PDF
     const pdfDoc = await PDFDocument.load(pdfBytes);
-
-    // Enable forms
     const form = pdfDoc.getForm();
 
-    // Add a text field
     const additionalInfo = form.createTextField("additional_information");
-    additionalInfo.setText(""); // blank
+    additionalInfo.setText("");
     additionalInfo.enableMultiline();
 
-    // Place the field (adjust coordinates)
-    additionalInfo.addToPage(
-        pdfDoc.getPages()[0],
-        {
-            x: 60,
-            y: 700,
-            width: 480,
-            height: 60
-        }
-    );
+    const page = pdfDoc.getPages()[0];
+    const { height } = page.getSize();
 
-    // Output the final fillable PDF
+    additionalInfo.addToPage(page, {
+        x: 60,
+        y: height - 760,
+        width: 480,
+        height: 60
+    });
+
     const finalPdfBytes = await pdfDoc.save();
-
-    // Trigger download
     const blob = new Blob([finalPdfBytes], { type: "application/pdf" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "intake-form-fillable.pdf";
+    document.body.appendChild(link);
     link.click();
+    link.remove();
 }
-
-
-  
 
 
   // ============================================

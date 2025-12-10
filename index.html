@@ -447,6 +447,109 @@
     if(selectedValue) { $s.val(selectedValue).trigger('change'); }
   }
 
+
+
+
+
+
+
+
+
+
+
+
+  
+// ============================================
+  // GRADE CALCULATION LOGIC
+  // ============================================
+  /**
+   * Calculates the age-appropriate grade based on DOB and the academic year start.
+   * @param {string} dobString - The date of birth (YYYY-MM-DD).
+   * @param {number} startYear - The starting year of the academic cycle (e.g., 2025 for 2025/2026).
+   * @returns {string} The calculated grade level.
+   */
+  function calculateGrade(dobString, startYear) {
+    if (!dobString || !startYear) return "";
+    const parts = dobString.split('-');
+    if (parts.length !== 3) return "";
+    
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const d = parseInt(parts[2], 10);
+    const dob = new Date(y, m - 1, d);
+    
+    // --- 1. CALENDAR YEAR LOGIC (Jan 1 - Dec 31) ---
+    if (y === startYear - 3) return "100 Voices (3YO)";
+    if (y === startYear - 4) return "100 Voices (4YO)";
+    if (y === startYear - 5) return "Kindergarten";
+    if (y === startYear - 6) return "Grade 1";
+    if (y === startYear - 7) return "Grade 2";
+
+    // --- 2. MARCH 1ST CYCLE LOGIC (Grade 3+) ---
+    // Helper: checks if date is between March 1 (StartYear) and Feb 28/29 (EndYear)
+    function inRange(dateObj, yStart, yEnd) {
+        const rangeStart = new Date(yStart, 2, 1); // March 1
+        const rangeEnd = new Date(yEnd, 2, 0);     // Last day of Feb
+        return dateObj >= rangeStart && dateObj <= rangeEnd;
+    }
+
+    if (inRange(dob, startYear - 8, startYear - 7)) return "Grade 3";
+    if (inRange(dob, startYear - 9, startYear - 8)) return "Grade 4";
+    if (inRange(dob, startYear - 10, startYear - 9)) return "Grade 5";
+    if (inRange(dob, startYear - 11, startYear - 10)) return "Grade 6";
+    if (inRange(dob, startYear - 12, startYear - 11)) return "Grade 7";
+    if (inRange(dob, startYear - 13, startYear - 12)) return "Grade 8";
+    if (inRange(dob, startYear - 14, startYear - 13)) return "Grade 9";
+    if (inRange(dob, startYear - 15, startYear - 14)) return "Grade 10";
+    if (inRange(dob, startYear - 16, startYear - 15)) return "Grade 11";
+    if (inRange(dob, startYear - 17, startYear - 16)) return "Grade 12";
+    
+    // Post High School
+    if (inRange(dob, startYear - 18, startYear - 17)) return "Fourth Year";
+    if (inRange(dob, startYear - 19, startYear - 18)) return "Fifth Year";
+
+    // Sixth Year (Sept 1 Start)
+    const sixthStart = new Date(startYear - 20, 8, 1); // Sept 1
+    const sixthEnd = new Date(startYear - 19, 2, 0);   // Feb End
+    if (dob >= sixthStart && dob <= sixthEnd) return "Sixth Year";
+
+    return "Check Date";
+  }
+
+  /**
+   * Reads DOB and the selected 'School Year' radio button to calculate and display the grade.
+   * @param {number} id - The student ID.
+   */
+  function updateGrade(id) {
+    const dobInput = document.getElementById(`s_${id}_dob`);
+    const gradeInput = document.getElementById(`s_${id}_calc_grade`);
+    const yearRadios = document.getElementsByName(`s_${id}_year`);
+    let selectedYearValue = '';
+
+    yearRadios.forEach(radio => {
+        if (radio.checked) {
+            selectedYearValue = radio.value;
+        }
+    });
+
+    if (dobInput && gradeInput && dobInput.value && selectedYearValue) {
+        // Determine the academic start year based on the current date (Dec 2025)
+        // If "ThisYear" is chosen, the school year is 2025/2026. Start Year = 2025.
+        // If "NextYear" is chosen, the school year is 2026/2027. Start Year = 2026.
+        let targetStartYear = new Date().getFullYear(); 
+        
+        if (selectedYearValue === 'ThisYear') {
+            targetStartYear = 2025; // Explicitly set based on context
+        } else if (selectedYearValue === 'NextYear') {
+            targetStartYear = 2026; // Explicitly set based on context
+        }
+
+        gradeInput.value = calculateGrade(dobInput.value, targetStartYear);
+    } else {
+        gradeInput.value = '';
+    }
+  }
+
   // ============================================
   // 3. STUDENT ROWS (Responsive)
   // ============================================
@@ -457,25 +560,91 @@
     const wrap = document.createElement('div');
     wrap.className = 'p-4 border rounded bg-gray-50 mb-4';
     wrap.id = `student-${id}`;
+    
+    // UPDATED HTML STRUCTURE: Added "AGE APPR. GRADE" box and onchange triggers
     wrap.innerHTML = `
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-3"><label class="text-xs font-bold text-gray-700">STUDENT'S SURNAME</label><input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" /></div>
-        <div class="col-span-12 md:col-span-3"><label class="text-xs font-bold text-gray-700">STUDENT'S GIVEN NAME</label><input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" /></div>
-        <div class="col-span-12 md:col-span-3"><label class="text-xs font-bold text-gray-700">DOB</label><input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" /></div>
-        <div class="col-span-12 md:col-span-3"><label class="text-xs font-bold text-gray-700">BIRTH COUNTRY</label><select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1"><option disabled selected>Loading...</option></select></div>
+      <div class="grid grid-cols-12 gap-3">
+        <div class="col-span-12 md:col-span-3">
+            <label class="text-xs font-bold text-gray-700">STUDENT'S SURNAME</label>
+            <input type="text" id="s_${id}_surname" class="w-full border rounded p-2 mt-1" value="${prefill?.surname||''}" />
+        </div>
+        <div class="col-span-12 md:col-span-3">
+            <label class="text-xs font-bold text-gray-700">STUDENT'S GIVEN NAME</label>
+            <input type="text" id="s_${id}_given" class="w-full border rounded p-2 mt-1" value="${prefill?.given||''}" />
+        </div>
+        
+        <div class="col-span-6 md:col-span-2">
+            <label class="text-xs font-bold text-gray-700">DOB</label>
+            <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" onchange="updateGrade(${id})" />
+        </div>
+        <div class="col-span-6 md:col-span-2">
+            <label class="text-xs font-bold text-gray-700 text-blue-700">AGE APPR. GRADE</label>
+            <input type="text" id="s_${id}_calc_grade" class="w-full border rounded p-2 mt-1 bg-blue-50 font-bold text-blue-800" readonly tabindex="-1" placeholder="Auto" />
+        </div>
+
+        <div class="col-span-12 md:col-span-2">
+            <label class="text-xs font-bold text-gray-700">BIRTH COUNTRY</label>
+            <select id="s_${id}_birth" class="country-select w-full border rounded p-2 mt-1"><option disabled selected>Loading...</option></select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mt-3">
+        <div class="col-span-12 md:col-span-4 overflow-visible">
+            <label class="text-xs font-bold text-gray-700">LAST GRADE COMPLETED</label>
+            <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
+                <option value="" disabled selected hidden>Select grade</option>
+                <option value="Pre KG">Pre KG</option>
+                <option value="KG">KG</option>
+                ${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}
+                <option value="Other">Other</option>
+            </select>
+            <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
+        </div>
+        <div class="col-span-12 md:col-span-8">
+            <label class="text-xs font-bold text-gray-700">PROGRAM</label>
+            <div class="mt-1 p-2 border rounded bg-white">
+                <div class="flex items-center gap-4">
+                    <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular</label>
+                    <label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special</label>
+                </div>
+                <select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})">
+                    <option value="" disabled selected hidden>Select program</option>
+                    <option value="French Immersion">French Immersion</option>
+                    <option value="Spanish Bilingual">Spanish Bilingual</option>
+                    <option value="Ukrainian Bilingual">Ukrainian Bilingual</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" />
+            </div>
+        </div>
       </div>
       <div class="grid grid-cols-12 gap-4 mt-3">
-        <div class="col-span-12 md:col-span-4 overflow-visible"><label class="text-xs font-bold text-gray-700">LAST GRADE COMPLETED</label><select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})"><option value="" disabled selected hidden>Select grade</option><option value="Pre KG">Pre KG</option><option value="KG">KG</option>${Array.from({length:12},(_,i)=>`<option value="Grade ${i+1}">Grade ${i+1}</option>`).join('')}<option value="Other">Other</option></select><input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" /></div>
-        <div class="col-span-12 md:col-span-8"><label class="text-xs font-bold text-gray-700">PROGRAM</label><div class="mt-1 p-2 border rounded bg-white"><div class="flex items-center gap-4"><label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Regular" class="mr-2" onchange="toggleProgramDropdown(${id})">Regular</label><label class="inline-flex items-center"><input type="radio" name="s_${id}_progType" value="Special" class="mr-2" onchange="toggleProgramDropdown(${id})">Special</label></div><select id="s_${id}_prog_dropdown" class="w-full border rounded p-2 mt-2 hidden" onchange="toggleOtherProg(${id})"><option value="" disabled selected hidden>Select program</option><option value="French Immersion">French Immersion</option><option value="Spanish Bilingual">Spanish Bilingual</option><option value="Ukrainian Bilingual">Ukrainian Bilingual</option><option value="Other">Other</option></select><input type="text" id="s_${id}_prog_spec" class="w-full border rounded p-2 mt-2 hidden" placeholder="Specify program" /></div></div>
-      </div>
-      <div class="grid grid-cols-12 gap-4 mt-3">
-        <div class="col-span-12 md:col-span-6"><label class="text-xs font-bold text-gray-700">GENDER</label><div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white"><label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label><label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label></div></div>
-        <div class="col-span-12 md:col-span-6"><label class="text-xs font-bold text-gray-700">SCHOOL YEAR</label><div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white"><label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2">This year</label><label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2">Next year</label></div></div>
+        <div class="col-span-12 md:col-span-6">
+            <label class="text-xs font-bold text-gray-700">GENDER</label>
+            <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
+                <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="F" class="mr-2">F</label>
+                <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
+            </div>
+        </div>
+        <div class="col-span-12 md:col-span-6">
+            <label class="text-xs font-bold text-gray-700">SCHOOL YEAR</label>
+            <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
+                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2" onchange="updateGrade(${id})">This year</label>
+                <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="NextYear" class="mr-2" onchange="updateGrade(${id})">Next year</label>
+            </div>
+        </div>
       </div>`;
+    
     container.appendChild(wrap);
     const selectEl = wrap.querySelector(`#s_${id}_birth`);
+    
+    // Init Country
     if (countriesLoaded) { populateCountrySelectById(selectEl, prefill?.birth || ''); } 
     else { loadCountriesPromise.then(()=> populateCountrySelectById(selectEl, prefill?.birth || '')); }
+    
+    // Trigger calc if prefill exists
+    if (prefill?.dob) updateGrade(id);
+
     if(studentCount > 1) window.scrollTo({top:wrap.offsetTop-60, behavior:'smooth'});
   }
 
@@ -487,15 +656,13 @@
   addStudent(); // Default first student
 
   
-  
-  
-  
   // ============================================
   // 4. GENERATE FINAL FORM
   // ============================================
   function generateFinal(){
     const final = document.getElementById('finalArea');
     final.innerHTML = '';
+    // Reverting title to original state as requested year logic is handled by radio buttons
     final.insertAdjacentHTML('beforeend', `
         <div class="w-full flex items-center justify-between mb-2">
             <h1 class="text-lg font-semibold leading-tight text-left uppercase">
@@ -506,14 +673,13 @@
                  class="w-48 md:w-72 h-auto object-contain">
         </div>
     `);
-    // Create a wrapper for mobile scrolling
+    
     const scrollWrap = document.createElement('div');
     scrollWrap.className = 'overflow-x-auto';
 
     const tbl = document.createElement('table');
     tbl.className = 'yellow-table';
 
-    // Helper cell function
     const c = (lbl, val) => `<div class="font-semibold">${lbl}</div><div class="cell-content">${escapeHtml(val)}</div>`;
     
     // ROW 1
@@ -529,17 +695,17 @@
     tr2.innerHTML = `<td>${c("STUDENT'S STATUS", sStatTxt)}</td><td>${c('IMMIGRATION DOCUMENT', immTxt)}</td><td>${c('EXPIRY DATE', document.getElementById('expiry').value)}</td><td>${c('PREVIOUS ATTENDANCE?', pAttTxt)}</td><td>${c('DATE LANDED', document.getElementById('landed').value)}</td>`;
     tbl.appendChild(tr2);
 
-    // ROW 3 (Parents)
+    // ROW 3
     const tr3 = document.createElement('tr');
     tr3.innerHTML = `<td colspan="5" class="no-padding"><table class="nested-table"><tr><td width="25%">${c("FATHER'S SURNAME", document.getElementById('fatherSurname').value)}</td><td width="25%">${c("FATHER'S GIVEN NAME", document.getElementById('fatherGiven').value)}</td><td width="25%">${c("MOTHER'S SURNAME", document.getElementById('motherSurname').value)}</td><td width="25%">${c("MOTHER'S GIVEN NAME", document.getElementById('motherGiven').value)}</td></tr></table></td>`;
     tbl.appendChild(tr3);
 
-    // ROW 4 (Address)
+    // ROW 4
     const tr4 = document.createElement('tr');
     tr4.innerHTML = `<td colspan="5" class="no-padding"><table class="nested-table"><tr><td width="20%">${c("APARTMENT #", document.getElementById('apt').value)}</td><td width="60%">${c("FAMILY ADDRESS", document.getElementById('address').value)}</td><td width="20%">${c("POSTAL CODE", document.getElementById('postal').value)}</td></tr></table></td>`;
     tbl.appendChild(tr4);
 
-    // ROW 5 (Info)
+    // ROW 5
     let homeLangs = '';
     const hlSelect = document.getElementById('homeLang');
     if (hlSelect.tomselect) { const val = hlSelect.tomselect.getValue(); homeLangs = Array.isArray(val) ? val.join(', ') : val; } 
@@ -549,22 +715,10 @@
     const relOther = document.getElementById('religionOther').value;
     const cathTxt = `${checkboxMark(cath==='Yes')} Yes  ${checkboxMark(cath==='No')} No` + (relOther ? `<br>Note: ${escapeHtml(relOther)}` : '');  
     const tr5 = document.createElement('tr');
-    tr5.innerHTML = `<td colspan="5" class="no-padding">
-        <table class="nested-table">
-            <tr>
-                <td width="33%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td>
-                <td width="34%">${c("HOME LANGUAGE", homeLangs)}</td>
-                <td width="33%">
-                    <div class="font-semibold">CATHOLIC</div>
-                    <div class="cell-content">${cathTxt}</div>
-                </td>
-            </tr>
-        </table>
-    </td>`;
-    
+    tr5.innerHTML = `<td colspan="5" class="no-padding"><table class="nested-table"><tr><td width="33%">${c("FAMILY PHONE #", document.getElementById('familyPhone').value)}</td><td width="34%">${c("HOME LANGUAGE", homeLangs)}</td><td width="33%"><div class="font-semibold">CATHOLIC</div><div class="cell-content">${cathTxt}</div></td></tr></table></td>`;
     tbl.appendChild(tr5);
 
-    // --- ROW 6: 
+    // --- ROW 6: STUDENTS TABLE ---
     let stRows = '';
     for(let i=1; i<=studentCount; i++){
         const sn = document.getElementById(`s_${i}_surname`)?.value;
@@ -573,18 +727,13 @@
         if(document.getElementById(`s_${i}_surname`)){
             const gn = document.getElementById(`s_${i}_given`).value;
             const dob = document.getElementById(`s_${i}_dob`).value;
-            const birth = $(`#s_${i}_birth`).val() || ''; // JQuery for Select2
+            const calcGrade = document.getElementById(`s_${i}_calc_grade`)?.value || ''; // Retrieve calculated grade
+            const birth = $(`#s_${i}_birth`).val() || '';
             const gender = getRadioValue(`s_${i}_gender`);
-         // Get the actual value
-const yearVal = getRadioValue(`s_${i}_year`);
-let year = '';
+            
+            const yearVal = getRadioValue(`s_${i}_year`);
+            let year = (yearVal === 'ThisYear') ? 'This year' : ((yearVal === 'NextYear') ? 'Next year' : '');
 
-// Only assign text if a specific button was checked
-if (yearVal === 'ThisYear') {
-    year = 'This year';
-} else if (yearVal === 'NextYear') {
-    year = 'Next year';
-}
             let prog = '';
             const pt = getRadioValue(`s_${i}_progType`);
             if(pt === 'Regular') prog = 'Regular';
@@ -602,6 +751,7 @@ if (yearVal === 'ThisYear') {
                 <td class="cell-content">${escapeHtml(gn)}</td>
                 <td class="text-center">${checkboxMark(gender==='F')} F ${checkboxMark(gender==='M')} M</td>
                 <td class="text-center cell-content">${escapeHtml(dob)}</td>
+                <td class="text-center font-bold" style="background-color:#f0f9ff;">${escapeHtml(calcGrade)}</td>
                 <td class="cell-content">${escapeHtml(birth)}</td>
                 <td class="text-center">${escapeHtml(grd)}</td>
                 <td class="text-center">${year}</td>
@@ -610,47 +760,35 @@ if (yearVal === 'ThisYear') {
         }
     }
 
-
-
-
-
-
-
-const tr6 = document.createElement('tr');
-   tr6.innerHTML = `<td colspan="5" class="no-padding">
-    <table class="nested-table">
-        <tr style="background-color:#fcf89f; border-bottom: 1px solid #000000; font-size: 8pt;">
-            <th width="18%">STUDENT'S SURNAME</th>
-            <th width="18%">STUDENT'S GIVEN NAME</th>
-            <th width="8%">GENDER</th>
-            <th width="13%">DOB: YYYY/MM/DD</th>
-            <th width="14%">BIRTH COUNTRY</th>
-            <th width="10%">LAST GRADE</th>
-            <th width="9%">School Year</th>
-            <th width="10%">PROGRAM</th>
-        </tr>
-        ${stRows}
-    </table>
-</td>`;
-tbl.appendChild(tr6);
-
-
-    
+    const tr6 = document.createElement('tr');
+    tr6.innerHTML = `<td colspan="5" class="no-padding">
+        <table class="nested-table">
+            <tr style="background-color:#fcf89f; border-bottom: 1px solid #000000; font-size: 8pt;">
+                <th width="15%">STUDENT'S SURNAME</th>
+                <th width="15%">STUDENT'S GIVEN NAME</th>
+                <th width="8%">GENDER</th>
+                <th width="12%">DOB: YYYY/MM/DD</th>
+                <th width="10%">AGE GRADE</th>
+                <th width="12%">BIRTH COUNTRY</th>
+                <th width="9%">LAST GRADE</th>
+                <th width="9%">School Year</th>
+                <th width="10%">PROGRAM</th>
+            </tr>
+            ${stRows}
+        </table>
+    </td>`;
+    tbl.appendChild(tr6);
 
     // --- ROW 7: LIMITED PROFILE ---
     const lim = getRadioValue('limitedProfile');
     const limDet = document.getElementById('limitedProfileDetails').value;
     const tr7 = document.createElement('tr');
-    
-    // Construct the detailed header for the Limited Profile section
     let limContent = `<div class="font-semibold">POTENTIAL LIMITED FORMAL SCHOOLING PROFILE</div>`;
-    limContent += `<div>${checkboxMark(lim==='Yes')} Yes  ${checkboxMark(lim==='No')} No</div>`;
-
+    limContent += `<div>${checkboxMark(lim==='Yes')} Yes  ${checkboxMark(lim==='No')} No</div>`;
     if (lim === 'Yes') {
-        limContent += `<div style="font-size:10px; margin-top: 5px; color:#555;">If YES, describe for each student, Grade 1–Grade 12, as relevant:</div>`;
+        limContent += `<div style="font-size:10px; margin-top: 5px; color:#555;">If YES, describe for each student...</div>`;
         limContent += `<div class="cell-content" style="padding: 5px 20px; white-space: pre-wrap;">${escapeHtml(limDet)}</div>`;
     }
-
     tr7.innerHTML = `<td colspan="5">${limContent}</td>`;
     tbl.appendChild(tr7);
 
@@ -677,7 +815,7 @@ tbl.appendChild(tr6);
     $('#contactRel').select2({ dropdownParent: $(document.body), dropdownPosition: 'below', width: '100%' });
   });
 
-  // Home Language TomSelect (Expanded List)
+  // Home Language TomSelect
   const languages = [
     "English", "Tigrinya", "Amharic", "Arabic", "French", "Spanish", "Somali", "Swahili", "Hindi",
     "Mandarin Chinese", "Cantonese", "Portuguese", "Tagalog", "Italian", "German", "Russian",
@@ -701,12 +839,11 @@ tbl.appendChild(tr6);
     new TomSelect(select, { placeholder: "Select or type language(s)", maxOptions: 500, create: true, plugins: ['remove_button'] });
   });
 
-  // Buttons Logic
-  // Dedicated function to handle PDF generation
+  // Buttons Logic & PDF
   function downloadPDF(orientation) {
       const final = document.getElementById('finalArea');
       final.classList.add('pdf-scale');
-      document.getElementById('orientationSelector').classList.add('hidden'); // Hide selector
+      document.getElementById('orientationSelector').classList.add('hidden');
       
       const opt = { 
           margin: 0.2, 
@@ -726,19 +863,16 @@ tbl.appendChild(tr6);
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  // Toggle orientation selector
   document.getElementById('pdfBtn').onclick = (event) => {
       event.stopPropagation();
       document.getElementById('orientationSelector').classList.toggle('hidden');
   }
 
-  // Listener for selector buttons
   document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
       document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
   });
 
-  // Close selector if clicking outside
   document.addEventListener('click', function(event) {
       const selector = document.getElementById('orientationSelector');
       const pdfBtn = document.getElementById('pdfBtn');
@@ -748,6 +882,7 @@ tbl.appendChild(tr6);
   });
 
   document.getElementById('newFormBtn').onclick = () => { if(!confirm("Start new form? Data will be lost.")) return; location.reload(); };
+
 
   // ============================================
   // 6. KEYBOARD NAVIGATION
@@ -850,6 +985,11 @@ tbl.appendChild(tr6);
                             input.classList.add("hidden");
                             input.value = "";
                         }
+                    }
+                    // Crucial: Re-run updateGrade if unchecking a year radio
+                    if (activeEl.name.endsWith('_year')) {
+                         const studentId = activeEl.name.split('_')[1];
+                         updateGrade(studentId);
                     }
                     return;
                 }

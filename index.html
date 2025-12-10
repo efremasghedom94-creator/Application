@@ -717,7 +717,7 @@ function addStudent(prefill){
             const gender = getRadioValue(`s_${i}_gender`);
             
             const yearVal = getRadioValue(`s_${i}_year`);
-            let year = (yearVal === 'ThisYear') ? 'This year (2025-26)' : ((yearVal === 'NextYear') ? 'Next year' : '');
+            let year = (yearVal === 'ThisYear') ? 'AY 2025-26' : ((yearVal === 'NextYear') ? 'AY 2026-27' : '');
 
             let prog = '';
             const pt = getRadioValue(`s_${i}_progType`);
@@ -753,7 +753,7 @@ function addStudent(prefill){
                 <th width="15%">STUDENT'S GIVEN NAME</th>
                 <th width="8%">GENDER</th>
                 <th width="12%">DOB: YYYY/MM/DD</th>
-                <th width="10%">AGE APPROPRIATE GRADE</th>
+                <th width="10%">GRADE PLACEMENT</th>
                 <th width="12%">BIRTH COUNTRY</th>
                 <th width="9%">LAST GRADE</th>
                 <th width="9%">SCHOOL YEAR</th>

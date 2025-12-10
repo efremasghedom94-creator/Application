@@ -16,10 +16,6 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
 
-  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-
-
-
   <style>
 
     /* GLOBAL BOX SIZING FIX */
@@ -833,69 +829,50 @@ function addStudent(prefill){
   });
 
 
+ // Buttons Logic & PDF
+  function downloadPDF(orientation) {
+      const final = document.getElementById('finalArea');
+      final.classList.add('pdf-scale');
+      document.getElementById('orientationSelector').classList.add('hidden');
+      
+      const opt = { 
+          margin: 0.2, 
+          filename: `intake-form-${orientation}.pdf`, 
+          image: { type: 'jpeg', quality: 0.98 }, 
+          html2canvas: { scale: 2, useCORS: true }, 
+          jsPDF: { unit: 'in', format: 'a4', orientation: orientation } 
+      };
+      
+      html2pdf().set(opt).from(final).save().then(() => { final.classList.remove('pdf-scale'); });
+  }
 
-
-
-  
-
-async function downloadPDF(orientation) {
-    const final = document.getElementById('finalArea');
-    final.classList.add('pdf-scale');
+  document.getElementById('editBtn').onclick = () => {
+    document.getElementById('wizardRoot').classList.remove('hidden');
+    document.getElementById('finalWrap').classList.add('hidden');
     document.getElementById('orientationSelector').classList.add('hidden');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
 
-    const opt = {
-        margin: 0.2,
-        filename: `intake-form-${orientation}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'pt', format: 'a4', orientation: orientation }
-    };
+  document.getElementById('pdfBtn').onclick = (event) => {
+      event.stopPropagation();
+      document.getElementById('orientationSelector').classList.toggle('hidden');
+  }
 
-    // Step 1 — Generate FLAT PDF as ArrayBuffer
-    const pdfArrayBuffer = await html2pdf()
-        .set(opt)
-        .from(final)
-        .outputPdf('arraybuffer');
+  document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('downloadPortraitBtn').onclick = () => downloadPDF('portrait');
+      document.getElementById('downloadLandscapeBtn').onclick = () => downloadPDF('landscape');
+  });
 
-    final.classList.remove('pdf-scale');
-
-    // Step 2 — Add fillable fields using pdf-lib
-    await addFillableFields(pdfArrayBuffer);
-}
-
-
-async function addFillableFields(pdfBytes) {
-    const { PDFDocument } = PDFLib;
-
-    const pdfDoc = await PDFDocument.load(pdfBytes);
-    const form = pdfDoc.getForm();
-
-    const additionalInfo = form.createTextField("additional_information");
-    additionalInfo.setText("");
-    additionalInfo.enableMultiline();
-
-    const page = pdfDoc.getPages()[0];
-    const { height } = page.getSize();
-
-    additionalInfo.addToPage(page, {
-        x: 60,
-        y: height - 760,
-        width: 480,
-        height: 60
-    });
-
-    const finalPdfBytes = await pdfDoc.save();
-    const blob = new Blob([finalPdfBytes], { type: "application/pdf" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "intake-form-fillable.pdf";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-}
+  document.addEventListener('click', function(event) {
+      const selector = document.getElementById('orientationSelector');
+      const pdfBtn = document.getElementById('pdfBtn');
+      if (!selector.classList.contains('hidden') && event.target !== selector && !selector.contains(event.target) && event.target !== pdfBtn) {
+          selector.classList.add('hidden');
+      }
   });
 
   document.getElementById('newFormBtn').onclick = () => { if(!confirm("Start new form? Data will be lost.")) return; location.reload(); };
+
 
 
   // ============================================

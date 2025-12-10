@@ -345,6 +345,8 @@
   </div>
 
 <script>
+
+  
   // ============================================
   // 1. GLOBAL VARIABLES & UTILS
   // ============================================
@@ -447,27 +449,6 @@
     if(selectedValue) { $s.val(selectedValue).trigger('change'); }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-  
-// ============================================
-  // GRADE CALCULATION LOGIC
-  // ============================================
-  /**
-   * Calculates the age-appropriate grade based on DOB and the academic year start.
-   * @param {string} dobString - The date of birth (YYYY-MM-DD).
-   * @param {number} startYear - The starting year of the academic cycle (e.g., 2025 for 2025/2026).
-   * @returns {string} The calculated grade level.
-   */
   function calculateGrade(dobString, startYear) {
     if (!dobString || !startYear) return "";
     const parts = dobString.split('-');
@@ -505,13 +486,13 @@
     if (inRange(dob, startYear - 17, startYear - 16)) return "Grade 12";
     
     // Post High School
-    if (inRange(dob, startYear - 18, startYear - 17)) return "Fourth Year";
-    if (inRange(dob, startYear - 19, startYear - 18)) return "Fifth Year";
+    if (inRange(dob, startYear - 18, startYear - 17)) return "4th Year";
+    if (inRange(dob, startYear - 19, startYear - 18)) return "5th Year";
 
     // Sixth Year (Sept 1 Start)
     const sixthStart = new Date(startYear - 20, 8, 1); // Sept 1
     const sixthEnd = new Date(startYear - 19, 2, 0);   // Feb End
-    if (dob >= sixthStart && dob <= sixthEnd) return "Sixth Year";
+    if (dob >= sixthStart && dob <= sixthEnd) return "6th Year";
 
     return "Check Date";
   }
@@ -581,12 +562,12 @@ function addStudent(prefill){
 
     <div class="grid grid-cols-12 gap-4 mt-3">
       
-      <div class="col-span-6 md:col-span-2">
+      <div class="col-span-6 md:col-span-4">
           <label class="text-xs font-bold text-gray-700">DOB</label>
           <input type="date" id="s_${id}_dob" class="w-full border rounded p-2 mt-1" value="${prefill?.dob||''}" onchange="updateGrade(${id})" />
       </div>
       
-      <div class="col-span-6 md:col-span-4 overflow-visible">
+      <div class="col-span-6 md:col-span-3 overflow-visible">
           <label class="text-xs font-bold text-gray-700">LAST GRADE COMPLETED</label>
           <select id="s_${id}_lastgrade" class="w-full border rounded p-2 mt-1" onchange="toggleOtherGrade(${id})">
               <option value="" disabled selected hidden>Select grade</option>
@@ -598,7 +579,7 @@ function addStudent(prefill){
           <input type="text" id="s_${id}_lastgrade_spec" class="w-full border rounded p-2 mt-1 hidden" placeholder="Specify grade" />
       </div>
       
-      <div class="col-span-12 md:col-span-6">
+      <div class="col-span-12 md:col-span-4">
           <label class="text-xs font-bold text-gray-700">PROGRAM</label>
           <div class="mt-1 p-2 border rounded bg-white">
               <div class="flex items-center gap-4">

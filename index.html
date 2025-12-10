@@ -719,7 +719,7 @@ function addStudent(prefill){
             const gender = getRadioValue(`s_${i}_gender`);
             
             const yearVal = getRadioValue(`s_${i}_year`);
-            let year = (yearVal === 'ThisYear') ? 'AY 2025-26' : ((yearVal === 'NextYear') ? 'AY 2026-27' : '');
+            let year = (yearVal === 'ThisYear') ? '2025-26' : ((yearVal === 'NextYear') ? '2026-27' : '');
 
             let prog = '';
             const pt = getRadioValue(`s_${i}_progType`);
@@ -736,7 +736,7 @@ function addStudent(prefill){
             stRows += `<tr class="student-row">
                 <td class="cell-content">${escapeHtml(sn)}</td>
                 <td class="cell-content">${escapeHtml(gn)}</td>
-                <td class="text-center">${checkboxMark(gender==='F')} F ${checkboxMark(gender==='M')} M</td>
+                <td class="text-center cell-content">${escapeHtml(gender)}</td>
                 <td class="text-center cell-content">${escapeHtml(dob)}</td>
                 <td class="text-center font-bold" style="background-color:#fcf89f;">${escapeHtml(calcGrade)}</td>
                 <td class="cell-content">${escapeHtml(birth)}</td>

@@ -606,7 +606,7 @@ function addStudent(prefill){
               <label class="inline-flex items-center"><input type="radio" name="s_${id}_gender" value="M" class="mr-2">M</label>
           </div>
       </div>
-      <div class="col-span-12 md:col-span-5">
+      <div class="col-span-12 md:col-span-6">
           <label class="text-xs font-bold text-gray-700">SCHOOL YEAR</label>
           <div class="mt-1 flex items-center gap-6 p-2 border rounded bg-white">
               <label class="inline-flex items-center"><input type="radio" name="s_${id}_year" value="ThisYear" class="mr-2" onchange="updateGrade(${id})">This Year (2025–26)</label>
@@ -614,7 +614,7 @@ function addStudent(prefill){
           </div>
       </div>
       
-      <div class="col-span-12 md:col-span-4">
+      <div class="col-span-12 md:col-span-3">
           <label class="text-xs font-bold text-gray-700 text-blue-700">AGE APPROPRIATE GRADE</label>
           <input type="text" id="s_${id}_calc_grade" class="w-full border rounded p-2 mt-1 bg-blue-50 font-bold text-blue-800" readonly tabindex="-1" placeholder="Auto" />
       </div>
